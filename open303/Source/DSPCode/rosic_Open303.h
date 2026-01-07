@@ -34,6 +34,24 @@ namespace rosic
     /** Constructor. */
     Open303();
 
+    // --- SLIDE FIX: Custom Portamento Function ---
+    /** Triggers a note but Glides to the pitch (Portamento) instead of jumping. */
+    void noteOnPortamento(int noteNumber, int velocity) {
+        // 1. Set Pitch (Glide using internal slew limiter)
+        slideToNote(noteNumber, velocity >= 100);
+        
+        // 2. Trigger Envelopes (So it plays even if staccato)
+        mainEnv.trigger();
+        ampEnv.noteOn(true);
+        
+        // 3. Update Note List (Manually add note since we bypassed standard noteOn)
+        currentNote = noteNumber;
+        MidiNoteEvent newNote(noteNumber, velocity);
+        noteList.push_front(newNote);
+    }
+    
+    // ---------------------------------------------
+
     /** Destructor. */
     ~Open303();
 
@@ -323,11 +341,13 @@ namespace rosic
 
   inline void Open303::trimNoteList() 
   {
+    // CRASH FIX: If there are no notes, do nothing (don't try to access .front())
+    if(noteList.empty()) return;
+
     // Trim the note list to just the most recent note
     MidiNoteEvent recentNote = noteList.front();
     noteList.clear();
     noteList.push_front(recentNote);
-
   }
 
 

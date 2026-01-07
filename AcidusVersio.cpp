@@ -2,13 +2,18 @@
 #include "daisysp.h"
 #include "rosic_Open303.h"
 #include "Note.hpp"
+#include <new>
 
 using namespace daisy;
 using namespace daisysp;
 using namespace rosic;
 
 DaisyVersio hw;
-Open303 tb303;
+
+// Force 16-byte alignment to prevent crashes with doubles/floats
+uint8_t DSY_SDRAM_BSS __attribute__((aligned(16))) tb303_memory[sizeof(Open303)];
+Open303 *tb303_ptr;
+#define tb303 (*tb303_ptr)
 
 enum param_mode {
     BABYFISH,
@@ -18,9 +23,13 @@ enum param_mode {
 
 uint8_t mode  = BABYFISH;
 float sampleRate;
-float prevTrigger;
+
+// LOGIC FIX: Changed prevTrigger to bool for proper logic checks
+bool prevTrigger = false; 
+
 float tuning;
 bool slideToNextNote;
+int active_note = 60; // Keep track of which note is playing so we can turn it off
 
 bool inCalibration;
 const int calibration_max = 65536;
@@ -81,7 +90,14 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
 
 void doTriggerReceived() {
 
-    // Convert CV from tuning jack to midi note number using calibrated scaling
+    // --- FIX 1: CV LAG / SETTLE TIME ---
+    // Wait 4ms for the voltage to stabilize in the capacitors.
+    // This prevents reading the "previous" note (octave lag) or "in-between" voltages (random notes).
+    System::Delay(4);
+    hw.ProcessAllControls(); 
+    // -----------------------------------
+
+    // Convert CV from tuning jack to midi note number
     Note currentNote = Note();
     float raw_cv = hw.knobs[hw.KNOB_0].GetRawValue();
     float volts;
@@ -93,23 +109,50 @@ void doTriggerReceived() {
     float midi_pitch = round(((volts) * 12) + (12 * (base_octave + 1)));
     if (midi_pitch > max_midi_note) midi_pitch = max_midi_note;
     if (midi_pitch < min_midi_note) midi_pitch = min_midi_note;
-    Note current_note = Note(midi_pitch);
+    
+    // --- FIX 2: SLIDE / PORTAMENTO ---
+    // 1. Read the knob (0.0 to 1.0)
+    float slide_val = hw.GetKnobValue(DaisyVersio::KNOB_3);
+    
+    // 2. Determine if Slide is Active (Threshold > 5%)
+    bool is_sliding = (slide_val > 0.05f);
 
-    // Manage note list
-    if (!slideToNextNote) {
-        tb303.allNotesOff();
+    // 3. Map Knob to Slide Time (Slew Amount)
+    //    Range: 50ms (fast) to 400ms (slow drag)
+    if (is_sliding) {
+        tb303.setSlideTime(slide_val * 400.0f);
     } else {
-        tb303.trimNoteList(); 
-        if (mode == BABYFISH) {
-            // Retriggering these gives slides a new envelope
-            tb303.mainEnv.trigger();
-            tb303.ampEnv.reset();
-        }
+        tb303.setSlideTime(60.0f); // Default 303 speed
     }
 
-    int velocity = 150; // What should base note velocity be? 
-    tb303.noteOn(current_note.noteNumMIDI, velocity);
+    active_note = (int)midi_pitch;
 
+    // --- FIX 3: ACCENT "ATTENUATOR" STYLE ---
+    // Threshold set to 0.9 (90%).
+    // Knob (0-90%): Controls "Intensity" (Filter/Res boost) but does not trigger the snap.
+    // Gate Input (or Knob > 90%): Triggers the velocity 127 "Snap".
+    float accent_val = hw.GetKnobValue(DaisyVersio::KNOB_6);
+    int velocity = (accent_val > 0.9f) ? 127 : 100;
+
+    // --- TRIGGER EXECUTION ---
+    if (!is_sliding) {
+        // STANDARD TRIGGER
+        // Stop previous notes, jump to new pitch.
+        tb303.allNotesOff();
+        tb303.noteOn(active_note, velocity);
+    } else {
+        // SLIDE / PORTAMENTO TRIGGER
+        // Keep previous note frequency, glide to new pitch.
+        tb303.trimNoteList();
+        
+        // Use helper function to Glide + Trigger Envelope safely
+        tb303.noteOnPortamento(active_note, velocity);
+    }
+}
+
+void doNoteOff() {
+    // ENVELOPE FIX: Send a velocity 0 message to trigger the Release phase
+    tb303.noteOn(active_note, 0);
 }
 
 void waitForButton() {
@@ -196,6 +239,10 @@ int main(void)
 
     // Initialize Versio hardware and start audio, ADC
     hw.Init();
+
+    // --- MEMORY FIX: Initialize SDRAM object ---
+    tb303_ptr = new(tb303_memory) Open303();
+
     hw.seed.StartLog(false);
     hw.StartAdc();
 
@@ -225,7 +272,15 @@ int main(void)
     // Set up 303
     tb303.setSampleRate(sampleRate);
     tb303.setVolume(0);
-    tb303.setDecay(2000);
+    
+    // AUTHENTICITY FIX: 
+    // 1. Set Volume Envelope to ~4 seconds (Original 303 spec) so held notes sustain longer.
+    tb303.setAmpDecay(4000); 
+    
+    // 2. Set Volume Release to 15ms (prevent clicking when you let go of the button)
+    tb303.setAmpRelease(15); 
+    
+    tb303.setDecay(500); // Default Start Value
 
     // Check for calibration routine
     hw.ProcessAllControls();
@@ -250,26 +305,43 @@ int main(void)
         float envmod    = hw.GetKnobValue(DaisyVersio::KNOB_5);
         float accent    = hw.GetKnobValue(DaisyVersio::KNOB_6);
 
-        // Map knob values onto parameters depending on mode
+// Map knob values onto parameters depending on mode
         switch (mode) {
             case BABYFISH:
+                // Babyfish: Tame range, knob controls both normal and accent decay
+                tb303.setDecay(decay * 1000 + 200); 
+                tb303.setAccentDecay(decay * 1000 + 200);
+                
                 tb303.setResonance(resonance * 80 + 10);
                 tb303.setCutoff(cutoff * 4000);
-                tb303.setAccentDecay(decay * 1000);
                 tb303.setAccent(accent * 40);
                 tb303.setEnvMod(envmod * 80 + 10);
             break;
+
             case NORMAL:
+                // NORMAL 303 BEHAVIOR:
+                // 1. Decay Knob controls Filter Decay (200ms to 2000ms range)
+                tb303.setDecay(decay * 1800 + 200); 
+
+                // 2. Authenticity: Accents on a real 303 have a FIXED fast decay (knob is ignored!)
+                tb303.setAccentDecay(200); 
+
                 tb303.setResonance(resonance * 90);
                 tb303.setCutoff(cutoff * 5000);
-                tb303.setAccentDecay(decay * 2000);
                 tb303.setAccent(accent * 50);
                 tb303.setEnvMod(envmod * 100);
             break;
+
             case DEVILFISH:
+                // DEVILFISH MOD BEHAVIOR:
+                // 1. Huge Range (30ms to 3000ms)
+                tb303.setDecay(decay * 3000 + 30);
+                
+                // 2. Devilfish mod connects the Knob to Accent Decay too!
+                tb303.setAccentDecay(decay * 3000 + 30);
+
                 tb303.setResonance(resonance * 100);
                 tb303.setCutoff(cutoff * 10000);
-                tb303.setAccentDecay(decay * 30000);
                 tb303.setAccent(accent * 100);
                 tb303.setEnvMod(envmod * 100);
             break;
@@ -284,11 +356,28 @@ int main(void)
 
         // Read in trigger, comes from FSU or button
         bool triggerIn = hw.Gate();
-        if (triggerIn &! prevTrigger) {
+
+        // LOGIC FIX: Check for Rising Edge properly
+        if (triggerIn && !prevTrigger) {
             doTriggerReceived();
         }
+
+        // LOGIC FIX: Check for Falling Edge (Note Off)
+        if (!triggerIn && prevTrigger) {
+            doNoteOff();
+        }
+        
+        // LOGIC FIX: Update history
+        prevTrigger = triggerIn;
+
+
         if(hw.tap.RisingEdge()) {
             doTriggerReceived();
+        }
+        // Manual button release handled by gate logic above if HW Tap is tied to gate?
+        // Usually Tap is separate. Let's add explicit Tap release just in case.
+        if(hw.tap.FallingEdge()) {
+            doNoteOff();
         }
 
         // Top switch
@@ -310,15 +399,10 @@ int main(void)
          }
         // Set left side lights, orangish
         if (!inCalibration) {
-            float env = tb303.mainEnv.getSample();
+            // float env = tb303.mainEnv.getSample(); // Unused
             hw.SetLed(hw.LED_0,triggerIn,triggerIn/1.7,0);
             hw.SetLed(hw.LED_1,triggerIn,triggerIn/1.7,0);
             hw.UpdateLeds();
         }
-
-
-
     }
-
 }
-
