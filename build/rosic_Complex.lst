@@ -1,0 +1,1015 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_Complex.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_Complex.cpp"
+  19              		.section	.text._ZN5rosic6sinCosEdPdS0_,"axG",%progbits,_ZN5rosic6sinCosEdPdS0_,comdat
+  20              		.align	1
+  21              		.weak	_ZN5rosic6sinCosEdPdS0_
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic6sinCosEdPdS0_:
+  27              	.LVL0:
+  28              	.LFB611:
+  29              		.file 2 "open303/Source/DSPCode/rosic_RealFunctions.h"
+   1:open303/Source/DSPCode/rosic_RealFunctions.h **** #ifndef rosic_RealFunctions_h
+   2:open303/Source/DSPCode/rosic_RealFunctions.h **** #define rosic_RealFunctions_h
+   3:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+   4:open303/Source/DSPCode/rosic_RealFunctions.h **** // standard library includes:
+   5:open303/Source/DSPCode/rosic_RealFunctions.h **** #include <math.h>
+   6:open303/Source/DSPCode/rosic_RealFunctions.h **** #include <stdlib.h>
+   7:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+   8:open303/Source/DSPCode/rosic_RealFunctions.h **** // rosic includes:
+   9:open303/Source/DSPCode/rosic_RealFunctions.h **** #include "GlobalFunctions.h"
+  10:open303/Source/DSPCode/rosic_RealFunctions.h **** #include "rosic_NumberManipulations.h"
+  11:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  12:open303/Source/DSPCode/rosic_RealFunctions.h **** namespace rosic
+  13:open303/Source/DSPCode/rosic_RealFunctions.h **** {
+  14:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  15:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Inverse hyperbolic sine. */
+  16:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double asinh(double x);
+  17:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  18:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Returns -1.0 if x is below low, 0.0 if x is between low and high and 1.0 if x is above high. 
+  19:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double belowOrAbove(double x, double low, double high);
+  20:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  21:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Clips x into the range min...max. */
+  22:open303/Source/DSPCode/rosic_RealFunctions.h ****   template <class T>
+  23:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE T clip(T x, T min, T max);
+  24:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  25:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Evaluates the quartic polynomial y = a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 at x. */
+  26:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double evaluateQuartic(double x, double a0, double a1, double a2, double a3, double a4);
+  27:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  28:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** foldover at the specified value */
+  29:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double foldOver(double x, double min, double max);
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 2
+
+
+  30:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  31:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Computes an integer power of x by successively multiplying x with itself. */
+  32:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double integerPower(double x, int exponent);
+  33:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  34:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a pseudo-random number between min and max. */
+  35:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double random(double min=0.0, double max=1.0);
+  36:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  37:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic saw wave. */
+  38:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sawWave(double x);
+  39:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  40:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Calculates sine and cosine of x - this is more efficient than calling sin(x) and
+  41:open303/Source/DSPCode/rosic_RealFunctions.h ****   cos(x) seperately. */
+  42:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCos(double x, double* sinResult, double* cosResult);
+  43:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  44:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Calculates a parabolic approximation of the sine and cosine of x. */
+  45:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCosApprox(double x, double* sinResult, double* cosResult);
+  46:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  47:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic square wave. */
+  48:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sqrWave(double x);
+  49:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  50:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Rational approximation of the hyperbolic tangent. */
+  51:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double tanhApprox(double x);
+  52:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  53:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic triangle wave. */
+  54:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double triWave(double x);
+  55:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  56:open303/Source/DSPCode/rosic_RealFunctions.h ****   //===============================================================================================
+  57:open303/Source/DSPCode/rosic_RealFunctions.h ****   // implementation:
+  58:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  59:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double asinh(double x)
+  60:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  61:open303/Source/DSPCode/rosic_RealFunctions.h ****     return log(x + sqrt(x*x+1) );
+  62:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  63:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  64:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double belowOrAbove(double x, double low, double high)
+  65:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  66:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x < low )
+  67:open303/Source/DSPCode/rosic_RealFunctions.h ****       return -1.0;
+  68:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if ( x > high )
+  69:open303/Source/DSPCode/rosic_RealFunctions.h ****       return 1.0;
+  70:open303/Source/DSPCode/rosic_RealFunctions.h ****     else
+  71:open303/Source/DSPCode/rosic_RealFunctions.h ****       return 0.0;
+  72:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  73:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  74:open303/Source/DSPCode/rosic_RealFunctions.h ****   template <class T>
+  75:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE T clip(T x, T min, T max)
+  76:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  77:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x > max )
+  78:open303/Source/DSPCode/rosic_RealFunctions.h ****       return max;
+  79:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if ( x < min )
+  80:open303/Source/DSPCode/rosic_RealFunctions.h ****       return min;
+  81:open303/Source/DSPCode/rosic_RealFunctions.h ****     else return x;
+  82:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  83:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  84:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double evaluateQuartic(double x, double a0, double a1, double a2, double a3, double a4)
+  85:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  86:open303/Source/DSPCode/rosic_RealFunctions.h ****     double x2 = x*x;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 3
+
+
+  87:open303/Source/DSPCode/rosic_RealFunctions.h ****     return x*(a3*x2+a1) + x2*(a4*x2+a2) + a0;
+  88:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  89:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  90:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double foldOver(double x, double min, double max)
+  91:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  92:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x > max )
+  93:open303/Source/DSPCode/rosic_RealFunctions.h ****       return max - (x-max);
+  94:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if( x < min )
+  95:open303/Source/DSPCode/rosic_RealFunctions.h ****       return min - (x-min);
+  96:open303/Source/DSPCode/rosic_RealFunctions.h ****     else return x;
+  97:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  98:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  99:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double integerPower(double x, int exponent)
+ 100:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 101:open303/Source/DSPCode/rosic_RealFunctions.h ****     double accu = 1.0;
+ 102:open303/Source/DSPCode/rosic_RealFunctions.h ****     for(int i=0; i<exponent; i++)
+ 103:open303/Source/DSPCode/rosic_RealFunctions.h ****       accu *= x;
+ 104:open303/Source/DSPCode/rosic_RealFunctions.h ****     return accu;
+ 105:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 106:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 107:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double random(double min, double max)
+ 108:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 109:open303/Source/DSPCode/rosic_RealFunctions.h ****     double tmp = (1.0/RAND_MAX) * rand() ;  // between 0...1
+ 110:open303/Source/DSPCode/rosic_RealFunctions.h ****     return linToLin(tmp, 0.0, 1.0, min, max);
+ 111:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 112:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 113:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sawWave(double x)
+ 114:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 115:open303/Source/DSPCode/rosic_RealFunctions.h ****     double tmp = fmod(x, 2*PI);
+ 116:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( tmp < PI )
+ 117:open303/Source/DSPCode/rosic_RealFunctions.h ****       return tmp/PI;
+ 118:open303/Source/DSPCode/rosic_RealFunctions.h ****     else
+ 119:open303/Source/DSPCode/rosic_RealFunctions.h ****       return (tmp/PI)-2.0;
+ 120:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 121:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 122:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCos(double x, double* sinResult, double* cosResult)
+ 123:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  30              		.loc 2 123 3 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+ 124:open303/Source/DSPCode/rosic_RealFunctions.h ****     #ifdef __GNUC__  // \todo assembly-version causes compiler errors on gcc
+ 125:open303/Source/DSPCode/rosic_RealFunctions.h ****       *sinResult = sin(x);
+  34              		.loc 2 125 7 view .LVU1
+ 123:open303/Source/DSPCode/rosic_RealFunctions.h ****     #ifdef __GNUC__  // \todo assembly-version causes compiler errors on gcc
+  35              		.loc 2 123 3 is_stmt 0 view .LVU2
+  36 0000 38B5     		push	{r3, r4, r5, lr}
+  37              		.cfi_def_cfa_offset 16
+  38              		.cfi_offset 3, -16
+  39              		.cfi_offset 4, -12
+  40              		.cfi_offset 5, -8
+  41              		.cfi_offset 14, -4
+  42 0002 2DED028B 		vpush.64	{d8}
+  43              		.cfi_def_cfa_offset 24
+  44              		.cfi_offset 80, -24
+  45              		.cfi_offset 81, -20
+ 123:open303/Source/DSPCode/rosic_RealFunctions.h ****     #ifdef __GNUC__  // \todo assembly-version causes compiler errors on gcc
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 4
+
+
+  46              		.loc 2 123 3 view .LVU3
+  47 0006 B0EE408B 		vmov.f64	d8, d0
+  48 000a 0546     		mov	r5, r0
+  49 000c 0C46     		mov	r4, r1
+  50              		.loc 2 125 23 view .LVU4
+  51 000e FFF7FEFF 		bl	sin
+  52              	.LVL1:
+  53              		.loc 2 125 18 discriminator 1 view .LVU5
+  54 0012 85ED000B 		vstr.64	d0, [r5]
+ 126:open303/Source/DSPCode/rosic_RealFunctions.h ****       *cosResult = cos(x);
+  55              		.loc 2 126 7 is_stmt 1 view .LVU6
+  56              		.loc 2 126 23 is_stmt 0 view .LVU7
+  57 0016 B0EE480B 		vmov.f64	d0, d8
+  58 001a FFF7FEFF 		bl	cos
+  59              	.LVL2:
+ 127:open303/Source/DSPCode/rosic_RealFunctions.h ****     #else
+ 128:open303/Source/DSPCode/rosic_RealFunctions.h ****       double s, c;     // do we need these intermediate variables?
+ 129:open303/Source/DSPCode/rosic_RealFunctions.h ****       __asm fld x
+ 130:open303/Source/DSPCode/rosic_RealFunctions.h ****       __asm fsincos
+ 131:open303/Source/DSPCode/rosic_RealFunctions.h ****       __asm fstp c
+ 132:open303/Source/DSPCode/rosic_RealFunctions.h ****       __asm fstp s
+ 133:open303/Source/DSPCode/rosic_RealFunctions.h ****       *sinResult = s;
+ 134:open303/Source/DSPCode/rosic_RealFunctions.h ****       *cosResult = c;
+ 135:open303/Source/DSPCode/rosic_RealFunctions.h ****     #endif
+ 136:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  60              		.loc 2 136 3 view .LVU8
+  61 001e BDEC028B 		vldm	sp!, {d8}
+  62              		.cfi_restore 80
+  63              		.cfi_restore 81
+  64              		.cfi_def_cfa_offset 16
+  65              	.LVL3:
+ 126:open303/Source/DSPCode/rosic_RealFunctions.h ****       *cosResult = cos(x);
+  66              		.loc 2 126 18 discriminator 1 view .LVU9
+  67 0022 84ED000B 		vstr.64	d0, [r4]
+  68              		.loc 2 136 3 view .LVU10
+  69 0026 38BD     		pop	{r3, r4, r5, pc}
+  70              		.loc 2 136 3 view .LVU11
+  71              		.cfi_endproc
+  72              	.LFE611:
+  74              		.section	.text._ZN5rosic7ComplexC2Ev,"ax",%progbits
+  75              		.align	1
+  76              		.global	_ZN5rosic7ComplexC2Ev
+  77              		.syntax unified
+  78              		.thumb
+  79              		.thumb_func
+  81              	_ZN5rosic7ComplexC2Ev:
+  82              	.LVL4:
+  83              	.LFB640:
+   1:open303/Source/DSPCode/rosic_Complex.cpp **** #include "rosic_Complex.h"
+   2:open303/Source/DSPCode/rosic_Complex.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_Complex.cpp **** 
+   4:open303/Source/DSPCode/rosic_Complex.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_Complex.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_Complex.cpp **** 
+   7:open303/Source/DSPCode/rosic_Complex.cpp **** Complex::Complex()
+  84              		.loc 1 7 1 is_stmt 1 view -0
+  85              		.cfi_startproc
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 5
+
+
+  86              		@ args = 0, pretend = 0, frame = 0
+  87              		@ frame_needed = 0, uses_anonymous_args = 0
+  88              		@ link register save eliminated.
+  89              	.LBB16:
+   8:open303/Source/DSPCode/rosic_Complex.cpp **** {
+   9:open303/Source/DSPCode/rosic_Complex.cpp ****   re = im = 0.0;
+  90              		.loc 1 9 3 view .LVU13
+  91              		.loc 1 9 11 is_stmt 0 view .LVU14
+  92 0000 0022     		movs	r2, #0
+  93 0002 0023     		movs	r3, #0
+  94 0004 C0E90223 		strd	r2, [r0, #8]
+  95              		.loc 1 9 6 view .LVU15
+  96 0008 C0E90023 		strd	r2, [r0]
+  97              	.LBE16:
+  10:open303/Source/DSPCode/rosic_Complex.cpp **** }
+  98              		.loc 1 10 1 view .LVU16
+  99 000c 7047     		bx	lr
+ 100              		.cfi_endproc
+ 101              	.LFE640:
+ 103              		.global	_ZN5rosic7ComplexC1Ev
+ 104              		.thumb_set _ZN5rosic7ComplexC1Ev,_ZN5rosic7ComplexC2Ev
+ 105              		.section	.text._ZN5rosic7ComplexC2Ed,"ax",%progbits
+ 106              		.align	1
+ 107              		.global	_ZN5rosic7ComplexC2Ed
+ 108              		.syntax unified
+ 109              		.thumb
+ 110              		.thumb_func
+ 112              	_ZN5rosic7ComplexC2Ed:
+ 113              	.LVL5:
+ 114              	.LFB643:
+  11:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  12:open303/Source/DSPCode/rosic_Complex.cpp **** Complex::Complex(double reInit)
+ 115              		.loc 1 12 1 is_stmt 1 view -0
+ 116              		.cfi_startproc
+ 117              		@ args = 0, pretend = 0, frame = 0
+ 118              		@ frame_needed = 0, uses_anonymous_args = 0
+ 119              		@ link register save eliminated.
+ 120              	.LBB17:
+  13:open303/Source/DSPCode/rosic_Complex.cpp **** {
+  14:open303/Source/DSPCode/rosic_Complex.cpp ****   re = reInit;
+ 121              		.loc 1 14 3 view .LVU18
+  15:open303/Source/DSPCode/rosic_Complex.cpp ****   im = 0.0;
+ 122              		.loc 1 15 6 is_stmt 0 view .LVU19
+ 123 0000 0022     		movs	r2, #0
+ 124 0002 0023     		movs	r3, #0
+  14:open303/Source/DSPCode/rosic_Complex.cpp ****   im = 0.0;
+ 125              		.loc 1 14 6 view .LVU20
+ 126 0004 80ED000B 		vstr.64	d0, [r0]
+ 127              		.loc 1 15 3 is_stmt 1 view .LVU21
+ 128              		.loc 1 15 6 is_stmt 0 view .LVU22
+ 129 0008 C0E90223 		strd	r2, [r0, #8]
+ 130              	.LBE17:
+  16:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 131              		.loc 1 16 1 view .LVU23
+ 132 000c 7047     		bx	lr
+ 133              		.cfi_endproc
+ 134              	.LFE643:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 6
+
+
+ 136              		.global	_ZN5rosic7ComplexC1Ed
+ 137              		.thumb_set _ZN5rosic7ComplexC1Ed,_ZN5rosic7ComplexC2Ed
+ 138              		.section	.text._ZN5rosic7ComplexC2Edd,"ax",%progbits
+ 139              		.align	1
+ 140              		.global	_ZN5rosic7ComplexC2Edd
+ 141              		.syntax unified
+ 142              		.thumb
+ 143              		.thumb_func
+ 145              	_ZN5rosic7ComplexC2Edd:
+ 146              	.LVL6:
+ 147              	.LFB646:
+  17:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  18:open303/Source/DSPCode/rosic_Complex.cpp **** Complex::Complex(double reInit, double imInit)
+ 148              		.loc 1 18 1 is_stmt 1 view -0
+ 149              		.cfi_startproc
+ 150              		@ args = 0, pretend = 0, frame = 0
+ 151              		@ frame_needed = 0, uses_anonymous_args = 0
+ 152              		@ link register save eliminated.
+ 153              	.LBB18:
+  19:open303/Source/DSPCode/rosic_Complex.cpp **** {
+  20:open303/Source/DSPCode/rosic_Complex.cpp ****   re = reInit;
+ 154              		.loc 1 20 3 view .LVU25
+ 155              		.loc 1 20 6 is_stmt 0 view .LVU26
+ 156 0000 80ED000B 		vstr.64	d0, [r0]
+  21:open303/Source/DSPCode/rosic_Complex.cpp ****   im = imInit;
+ 157              		.loc 1 21 3 is_stmt 1 view .LVU27
+ 158              		.loc 1 21 6 is_stmt 0 view .LVU28
+ 159 0004 80ED021B 		vstr.64	d1, [r0, #8]
+ 160              	.LBE18:
+  22:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 161              		.loc 1 22 1 view .LVU29
+ 162 0008 7047     		bx	lr
+ 163              		.cfi_endproc
+ 164              	.LFE646:
+ 166              		.global	_ZN5rosic7ComplexC1Edd
+ 167              		.thumb_set _ZN5rosic7ComplexC1Edd,_ZN5rosic7ComplexC2Edd
+ 168              		.section	.text._ZN5rosic7ComplexD2Ev,"ax",%progbits
+ 169              		.align	1
+ 170              		.global	_ZN5rosic7ComplexD2Ev
+ 171              		.syntax unified
+ 172              		.thumb
+ 173              		.thumb_func
+ 175              	_ZN5rosic7ComplexD2Ev:
+ 176              	.LVL7:
+ 177              	.LFB649:
+  23:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  24:open303/Source/DSPCode/rosic_Complex.cpp **** Complex::~Complex()
+ 178              		.loc 1 24 1 is_stmt 1 view -0
+ 179              		.cfi_startproc
+ 180              		@ args = 0, pretend = 0, frame = 0
+ 181              		@ frame_needed = 0, uses_anonymous_args = 0
+ 182              		@ link register save eliminated.
+  25:open303/Source/DSPCode/rosic_Complex.cpp **** {
+  26:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  27:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 183              		.loc 1 27 1 is_stmt 0 view .LVU31
+ 184 0000 7047     		bx	lr
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 7
+
+
+ 185              		.cfi_endproc
+ 186              	.LFE649:
+ 188              		.global	_ZN5rosic7ComplexD1Ev
+ 189              		.thumb_set _ZN5rosic7ComplexD1Ev,_ZN5rosic7ComplexD2Ev
+ 190              		.section	.text._ZN5rosic7Complex9getRadiusEv,"ax",%progbits
+ 191              		.align	1
+ 192              		.global	_ZN5rosic7Complex9getRadiusEv
+ 193              		.syntax unified
+ 194              		.thumb
+ 195              		.thumb_func
+ 197              	_ZN5rosic7Complex9getRadiusEv:
+ 198              	.LVL8:
+ 199              	.LFB651:
+  28:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  29:open303/Source/DSPCode/rosic_Complex.cpp **** //-------------------------------------------------------------------------------------------------
+  30:open303/Source/DSPCode/rosic_Complex.cpp **** // magnitude, angle, etc.
+  31:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  32:open303/Source/DSPCode/rosic_Complex.cpp **** double Complex::getRadius()
+  33:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 200              		.loc 1 33 1 is_stmt 1 view -0
+ 201              		.cfi_startproc
+ 202              		@ args = 0, pretend = 0, frame = 0
+ 203              		@ frame_needed = 0, uses_anonymous_args = 0
+ 204              		@ link register save eliminated.
+  34:open303/Source/DSPCode/rosic_Complex.cpp ****   return sqrt(re*re + im*im);
+ 205              		.loc 1 34 3 view .LVU33
+ 206              		.loc 1 34 23 is_stmt 0 view .LVU34
+ 207 0000 90ED020B 		vldr.64	d0, [r0, #8]
+ 208              		.loc 1 34 15 view .LVU35
+ 209 0004 90ED007B 		vldr.64	d7, [r0]
+ 210              		.loc 1 34 25 view .LVU36
+ 211 0008 20EE000B 		vmul.f64	d0, d0, d0
+ 212              		.loc 1 34 14 view .LVU37
+ 213 000c A7EE070B 		vfma.f64	d0, d7, d7
+ 214 0010 FFF7FEBF 		b	sqrt
+ 215              	.LVL9:
+ 216              		.loc 1 34 14 view .LVU38
+ 217              		.cfi_endproc
+ 218              	.LFE651:
+ 220              		.section	.text._ZN5rosic7Complex8getAngleEv,"ax",%progbits
+ 221              		.align	1
+ 222              		.global	_ZN5rosic7Complex8getAngleEv
+ 223              		.syntax unified
+ 224              		.thumb
+ 225              		.thumb_func
+ 227              	_ZN5rosic7Complex8getAngleEv:
+ 228              	.LVL10:
+ 229              	.LFB652:
+  35:open303/Source/DSPCode/rosic_Complex.cpp **** }
+  36:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  37:open303/Source/DSPCode/rosic_Complex.cpp **** double Complex::getAngle()
+  38:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 230              		.loc 1 38 1 is_stmt 1 view -0
+ 231              		.cfi_startproc
+ 232              		@ args = 0, pretend = 0, frame = 0
+ 233              		@ frame_needed = 0, uses_anonymous_args = 0
+ 234              		@ link register save eliminated.
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 8
+
+
+  39:open303/Source/DSPCode/rosic_Complex.cpp ****   if((re==0.0) && (im==0))
+ 235              		.loc 1 39 3 view .LVU40
+ 236              		.loc 1 39 7 is_stmt 0 view .LVU41
+ 237 0000 90ED001B 		vldr.64	d1, [r0]
+ 238              		.loc 1 39 20 discriminator 1 view .LVU42
+ 239 0004 90ED020B 		vldr.64	d0, [r0, #8]
+ 240              		.loc 1 39 3 view .LVU43
+ 241 0008 B5EE401B 		vcmp.f64	d1, #0
+ 242 000c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 243 0010 04D1     		bne	.L8
+ 244              		.loc 1 39 16 discriminator 1 view .LVU44
+ 245 0012 B5EE400B 		vcmp.f64	d0, #0
+ 246 0016 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 247 001a 01D0     		beq	.L9
+ 248              	.L8:
+  40:open303/Source/DSPCode/rosic_Complex.cpp ****     return 0.0;
+  41:open303/Source/DSPCode/rosic_Complex.cpp ****   else
+  42:open303/Source/DSPCode/rosic_Complex.cpp ****     return atan2(im, re);
+ 249              		.loc 1 42 5 is_stmt 1 view .LVU45
+ 250              		.loc 1 42 17 is_stmt 0 view .LVU46
+ 251 001c FFF7FEBF 		b	atan2
+ 252              	.LVL11:
+ 253              	.L9:
+  43:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 254              		.loc 1 43 1 view .LVU47
+ 255 0020 9FED010B 		vldr.64	d0, .L10
+ 256 0024 7047     		bx	lr
+ 257              	.L11:
+ 258 0026 00BF     		.align	3
+ 259              	.L10:
+ 260 0028 00000000 		.word	0
+ 261 002c 00000000 		.word	0
+ 262              		.cfi_endproc
+ 263              	.LFE652:
+ 265              		.section	.text._ZN5rosic7Complex9setRadiusEd,"ax",%progbits
+ 266              		.align	1
+ 267              		.global	_ZN5rosic7Complex9setRadiusEd
+ 268              		.syntax unified
+ 269              		.thumb
+ 270              		.thumb_func
+ 272              	_ZN5rosic7Complex9setRadiusEd:
+ 273              	.LVL12:
+ 274              	.LFB653:
+  44:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  45:open303/Source/DSPCode/rosic_Complex.cpp **** void Complex::setRadius(double newRadius)
+  46:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 275              		.loc 1 46 1 is_stmt 1 view -0
+ 276              		.cfi_startproc
+ 277              		@ args = 0, pretend = 0, frame = 0
+ 278              		@ frame_needed = 0, uses_anonymous_args = 0
+  47:open303/Source/DSPCode/rosic_Complex.cpp ****   double phi = getAngle();
+ 279              		.loc 1 47 3 view .LVU49
+  46:open303/Source/DSPCode/rosic_Complex.cpp ****   double phi = getAngle();
+ 280              		.loc 1 46 1 is_stmt 0 view .LVU50
+ 281 0000 10B5     		push	{r4, lr}
+ 282              		.cfi_def_cfa_offset 8
+ 283              		.cfi_offset 4, -8
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 9
+
+
+ 284              		.cfi_offset 14, -4
+ 285 0002 0446     		mov	r4, r0
+ 286 0004 2DED028B 		vpush.64	{d8}
+ 287              		.cfi_def_cfa_offset 16
+ 288              		.cfi_offset 80, -16
+ 289              		.cfi_offset 81, -12
+  46:open303/Source/DSPCode/rosic_Complex.cpp ****   double phi = getAngle();
+ 290              		.loc 1 46 1 view .LVU51
+ 291 0008 B0EE408B 		vmov.f64	d8, d0
+ 292              		.loc 1 47 24 view .LVU52
+ 293 000c FFF7FEFF 		bl	_ZN5rosic7Complex8getAngleEv
+ 294              	.LVL13:
+  48:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(phi, &im, &re);
+ 295              		.loc 1 48 3 is_stmt 1 view .LVU53
+ 296              		.loc 1 48 9 is_stmt 0 view .LVU54
+ 297 0010 2146     		mov	r1, r4
+ 298 0012 04F10800 		add	r0, r4, #8
+ 299 0016 FFF7FEFF 		bl	_ZN5rosic6sinCosEdPdS0_
+ 300              	.LVL14:
+  49:open303/Source/DSPCode/rosic_Complex.cpp ****   re *= newRadius;           // re = newRadius * cos(phi);
+ 301              		.loc 1 49 3 is_stmt 1 view .LVU55
+ 302              		.loc 1 49 6 is_stmt 0 view .LVU56
+ 303 001a 94ED007B 		vldr.64	d7, [r4]
+ 304 001e 27EE087B 		vmul.f64	d7, d7, d8
+ 305 0022 84ED007B 		vstr.64	d7, [r4]
+  50:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= newRadius;           // im = newRadius * sin(phi);
+ 306              		.loc 1 50 3 is_stmt 1 view .LVU57
+ 307              		.loc 1 50 6 is_stmt 0 view .LVU58
+ 308 0026 94ED027B 		vldr.64	d7, [r4, #8]
+ 309 002a 27EE087B 		vmul.f64	d7, d7, d8
+  51:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 310              		.loc 1 51 1 view .LVU59
+ 311 002e BDEC028B 		vldm	sp!, {d8}
+ 312              		.cfi_restore 80
+ 313              		.cfi_restore 81
+ 314              		.cfi_def_cfa_offset 8
+ 315              	.LVL15:
+  50:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= newRadius;           // im = newRadius * sin(phi);
+ 316              		.loc 1 50 6 view .LVU60
+ 317 0032 84ED027B 		vstr.64	d7, [r4, #8]
+ 318              		.loc 1 51 1 view .LVU61
+ 319 0036 10BD     		pop	{r4, pc}
+ 320              		.loc 1 51 1 view .LVU62
+ 321              		.cfi_endproc
+ 322              	.LFE653:
+ 324              		.section	.text._ZN5rosic7Complex8setAngleEd,"ax",%progbits
+ 325              		.align	1
+ 326              		.global	_ZN5rosic7Complex8setAngleEd
+ 327              		.syntax unified
+ 328              		.thumb
+ 329              		.thumb_func
+ 331              	_ZN5rosic7Complex8setAngleEd:
+ 332              	.LVL16:
+ 333              	.LFB654:
+  52:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  53:open303/Source/DSPCode/rosic_Complex.cpp **** void Complex::setAngle(double newAngle)
+  54:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 10
+
+
+ 334              		.loc 1 54 1 is_stmt 1 view -0
+ 335              		.cfi_startproc
+ 336              		@ args = 0, pretend = 0, frame = 0
+ 337              		@ frame_needed = 0, uses_anonymous_args = 0
+  55:open303/Source/DSPCode/rosic_Complex.cpp ****   double r = getRadius();
+ 338              		.loc 1 55 3 view .LVU64
+  54:open303/Source/DSPCode/rosic_Complex.cpp ****   double r = getRadius();
+ 339              		.loc 1 54 1 is_stmt 0 view .LVU65
+ 340 0000 10B5     		push	{r4, lr}
+ 341              		.cfi_def_cfa_offset 8
+ 342              		.cfi_offset 4, -8
+ 343              		.cfi_offset 14, -4
+ 344 0002 2DED048B 		vpush.64	{d8, d9}
+ 345              		.cfi_def_cfa_offset 24
+ 346              		.cfi_offset 80, -24
+ 347              		.cfi_offset 81, -20
+ 348              		.cfi_offset 82, -16
+ 349              		.cfi_offset 83, -12
+  54:open303/Source/DSPCode/rosic_Complex.cpp ****   double r = getRadius();
+ 350              		.loc 1 54 1 view .LVU66
+ 351 0006 B0EE409B 		vmov.f64	d9, d0
+ 352 000a 0446     		mov	r4, r0
+ 353              		.loc 1 55 23 view .LVU67
+ 354 000c FFF7FEFF 		bl	_ZN5rosic7Complex9getRadiusEv
+ 355              	.LVL17:
+ 356              		.loc 1 55 23 view .LVU68
+ 357 0010 B0EE408B 		vmov.f64	d8, d0
+ 358              	.LVL18:
+  56:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(newAngle, &im, &re);
+ 359              		.loc 1 56 3 is_stmt 1 view .LVU69
+ 360              		.loc 1 56 9 is_stmt 0 view .LVU70
+ 361 0014 2146     		mov	r1, r4
+ 362 0016 04F10800 		add	r0, r4, #8
+ 363 001a B0EE490B 		vmov.f64	d0, d9
+ 364              	.LVL19:
+ 365              		.loc 1 56 9 view .LVU71
+ 366 001e FFF7FEFF 		bl	_ZN5rosic6sinCosEdPdS0_
+ 367              	.LVL20:
+  57:open303/Source/DSPCode/rosic_Complex.cpp ****   re *= r;                   // re = r * cos(newAngle);
+ 368              		.loc 1 57 3 is_stmt 1 view .LVU72
+ 369              		.loc 1 57 6 is_stmt 0 view .LVU73
+ 370 0022 94ED007B 		vldr.64	d7, [r4]
+ 371 0026 27EE087B 		vmul.f64	d7, d7, d8
+ 372 002a 84ED007B 		vstr.64	d7, [r4]
+  58:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= r;                   // im = r * sin(newAngle);
+ 373              		.loc 1 58 3 is_stmt 1 view .LVU74
+ 374              		.loc 1 58 6 is_stmt 0 view .LVU75
+ 375 002e 94ED027B 		vldr.64	d7, [r4, #8]
+ 376 0032 27EE087B 		vmul.f64	d7, d7, d8
+  59:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 377              		.loc 1 59 1 view .LVU76
+ 378 0036 BDEC048B 		vldm	sp!, {d8-d9}
+ 379              		.cfi_restore 82
+ 380              		.cfi_restore 83
+ 381              		.cfi_restore 80
+ 382              		.cfi_restore 81
+ 383              		.cfi_def_cfa_offset 8
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 11
+
+
+ 384              	.LVL21:
+  58:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= r;                   // im = r * sin(newAngle);
+ 385              		.loc 1 58 6 view .LVU77
+ 386 003a 84ED027B 		vstr.64	d7, [r4, #8]
+ 387              		.loc 1 59 1 view .LVU78
+ 388 003e 10BD     		pop	{r4, pc}
+ 389              		.loc 1 59 1 view .LVU79
+ 390              		.cfi_endproc
+ 391              	.LFE654:
+ 393              		.section	.text._ZN5rosic7Complex17setRadiusAndAngleEdd,"ax",%progbits
+ 394              		.align	1
+ 395              		.global	_ZN5rosic7Complex17setRadiusAndAngleEdd
+ 396              		.syntax unified
+ 397              		.thumb
+ 398              		.thumb_func
+ 400              	_ZN5rosic7Complex17setRadiusAndAngleEdd:
+ 401              	.LVL22:
+ 402              	.LFB655:
+  60:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  61:open303/Source/DSPCode/rosic_Complex.cpp **** void Complex::setRadiusAndAngle(double newRadius, double newAngle)
+  62:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 403              		.loc 1 62 1 is_stmt 1 view -0
+ 404              		.cfi_startproc
+ 405              		@ args = 0, pretend = 0, frame = 0
+ 406              		@ frame_needed = 0, uses_anonymous_args = 0
+  63:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(newAngle, &im, &re);
+ 407              		.loc 1 63 3 view .LVU81
+  62:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(newAngle, &im, &re);
+ 408              		.loc 1 62 1 is_stmt 0 view .LVU82
+ 409 0000 10B5     		push	{r4, lr}
+ 410              		.cfi_def_cfa_offset 8
+ 411              		.cfi_offset 4, -8
+ 412              		.cfi_offset 14, -4
+ 413 0002 0446     		mov	r4, r0
+ 414              		.loc 1 63 9 view .LVU83
+ 415 0004 0146     		mov	r1, r0
+ 416 0006 0830     		adds	r0, r0, #8
+ 417              	.LVL23:
+  62:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(newAngle, &im, &re);
+ 418              		.loc 1 62 1 view .LVU84
+ 419 0008 2DED028B 		vpush.64	{d8}
+ 420              		.cfi_def_cfa_offset 16
+ 421              		.cfi_offset 80, -16
+ 422              		.cfi_offset 81, -12
+  62:open303/Source/DSPCode/rosic_Complex.cpp ****   sinCos(newAngle, &im, &re);
+ 423              		.loc 1 62 1 view .LVU85
+ 424 000c B0EE408B 		vmov.f64	d8, d0
+ 425              		.loc 1 63 9 view .LVU86
+ 426 0010 B0EE410B 		vmov.f64	d0, d1
+ 427              	.LVL24:
+ 428              		.loc 1 63 9 view .LVU87
+ 429 0014 FFF7FEFF 		bl	_ZN5rosic6sinCosEdPdS0_
+ 430              	.LVL25:
+  64:open303/Source/DSPCode/rosic_Complex.cpp ****   re *= newRadius;           // re = newRadius * cos(newAngle);
+ 431              		.loc 1 64 3 is_stmt 1 view .LVU88
+ 432              		.loc 1 64 6 is_stmt 0 view .LVU89
+ 433 0018 94ED007B 		vldr.64	d7, [r4]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 12
+
+
+ 434 001c 27EE087B 		vmul.f64	d7, d7, d8
+ 435 0020 84ED007B 		vstr.64	d7, [r4]
+  65:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= newRadius;           // im = newRadius * sin(newAngle);
+ 436              		.loc 1 65 3 is_stmt 1 view .LVU90
+ 437              		.loc 1 65 6 is_stmt 0 view .LVU91
+ 438 0024 94ED027B 		vldr.64	d7, [r4, #8]
+ 439 0028 27EE087B 		vmul.f64	d7, d7, d8
+  66:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 440              		.loc 1 66 1 view .LVU92
+ 441 002c BDEC028B 		vldm	sp!, {d8}
+ 442              		.cfi_restore 80
+ 443              		.cfi_restore 81
+ 444              		.cfi_def_cfa_offset 8
+ 445              	.LVL26:
+  65:open303/Source/DSPCode/rosic_Complex.cpp ****   im *= newRadius;           // im = newRadius * sin(newAngle);
+ 446              		.loc 1 65 6 view .LVU93
+ 447 0030 84ED027B 		vstr.64	d7, [r4, #8]
+ 448              		.loc 1 66 1 view .LVU94
+ 449 0034 10BD     		pop	{r4, pc}
+ 450              		.loc 1 66 1 view .LVU95
+ 451              		.cfi_endproc
+ 452              	.LFE655:
+ 454              		.section	.text._ZN5rosic7Complex12getConjugateEv,"ax",%progbits
+ 455              		.align	1
+ 456              		.global	_ZN5rosic7Complex12getConjugateEv
+ 457              		.syntax unified
+ 458              		.thumb
+ 459              		.thumb_func
+ 461              	_ZN5rosic7Complex12getConjugateEv:
+ 462              	.LVL27:
+ 463              	.LFB656:
+  67:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  68:open303/Source/DSPCode/rosic_Complex.cpp **** Complex Complex::getConjugate()
+  69:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 464              		.loc 1 69 1 is_stmt 1 view -0
+ 465              		.cfi_startproc
+ 466              		@ args = 0, pretend = 0, frame = 0
+ 467              		@ frame_needed = 0, uses_anonymous_args = 0
+ 468              		@ link register save eliminated.
+  70:open303/Source/DSPCode/rosic_Complex.cpp ****   return Complex(re, -im);
+ 469              		.loc 1 70 3 view .LVU97
+ 470              		.loc 1 70 25 is_stmt 0 view .LVU98
+ 471 0000 91ED027B 		vldr.64	d7, [r1, #8]
+ 472 0004 D1E90023 		ldrd	r2, [r1]
+ 473 0008 B1EE477B 		vneg.f64	d7, d7
+ 474              	.LVL28:
+ 475              	.LBB19:
+ 476              	.LBI19:
+  18:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 477              		.loc 1 18 1 is_stmt 1 view .LVU99
+ 478              	.LBB20:
+  20:open303/Source/DSPCode/rosic_Complex.cpp ****   im = imInit;
+ 479              		.loc 1 20 3 view .LVU100
+  20:open303/Source/DSPCode/rosic_Complex.cpp ****   im = imInit;
+ 480              		.loc 1 20 6 is_stmt 0 view .LVU101
+ 481 000c C0E90023 		strd	r2, [r0]
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 13
+
+
+ 482              		.loc 1 21 3 is_stmt 1 view .LVU102
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 483              		.loc 1 21 6 is_stmt 0 view .LVU103
+ 484 0010 80ED027B 		vstr.64	d7, [r0, #8]
+ 485              	.LVL29:
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 486              		.loc 1 21 6 view .LVU104
+ 487              	.LBE20:
+ 488              	.LBE19:
+  71:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 489              		.loc 1 71 1 view .LVU105
+ 490 0014 7047     		bx	lr
+ 491              		.cfi_endproc
+ 492              	.LFE656:
+ 494              		.section	.text._ZN5rosic7Complex13getReciprocalEv,"ax",%progbits
+ 495              		.align	1
+ 496              		.global	_ZN5rosic7Complex13getReciprocalEv
+ 497              		.syntax unified
+ 498              		.thumb
+ 499              		.thumb_func
+ 501              	_ZN5rosic7Complex13getReciprocalEv:
+ 502              	.LVL30:
+ 503              	.LFB657:
+  72:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  73:open303/Source/DSPCode/rosic_Complex.cpp **** Complex Complex::getReciprocal()
+  74:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 504              		.loc 1 74 1 is_stmt 1 view -0
+ 505              		.cfi_startproc
+ 506              		@ args = 0, pretend = 0, frame = 0
+ 507              		@ frame_needed = 0, uses_anonymous_args = 0
+ 508              		@ link register save eliminated.
+  75:open303/Source/DSPCode/rosic_Complex.cpp ****   double scaler = 1.0 / (re*re + im*im);
+ 509              		.loc 1 75 3 view .LVU107
+ 510              		.loc 1 75 34 is_stmt 0 view .LVU108
+ 511 0000 91ED025B 		vldr.64	d5, [r1, #8]
+ 512              		.loc 1 75 26 view .LVU109
+ 513 0004 91ED007B 		vldr.64	d7, [r1]
+ 514              		.loc 1 75 10 view .LVU110
+ 515 0008 B7EE003B 		vmov.f64	d3, #1.0e+0
+ 516              		.loc 1 75 36 view .LVU111
+ 517 000c 25EE054B 		vmul.f64	d4, d5, d5
+ 518              		.loc 1 75 10 view .LVU112
+ 519 0010 A7EE074B 		vfma.f64	d4, d7, d7
+ 520 0014 83EE046B 		vdiv.f64	d6, d3, d4
+ 521              	.LVL31:
+  76:open303/Source/DSPCode/rosic_Complex.cpp ****   return Complex(scaler*re, -scaler*im);
+ 522              		.loc 1 76 3 is_stmt 1 view .LVU113
+ 523              	.LBB21:
+ 524              	.LBI21:
+  18:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 525              		.loc 1 18 1 view .LVU114
+ 526              	.LBB22:
+  20:open303/Source/DSPCode/rosic_Complex.cpp ****   im = imInit;
+ 527              		.loc 1 20 3 view .LVU115
+ 528              	.LBE22:
+ 529              	.LBE21:
+ 530              		.loc 1 76 39 is_stmt 0 view .LVU116
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 14
+
+
+ 531 0018 27EE067B 		vmul.f64	d7, d7, d6
+ 532              	.LVL32:
+ 533              		.loc 1 76 39 view .LVU117
+ 534 001c 26EE456B 		vnmul.f64	d6, d6, d5
+ 535              	.LVL33:
+ 536              	.LBB24:
+ 537              	.LBB23:
+  20:open303/Source/DSPCode/rosic_Complex.cpp ****   im = imInit;
+ 538              		.loc 1 20 6 view .LVU118
+ 539 0020 80ED007B 		vstr.64	d7, [r0]
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 540              		.loc 1 21 3 is_stmt 1 view .LVU119
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 541              		.loc 1 21 6 is_stmt 0 view .LVU120
+ 542 0024 80ED026B 		vstr.64	d6, [r0, #8]
+ 543              	.LVL34:
+  21:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 544              		.loc 1 21 6 view .LVU121
+ 545              	.LBE23:
+ 546              	.LBE24:
+  77:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 547              		.loc 1 77 1 view .LVU122
+ 548 0028 7047     		bx	lr
+ 549              		.cfi_endproc
+ 550              	.LFE657:
+ 552              		.section	.text._ZN5rosic7Complex6isRealEv,"ax",%progbits
+ 553              		.align	1
+ 554              		.global	_ZN5rosic7Complex6isRealEv
+ 555              		.syntax unified
+ 556              		.thumb
+ 557              		.thumb_func
+ 559              	_ZN5rosic7Complex6isRealEv:
+ 560              	.LVL35:
+ 561              	.LFB658:
+  78:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  79:open303/Source/DSPCode/rosic_Complex.cpp **** bool Complex::isReal()
+  80:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 562              		.loc 1 80 1 is_stmt 1 view -0
+ 563              		.cfi_startproc
+ 564              		@ args = 0, pretend = 0, frame = 0
+ 565              		@ frame_needed = 0, uses_anonymous_args = 0
+ 566              		@ link register save eliminated.
+  81:open303/Source/DSPCode/rosic_Complex.cpp ****   return (im == 0.0);
+ 567              		.loc 1 81 3 view .LVU124
+ 568              		.loc 1 81 20 is_stmt 0 view .LVU125
+ 569 0000 90ED027B 		vldr.64	d7, [r0, #8]
+ 570 0004 B5EE407B 		vcmp.f64	d7, #0
+ 571 0008 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  82:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 572              		.loc 1 82 1 view .LVU126
+ 573 000c 0CBF     		ite	eq
+ 574 000e 0120     		moveq	r0, #1
+ 575              	.LVL36:
+ 576              		.loc 1 82 1 view .LVU127
+ 577 0010 0020     		movne	r0, #0
+ 578 0012 7047     		bx	lr
+ 579              		.cfi_endproc
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 15
+
+
+ 580              	.LFE658:
+ 582              		.section	.text._ZN5rosic7Complex11isImaginaryEv,"ax",%progbits
+ 583              		.align	1
+ 584              		.global	_ZN5rosic7Complex11isImaginaryEv
+ 585              		.syntax unified
+ 586              		.thumb
+ 587              		.thumb_func
+ 589              	_ZN5rosic7Complex11isImaginaryEv:
+ 590              	.LVL37:
+ 591              	.LFB659:
+  83:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  84:open303/Source/DSPCode/rosic_Complex.cpp **** bool Complex::isImaginary()
+  85:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 592              		.loc 1 85 1 is_stmt 1 view -0
+ 593              		.cfi_startproc
+ 594              		@ args = 0, pretend = 0, frame = 0
+ 595              		@ frame_needed = 0, uses_anonymous_args = 0
+ 596              		@ link register save eliminated.
+  86:open303/Source/DSPCode/rosic_Complex.cpp ****   return (re == 0.0);
+ 597              		.loc 1 86 3 view .LVU129
+ 598              		.loc 1 86 20 is_stmt 0 view .LVU130
+ 599 0000 90ED007B 		vldr.64	d7, [r0]
+ 600 0004 B5EE407B 		vcmp.f64	d7, #0
+ 601 0008 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  87:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 602              		.loc 1 87 1 view .LVU131
+ 603 000c 0CBF     		ite	eq
+ 604 000e 0120     		moveq	r0, #1
+ 605              	.LVL38:
+ 606              		.loc 1 87 1 view .LVU132
+ 607 0010 0020     		movne	r0, #0
+ 608 0012 7047     		bx	lr
+ 609              		.cfi_endproc
+ 610              	.LFE659:
+ 612              		.section	.text._ZN5rosic7Complex10isInfiniteEv,"ax",%progbits
+ 613              		.align	1
+ 614              		.global	_ZN5rosic7Complex10isInfiniteEv
+ 615              		.syntax unified
+ 616              		.thumb
+ 617              		.thumb_func
+ 619              	_ZN5rosic7Complex10isInfiniteEv:
+ 620              	.LVL39:
+ 621              	.LFB660:
+  88:open303/Source/DSPCode/rosic_Complex.cpp **** 
+  89:open303/Source/DSPCode/rosic_Complex.cpp **** bool Complex::isInfinite()
+  90:open303/Source/DSPCode/rosic_Complex.cpp **** {
+ 622              		.loc 1 90 1 is_stmt 1 view -0
+ 623              		.cfi_startproc
+ 624              		@ args = 0, pretend = 0, frame = 0
+ 625              		@ frame_needed = 0, uses_anonymous_args = 0
+ 626              		@ link register save eliminated.
+  91:open303/Source/DSPCode/rosic_Complex.cpp ****   if( re == INF || re == NEG_INF || im == INF || im == NEG_INF )
+ 627              		.loc 1 91 3 view .LVU134
+ 628              		.loc 1 91 13 is_stmt 0 discriminator 1 view .LVU135
+ 629 0000 B7EE004B 		vmov.f64	d4, #1.0e+0
+ 630 0004 9FED125B 		vldr.64	d5, .L23
+ 631              		.loc 1 91 7 view .LVU136
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 16
+
+
+ 632 0008 90ED006B 		vldr.64	d6, [r0]
+ 633              		.loc 1 91 13 discriminator 1 view .LVU137
+ 634 000c 84EE057B 		vdiv.f64	d7, d4, d5
+ 635              		.loc 1 91 47 discriminator 1 view .LVU138
+ 636 0010 B4EE476B 		vcmp.f64	d6, d7
+ 637 0014 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 638 0018 17D0     		beq	.L22
+ 639 001a B1EE475B 		vneg.f64	d5, d7
+ 640              		.loc 1 91 17 discriminator 4 view .LVU139
+ 641 001e B4EE456B 		vcmp.f64	d6, d5
+ 642 0022 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 643 0026 10D0     		beq	.L22
+ 644              		.loc 1 91 37 discriminator 6 view .LVU140
+ 645 0028 90ED026B 		vldr.64	d6, [r0, #8]
+ 646              		.loc 1 91 47 discriminator 10 view .LVU141
+ 647 002c B4EE456B 		vcmp.f64	d6, d5
+ 648 0030 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 649              		.loc 1 91 34 discriminator 7 view .LVU142
+ 650 0034 B4EE467B 		vcmp.f64	d7, d6
+ 651              		.loc 1 91 47 discriminator 10 view .LVU143
+ 652 0038 0CBF     		ite	eq
+ 653 003a 0120     		moveq	r0, #1
+ 654              	.LVL40:
+ 655              		.loc 1 91 47 discriminator 10 view .LVU144
+ 656 003c 0020     		movne	r0, #0
+ 657              		.loc 1 91 34 discriminator 7 view .LVU145
+ 658 003e F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 659 0042 08BF     		it	eq
+ 660 0044 40F00100 		orreq	r0, r0, #1
+ 661 0048 7047     		bx	lr
+ 662              	.LVL41:
+ 663              	.L22:
+  92:open303/Source/DSPCode/rosic_Complex.cpp ****     return true;
+ 664              		.loc 1 92 12 view .LVU146
+ 665 004a 0120     		movs	r0, #1
+ 666              	.LVL42:
+  93:open303/Source/DSPCode/rosic_Complex.cpp ****   else
+  94:open303/Source/DSPCode/rosic_Complex.cpp ****     return false;
+  95:open303/Source/DSPCode/rosic_Complex.cpp **** }
+ 667              		.loc 1 95 1 view .LVU147
+ 668 004c 7047     		bx	lr
+ 669              	.L24:
+ 670 004e 00BF     		.align	3
+ 671              	.L23:
+ 672 0050 00000000 		.word	0
+ 673 0054 00000000 		.word	0
+ 674              		.cfi_endproc
+ 675              	.LFE660:
+ 677              		.text
+ 678              	.Letext0:
+ 679              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 680              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 681              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 682              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/includ
+ 683              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 684              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 685              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ma
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 17
+
+
+ 686              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/s
+ 687              		.file 11 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 688              		.file 12 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 689              		.file 13 "open303/Source/DSPCode/rosic_Complex.h"
+ 690              		.file 14 "open303/Source/DSPCode/GlobalDefinitions.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s 			page 18
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_Complex.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:20     .text._ZN5rosic6sinCosEdPdS0_:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:26     .text._ZN5rosic6sinCosEdPdS0_:00000000 _ZN5rosic6sinCosEdPdS0_
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:75     .text._ZN5rosic7ComplexC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:81     .text._ZN5rosic7ComplexC2Ev:00000000 _ZN5rosic7ComplexC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:81     .text._ZN5rosic7ComplexC2Ev:00000000 _ZN5rosic7ComplexC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:106    .text._ZN5rosic7ComplexC2Ed:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:112    .text._ZN5rosic7ComplexC2Ed:00000000 _ZN5rosic7ComplexC2Ed
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:112    .text._ZN5rosic7ComplexC2Ed:00000000 _ZN5rosic7ComplexC1Ed
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:139    .text._ZN5rosic7ComplexC2Edd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:145    .text._ZN5rosic7ComplexC2Edd:00000000 _ZN5rosic7ComplexC2Edd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:145    .text._ZN5rosic7ComplexC2Edd:00000000 _ZN5rosic7ComplexC1Edd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:169    .text._ZN5rosic7ComplexD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:175    .text._ZN5rosic7ComplexD2Ev:00000000 _ZN5rosic7ComplexD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:175    .text._ZN5rosic7ComplexD2Ev:00000000 _ZN5rosic7ComplexD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:191    .text._ZN5rosic7Complex9getRadiusEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:197    .text._ZN5rosic7Complex9getRadiusEv:00000000 _ZN5rosic7Complex9getRadiusEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:221    .text._ZN5rosic7Complex8getAngleEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:227    .text._ZN5rosic7Complex8getAngleEv:00000000 _ZN5rosic7Complex8getAngleEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:260    .text._ZN5rosic7Complex8getAngleEv:00000028 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:266    .text._ZN5rosic7Complex9setRadiusEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:272    .text._ZN5rosic7Complex9setRadiusEd:00000000 _ZN5rosic7Complex9setRadiusEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:325    .text._ZN5rosic7Complex8setAngleEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:331    .text._ZN5rosic7Complex8setAngleEd:00000000 _ZN5rosic7Complex8setAngleEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:394    .text._ZN5rosic7Complex17setRadiusAndAngleEdd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:400    .text._ZN5rosic7Complex17setRadiusAndAngleEdd:00000000 _ZN5rosic7Complex17setRadiusAndAngleEdd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:455    .text._ZN5rosic7Complex12getConjugateEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:461    .text._ZN5rosic7Complex12getConjugateEv:00000000 _ZN5rosic7Complex12getConjugateEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:495    .text._ZN5rosic7Complex13getReciprocalEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:501    .text._ZN5rosic7Complex13getReciprocalEv:00000000 _ZN5rosic7Complex13getReciprocalEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:553    .text._ZN5rosic7Complex6isRealEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:559    .text._ZN5rosic7Complex6isRealEv:00000000 _ZN5rosic7Complex6isRealEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:583    .text._ZN5rosic7Complex11isImaginaryEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:589    .text._ZN5rosic7Complex11isImaginaryEv:00000000 _ZN5rosic7Complex11isImaginaryEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:613    .text._ZN5rosic7Complex10isInfiniteEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:619    .text._ZN5rosic7Complex10isInfiniteEv:00000000 _ZN5rosic7Complex10isInfiniteEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cc3wShU8.s:672    .text._ZN5rosic7Complex10isInfiniteEv:00000050 $d
+
+UNDEFINED SYMBOLS
+sin
+cos
+sqrt
+atan2

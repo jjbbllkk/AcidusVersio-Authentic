@@ -1,0 +1,347 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_MidiNoteEvent.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_MidiNoteEvent.cpp"
+  19              		.section	.text._ZN5rosic13MidiNoteEventC2Ev,"ax",%progbits
+  20              		.align	1
+  21              		.global	_ZN5rosic13MidiNoteEventC2Ev
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic13MidiNoteEventC2Ev:
+  27              	.LVL0:
+  28              	.LFB570:
+   1:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** #include "rosic_MidiNoteEvent.h"
+   2:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+   4:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+   7:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** MidiNoteEvent::MidiNoteEvent()
+  29              		.loc 1 7 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  34              	.LBB2:
+   8:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+   9:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   key       = 64;
+  35              		.loc 1 9 3 view .LVU1
+  36              		.loc 1 9 13 is_stmt 0 view .LVU2
+  37 0000 4023     		movs	r3, #64
+  10:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   vel       = 64;
+  11:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   detune    = 0.0;
+  38              		.loc 1 11 13 view .LVU3
+  39 0002 0022     		movs	r2, #0
+  10:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   vel       = 64;
+  40              		.loc 1 10 13 view .LVU4
+  41 0004 C0E90033 		strd	r3, r3, [r0]
+  42              		.loc 1 11 3 is_stmt 1 view .LVU5
+  43              		.loc 1 11 13 is_stmt 0 view .LVU6
+  44 0008 0023     		movs	r3, #0
+  45 000a C0E90223 		strd	r2, [r0, #8]
+  12:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   priority  = 0;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 2
+
+
+  46              		.loc 1 12 3 is_stmt 1 view .LVU7
+  47              		.loc 1 12 13 is_stmt 0 view .LVU8
+  48 000e 0023     		movs	r3, #0
+  49 0010 0361     		str	r3, [r0, #16]
+  50              	.LBE2:
+  13:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+  51              		.loc 1 13 1 view .LVU9
+  52 0012 7047     		bx	lr
+  53              		.cfi_endproc
+  54              	.LFE570:
+  56              		.global	_ZN5rosic13MidiNoteEventC1Ev
+  57              		.thumb_set _ZN5rosic13MidiNoteEventC1Ev,_ZN5rosic13MidiNoteEventC2Ev
+  58              		.section	.text._ZN5rosic13MidiNoteEventC2Eiiii,"ax",%progbits
+  59              		.align	1
+  60              		.global	_ZN5rosic13MidiNoteEventC2Eiiii
+  61              		.syntax unified
+  62              		.thumb
+  63              		.thumb_func
+  65              	_ZN5rosic13MidiNoteEventC2Eiiii:
+  66              	.LVL1:
+  67              	.LFB573:
+  14:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  15:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** MidiNoteEvent::MidiNoteEvent(int initKey, int initVel, int initDetune, int initPriority)
+  68              		.loc 1 15 1 is_stmt 1 view -0
+  69              		.cfi_startproc
+  70              		@ args = 4, pretend = 0, frame = 0
+  71              		@ frame_needed = 0, uses_anonymous_args = 0
+  72              		@ link register save eliminated.
+  73              	.LBB3:
+  16:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+  17:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( initKey >=0 && initKey <= 127)
+  74              		.loc 1 17 3 view .LVU11
+  18:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     key = initKey;
+  19:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   else
+  20:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     key = 64;
+  75              		.loc 1 20 9 is_stmt 0 view .LVU12
+  76 0000 8029     		cmp	r1, #128
+  77              	.LBE3:
+  15:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+  78              		.loc 1 15 1 view .LVU13
+  79 0002 07EE103A 		vmov	s14, r3	@ int
+  80              	.LBB4:
+  21:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  22:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( initVel >=0 && initVel <= 127)
+  23:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     vel = initVel;
+  24:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   else
+  25:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     vel = 64;
+  26:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  27:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( initPriority >=0 )
+  81              		.loc 1 27 3 view .LVU14
+  82 0006 009B     		ldr	r3, [sp]
+  83              	.LVL2:
+  20:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  84              		.loc 1 20 9 view .LVU15
+  85 0008 28BF     		it	cs
+  86 000a 4021     		movcs	r1, #64
+  87              	.LVL3:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 3
+
+
+  25:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  88              		.loc 1 25 9 view .LVU16
+  89 000c 802A     		cmp	r2, #128
+  28:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     priority = initPriority;
+  29:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   else
+  30:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     priority = 0;
+  31:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  32:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   detune = initDetune;
+  90              		.loc 1 32 10 view .LVU17
+  91 000e B8EEC77B 		vcvt.f64.s32	d7, s14
+  92              	.LVL4:
+  27:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     priority = initPriority;
+  93              		.loc 1 27 3 view .LVU18
+  94 0012 23EAE373 		bic	r3, r3, r3, asr #31
+  25:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  95              		.loc 1 25 9 view .LVU19
+  96 0016 28BF     		it	cs
+  97 0018 4022     		movcs	r2, #64
+  98              	.LVL5:
+  25:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  99              		.loc 1 25 9 view .LVU20
+ 100 001a 0160     		str	r1, [r0]
+  22:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     vel = initVel;
+ 101              		.loc 1 22 3 is_stmt 1 view .LVU21
+ 102 001c 0361     		str	r3, [r0, #16]
+ 103 001e 4260     		str	r2, [r0, #4]
+  27:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     priority = initPriority;
+ 104              		.loc 1 27 3 view .LVU22
+ 105              		.loc 1 32 3 view .LVU23
+ 106              		.loc 1 32 10 is_stmt 0 view .LVU24
+ 107 0020 80ED027B 		vstr.64	d7, [r0, #8]
+ 108              	.LBE4:
+  33:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 109              		.loc 1 33 1 view .LVU25
+ 110 0024 7047     		bx	lr
+ 111              		.cfi_endproc
+ 112              	.LFE573:
+ 114              		.global	_ZN5rosic13MidiNoteEventC1Eiiii
+ 115              		.thumb_set _ZN5rosic13MidiNoteEventC1Eiiii,_ZN5rosic13MidiNoteEventC2Eiiii
+ 116              		.section	.text._ZN5rosic13MidiNoteEventD2Ev,"ax",%progbits
+ 117              		.align	1
+ 118              		.global	_ZN5rosic13MidiNoteEventD2Ev
+ 119              		.syntax unified
+ 120              		.thumb
+ 121              		.thumb_func
+ 123              	_ZN5rosic13MidiNoteEventD2Ev:
+ 124              	.LVL6:
+ 125              	.LFB576:
+  34:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  35:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** MidiNoteEvent::~MidiNoteEvent()
+ 126              		.loc 1 35 1 is_stmt 1 view -0
+ 127              		.cfi_startproc
+ 128              		@ args = 0, pretend = 0, frame = 0
+ 129              		@ frame_needed = 0, uses_anonymous_args = 0
+ 130              		@ link register save eliminated.
+  36:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+  37:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 4
+
+
+  38:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 131              		.loc 1 38 1 is_stmt 0 view .LVU27
+ 132 0000 7047     		bx	lr
+ 133              		.cfi_endproc
+ 134              	.LFE576:
+ 136              		.global	_ZN5rosic13MidiNoteEventD1Ev
+ 137              		.thumb_set _ZN5rosic13MidiNoteEventD1Ev,_ZN5rosic13MidiNoteEventD2Ev
+ 138              		.section	.text._ZN5rosic13MidiNoteEvent6setKeyEi,"ax",%progbits
+ 139              		.align	1
+ 140              		.global	_ZN5rosic13MidiNoteEvent6setKeyEi
+ 141              		.syntax unified
+ 142              		.thumb
+ 143              		.thumb_func
+ 145              	_ZN5rosic13MidiNoteEvent6setKeyEi:
+ 146              	.LVL7:
+ 147              	.LFB578:
+  39:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  40:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** //-------------------------------------------------------------------------------------------------
+  41:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** // parameter settings:
+  42:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  43:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** void MidiNoteEvent::setKey(int newKey)
+  44:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+ 148              		.loc 1 44 1 is_stmt 1 view -0
+ 149              		.cfi_startproc
+ 150              		@ args = 0, pretend = 0, frame = 0
+ 151              		@ frame_needed = 0, uses_anonymous_args = 0
+ 152              		@ link register save eliminated.
+  45:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( newKey >=0 && newKey <= 127)
+ 153              		.loc 1 45 3 view .LVU29
+ 154 0000 7F29     		cmp	r1, #127
+  46:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     key = newKey;
+ 155              		.loc 1 46 5 view .LVU30
+ 156              		.loc 1 46 9 is_stmt 0 view .LVU31
+ 157 0002 98BF     		it	ls
+ 158 0004 0160     		strls	r1, [r0]
+  47:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 159              		.loc 1 47 1 view .LVU32
+ 160 0006 7047     		bx	lr
+ 161              		.cfi_endproc
+ 162              	.LFE578:
+ 164              		.section	.text._ZN5rosic13MidiNoteEvent11setVelocityEi,"ax",%progbits
+ 165              		.align	1
+ 166              		.global	_ZN5rosic13MidiNoteEvent11setVelocityEi
+ 167              		.syntax unified
+ 168              		.thumb
+ 169              		.thumb_func
+ 171              	_ZN5rosic13MidiNoteEvent11setVelocityEi:
+ 172              	.LVL8:
+ 173              	.LFB579:
+  48:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  49:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** void MidiNoteEvent::setVelocity(int newVelocity)
+  50:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+ 174              		.loc 1 50 1 is_stmt 1 view -0
+ 175              		.cfi_startproc
+ 176              		@ args = 0, pretend = 0, frame = 0
+ 177              		@ frame_needed = 0, uses_anonymous_args = 0
+ 178              		@ link register save eliminated.
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 5
+
+
+  51:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( newVelocity >=0 && newVelocity <= 127)
+ 179              		.loc 1 51 3 view .LVU34
+ 180 0000 7F29     		cmp	r1, #127
+  52:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     vel = newVelocity;
+ 181              		.loc 1 52 5 view .LVU35
+ 182              		.loc 1 52 9 is_stmt 0 view .LVU36
+ 183 0002 98BF     		it	ls
+ 184 0004 4160     		strls	r1, [r0, #4]
+  53:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 185              		.loc 1 53 1 view .LVU37
+ 186 0006 7047     		bx	lr
+ 187              		.cfi_endproc
+ 188              	.LFE579:
+ 190              		.section	.text._ZN5rosic13MidiNoteEvent9setDetuneEd,"ax",%progbits
+ 191              		.align	1
+ 192              		.global	_ZN5rosic13MidiNoteEvent9setDetuneEd
+ 193              		.syntax unified
+ 194              		.thumb
+ 195              		.thumb_func
+ 197              	_ZN5rosic13MidiNoteEvent9setDetuneEd:
+ 198              	.LVL9:
+ 199              	.LFB580:
+  54:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  55:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** void MidiNoteEvent::setDetune(double newDetune)
+  56:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+ 200              		.loc 1 56 1 is_stmt 1 view -0
+ 201              		.cfi_startproc
+ 202              		@ args = 0, pretend = 0, frame = 0
+ 203              		@ frame_needed = 0, uses_anonymous_args = 0
+ 204              		@ link register save eliminated.
+  57:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   detune = newDetune;
+ 205              		.loc 1 57 3 view .LVU39
+ 206              		.loc 1 57 10 is_stmt 0 view .LVU40
+ 207 0000 80ED020B 		vstr.64	d0, [r0, #8]
+  58:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 208              		.loc 1 58 1 view .LVU41
+ 209 0004 7047     		bx	lr
+ 210              		.cfi_endproc
+ 211              	.LFE580:
+ 213              		.section	.text._ZN5rosic13MidiNoteEvent11setPriorityEi,"ax",%progbits
+ 214              		.align	1
+ 215              		.global	_ZN5rosic13MidiNoteEvent11setPriorityEi
+ 216              		.syntax unified
+ 217              		.thumb
+ 218              		.thumb_func
+ 220              	_ZN5rosic13MidiNoteEvent11setPriorityEi:
+ 221              	.LVL10:
+ 222              	.LFB581:
+  59:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** 
+  60:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** void MidiNoteEvent::setPriority(int newPriority)
+  61:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** {
+ 223              		.loc 1 61 1 is_stmt 1 view -0
+ 224              		.cfi_startproc
+ 225              		@ args = 0, pretend = 0, frame = 0
+ 226              		@ frame_needed = 0, uses_anonymous_args = 0
+ 227              		@ link register save eliminated.
+  62:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****   if( newPriority >=0 )
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 6
+
+
+ 228              		.loc 1 62 3 view .LVU43
+ 229 0000 0029     		cmp	r1, #0
+  63:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp ****     priority = newPriority;
+ 230              		.loc 1 63 5 view .LVU44
+ 231              		.loc 1 63 14 is_stmt 0 view .LVU45
+ 232 0002 A8BF     		it	ge
+ 233 0004 0161     		strge	r1, [r0, #16]
+  64:open303/Source/DSPCode/rosic_MidiNoteEvent.cpp **** }
+ 234              		.loc 1 64 1 view .LVU46
+ 235 0006 7047     		bx	lr
+ 236              		.cfi_endproc
+ 237              	.LFE581:
+ 239              		.text
+ 240              	.Letext0:
+ 241              		.file 2 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 242              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 243              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 244              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ma
+ 245              		.file 6 "open303/Source/DSPCode/rosic_MidiNoteEvent.h"
+ 246              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ar
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s 			page 7
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_MidiNoteEvent.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:20     .text._ZN5rosic13MidiNoteEventC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:26     .text._ZN5rosic13MidiNoteEventC2Ev:00000000 _ZN5rosic13MidiNoteEventC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:26     .text._ZN5rosic13MidiNoteEventC2Ev:00000000 _ZN5rosic13MidiNoteEventC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:59     .text._ZN5rosic13MidiNoteEventC2Eiiii:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:65     .text._ZN5rosic13MidiNoteEventC2Eiiii:00000000 _ZN5rosic13MidiNoteEventC2Eiiii
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:65     .text._ZN5rosic13MidiNoteEventC2Eiiii:00000000 _ZN5rosic13MidiNoteEventC1Eiiii
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:117    .text._ZN5rosic13MidiNoteEventD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:123    .text._ZN5rosic13MidiNoteEventD2Ev:00000000 _ZN5rosic13MidiNoteEventD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:123    .text._ZN5rosic13MidiNoteEventD2Ev:00000000 _ZN5rosic13MidiNoteEventD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:139    .text._ZN5rosic13MidiNoteEvent6setKeyEi:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:145    .text._ZN5rosic13MidiNoteEvent6setKeyEi:00000000 _ZN5rosic13MidiNoteEvent6setKeyEi
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:165    .text._ZN5rosic13MidiNoteEvent11setVelocityEi:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:171    .text._ZN5rosic13MidiNoteEvent11setVelocityEi:00000000 _ZN5rosic13MidiNoteEvent11setVelocityEi
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:191    .text._ZN5rosic13MidiNoteEvent9setDetuneEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:197    .text._ZN5rosic13MidiNoteEvent9setDetuneEd:00000000 _ZN5rosic13MidiNoteEvent9setDetuneEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:214    .text._ZN5rosic13MidiNoteEvent11setPriorityEi:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//cch9oYrO.s:220    .text._ZN5rosic13MidiNoteEvent11setPriorityEi:00000000 _ZN5rosic13MidiNoteEvent11setPriorityEi
+
+NO UNDEFINED SYMBOLS

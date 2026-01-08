@@ -1,0 +1,1410 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_OnePoleFilter.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_OnePoleFilter.cpp"
+  19              		.section	.text._ZN5rosic13OnePoleFilter15setCoefficientsEddd,"ax",%progbits
+  20              		.align	1
+  21              		.global	_ZN5rosic13OnePoleFilter15setCoefficientsEddd
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic13OnePoleFilter15setCoefficientsEddd:
+  27              	.LVL0:
+  28              	.LFB627:
+   1:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** #include "rosic_OnePoleFilter.h"
+   2:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+   4:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+   7:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** OnePoleFilter::OnePoleFilter()
+   8:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+   9:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   shelvingGain = 1.0;
+  10:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setSampleRate(44100.0);  // sampleRate = 44100 Hz by default
+  11:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setMode      (0);        // bypass by default
+  12:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setCutoff    (20000.0);  // cutoff = 20000 Hz by default
+  13:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   reset();                 // reset memorized samples to zero
+  14:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  15:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  16:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** //-------------------------------------------------------------------------------------------------
+  17:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** // parameter settings:
+  18:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  19:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setSampleRate(double newSampleRate)
+  20:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  21:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( newSampleRate > 0.0 )
+  22:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     sampleRate = newSampleRate;
+  23:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   sampleRateRec = 1.0 / sampleRate;
+  24:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  25:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+  26:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+  27:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  28:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  29:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setMode(int newMode)
+  30:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 2
+
+
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   mode = newMode; // 0:bypass, 1:Low Pass, 2:High Pass
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+  33:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  34:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  35:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setCutoff(double newCutoff)
+  36:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  37:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( (newCutoff>0.0) && (newCutoff<=20000.0) )
+  38:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     cutoff = newCutoff;
+  39:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   else
+  40:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     cutoff = 20000.0;
+  41:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+  43:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+  44:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  45:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  46:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setShelvingGain(double newGain)
+  47:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  48:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( newGain > 0.0 )
+  49:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   {
+  50:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     shelvingGain = newGain;
+  51:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     calcCoeffs();
+  52:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   }
+  53:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   else
+  54:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     DEBUG_BREAK; // this is a linear gain factor and must be >= 0.0
+  55:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  56:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  57:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setShelvingGainInDecibels(double newGain)
+  58:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  59:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setShelvingGain(dB2amp(newGain));
+  60:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  61:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  62:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setCoefficients(double newB0, double newB1, double newA1)
+  63:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  29              		.loc 1 63 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  64:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   b0 = newB0;
+  34              		.loc 1 64 3 view .LVU1
+  35              		.loc 1 64 6 is_stmt 0 view .LVU2
+  36 0000 80ED040B 		vstr.64	d0, [r0, #16]
+  65:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   b1 = newB1;
+  37              		.loc 1 65 3 is_stmt 1 view .LVU3
+  38              		.loc 1 65 6 is_stmt 0 view .LVU4
+  39 0004 80ED061B 		vstr.64	d1, [r0, #24]
+  66:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   a1 = newA1;
+  40              		.loc 1 66 3 is_stmt 1 view .LVU5
+  41              		.loc 1 66 6 is_stmt 0 view .LVU6
+  42 0008 80ED082B 		vstr.64	d2, [r0, #32]
+  67:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  43              		.loc 1 67 1 view .LVU7
+  44 000c 7047     		bx	lr
+  45              		.cfi_endproc
+  46              	.LFE627:
+  48              		.section	.text._ZN5rosic13OnePoleFilter16setInternalStateEdd,"ax",%progbits
+  49              		.align	1
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 3
+
+
+  50              		.global	_ZN5rosic13OnePoleFilter16setInternalStateEdd
+  51              		.syntax unified
+  52              		.thumb
+  53              		.thumb_func
+  55              	_ZN5rosic13OnePoleFilter16setInternalStateEdd:
+  56              	.LVL1:
+  57              	.LFB628:
+  68:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  69:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::setInternalState(double newX1, double newY1)
+  70:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  58              		.loc 1 70 1 is_stmt 1 view -0
+  59              		.cfi_startproc
+  60              		@ args = 0, pretend = 0, frame = 0
+  61              		@ frame_needed = 0, uses_anonymous_args = 0
+  62              		@ link register save eliminated.
+  71:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   x1 = newX1;
+  63              		.loc 1 71 3 view .LVU9
+  64              		.loc 1 71 6 is_stmt 0 view .LVU10
+  65 0000 80ED000B 		vstr.64	d0, [r0]
+  72:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   y1 = newY1;
+  66              		.loc 1 72 3 is_stmt 1 view .LVU11
+  67              		.loc 1 72 6 is_stmt 0 view .LVU12
+  68 0004 80ED021B 		vstr.64	d1, [r0, #8]
+  73:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+  69              		.loc 1 73 1 view .LVU13
+  70 0008 7047     		bx	lr
+  71              		.cfi_endproc
+  72              	.LFE628:
+  74              		.section	.text._ZN5rosic13OnePoleFilter10calcCoeffsEv,"ax",%progbits
+  75              		.align	1
+  76              		.global	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+  77              		.syntax unified
+  78              		.thumb
+  79              		.thumb_func
+  81              	_ZN5rosic13OnePoleFilter10calcCoeffsEv:
+  82              	.LVL2:
+  83              	.LFB629:
+  74:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  75:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** //-------------------------------------------------------------------------------------------------
+  76:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** //others:
+  77:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+  78:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::calcCoeffs()
+  79:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+  84              		.loc 1 79 1 is_stmt 1 view -0
+  85              		.cfi_startproc
+  86              		@ args = 0, pretend = 0, frame = 0
+  87              		@ frame_needed = 0, uses_anonymous_args = 0
+  80:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   switch(mode)
+  88              		.loc 1 80 3 view .LVU15
+  89              	.LBB9:
+  90 0000 836B     		ldr	r3, [r0, #56]
+  91 0002 013B     		subs	r3, r3, #1
+  92              	.LBE9:
+  79:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   switch(mode)
+  93              		.loc 1 79 1 is_stmt 0 view .LVU16
+  94 0004 10B5     		push	{r4, lr}
+  95              		.cfi_def_cfa_offset 8
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 4
+
+
+  96              		.cfi_offset 4, -8
+  97              		.cfi_offset 14, -4
+  98 0006 0446     		mov	r4, r0
+  99 0008 2DED068B 		vpush.64	{d8, d9, d10}
+ 100              		.cfi_def_cfa_offset 32
+ 101              		.cfi_offset 80, -32
+ 102              		.cfi_offset 81, -28
+ 103              		.cfi_offset 82, -24
+ 104              		.cfi_offset 83, -20
+ 105              		.cfi_offset 84, -16
+ 106              		.cfi_offset 85, -12
+ 107 000c B7EE008B 		vmov.f64	d8, #1.0e+0
+ 108              	.LBB24:
+ 109              		.loc 1 80 3 view .LVU17
+ 110 0010 042B     		cmp	r3, #4
+ 111 0012 00F2B080 		bhi	.L17
+ 112 0016 DFE803F0 		tbb	[pc, r3]
+ 113              	.L6:
+ 114 001a 03       		.byte	(.L10-.L6)/2
+ 115 001b 1C       		.byte	(.L9-.L6)/2
+ 116 001c 31       		.byte	(.L8-.L6)/2
+ 117 001d 62       		.byte	(.L7-.L6)/2
+ 118 001e 97       		.byte	(.L5-.L6)/2
+ 119 001f 00       		.p2align 1
+ 120              	.L10:
+ 121              	.LBB10:
+  81:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   {
+  82:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case LOWPASS: 
+ 122              		.loc 1 82 3 is_stmt 1 view .LVU18
+  83:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 123              		.loc 1 83 5 view .LVU19
+ 124              	.LBB11:
+  84:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from dspguide:
+  85:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = exp( -2.0 * PI * cutoff * sampleRateRec); 
+ 125              		.loc 1 85 7 view .LVU20
+ 126              		.loc 1 85 33 is_stmt 0 view .LVU21
+ 127 0020 90ED0A0B 		vldr.64	d0, [r0, #40]
+ 128 0024 9FED587B 		vldr.64	d7, .L23
+ 129              	.LBE11:
+  86:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1-x;
+  87:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = 0.0;
+  88:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = x;
+  89:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+  90:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     break;
+ 130              		.loc 1 90 5 view .LVU22
+ 131 0028 9FED599B 		vldr.64	d9, .L23+8
+ 132              	.LBB12:
+  85:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1-x;
+ 133              		.loc 1 85 33 view .LVU23
+ 134 002c 20EE070B 		vmul.f64	d0, d0, d7
+  85:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1-x;
+ 135              		.loc 1 85 21 view .LVU24
+ 136 0030 90ED127B 		vldr.64	d7, [r0, #72]
+ 137 0034 20EE070B 		vmul.f64	d0, d0, d7
+ 138 0038 FFF7FEFF 		bl	exp
+ 139              	.LVL3:
+  86:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1-x;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 5
+
+
+ 140              		.loc 1 86 7 is_stmt 1 view .LVU25
+  86:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1-x;
+ 141              		.loc 1 86 13 is_stmt 0 view .LVU26
+ 142 003c 38EE408B 		vsub.f64	d8, d8, d0
+  87:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = x;
+ 143              		.loc 1 87 7 is_stmt 1 view .LVU27
+  88:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 144              		.loc 1 88 7 view .LVU28
+ 145              	.LBE12:
+ 146              		.loc 1 90 5 view .LVU29
+ 147              	.LVL4:
+ 148              	.L4:
+ 149              	.LBB13:
+  86:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = 0.0;
+ 150              		.loc 1 86 10 is_stmt 0 view .LVU30
+ 151 0040 84ED048B 		vstr.64	d8, [r4, #16]
+  87:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = x;
+ 152              		.loc 1 87 10 view .LVU31
+ 153 0044 84ED069B 		vstr.64	d9, [r4, #24]
+ 154              	.LBE13:
+ 155              	.LBE10:
+ 156              	.LBE24:
+  91:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case HIGHPASS:  
+  92:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+  93:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from dspguide:
+  94:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = exp( -2.0 * PI * cutoff * sampleRateRec);
+  95:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 =  0.5*(1+x);
+  96:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = -0.5*(1+x);
+  97:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = x;
+  98:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+  99:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     break;
+ 100:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case LOWSHELV:
+ 101:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 102:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double c = 0.5*(shelvingGain-1.0);
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 105:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 106:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       if( shelvingGain >= 1.0 )
+ 107:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (t-1.0)/(t+1.0);
+ 108:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (t-shelvingGain)/(t+shelvingGain);
+ 110:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 111:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1.0 + c + c*a;
+ 112:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = c + c*a + a;
+ 113:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 114:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 115:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     break;
+ 116:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case HIGHSHELV:
+ 117:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 118:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double c = 0.5*(shelvingGain-1.0);
+ 120:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 121:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 122:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       if( shelvingGain >= 1.0 )
+ 123:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (t-1.0)/(t+1.0);
+ 124:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (shelvingGain*t-1.0)/(shelvingGain*t+1.0);
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 6
+
+
+ 126:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 127:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1.0 + c - c*a;
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = a + c*a - c;
+ 129:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 130:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 131:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     break;
+ 132:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 133:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case ALLPASS:  
+ 134:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 135:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 136:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 137:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = (t-1.0) / (t+1.0);
+ 138:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 139:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = x;
+ 140:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = 1.0;
+ 141:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -x;
+ 142:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 143:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     break;
+ 144:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 145:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   default: // bypass
+ 146:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 147:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 = 1.0;
+ 148:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = 0.0;
+ 149:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = 0.0;
+ 150:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }break;
+ 151:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   }
+ 152:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 157              		.loc 1 152 1 view .LVU32
+ 158 0048 BDEC068B 		vldm	sp!, {d8-d10}
+ 159              		.cfi_remember_state
+ 160              		.cfi_restore 84
+ 161              		.cfi_restore 85
+ 162              		.cfi_restore 82
+ 163              		.cfi_restore 83
+ 164              		.cfi_restore 80
+ 165              		.cfi_restore 81
+ 166              		.cfi_def_cfa_offset 8
+ 167              	.LBB25:
+ 168              	.LBB22:
+ 169              	.LBB14:
+  88:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 170              		.loc 1 88 10 view .LVU33
+ 171 004c 84ED080B 		vstr.64	d0, [r4, #32]
+ 172              	.LBE14:
+ 173              	.LBE22:
+ 174              	.LBE25:
+ 175              		.loc 1 152 1 view .LVU34
+ 176 0050 10BD     		pop	{r4, pc}
+ 177              	.LVL5:
+ 178              	.L9:
+ 179              		.cfi_restore_state
+ 180              	.LBB26:
+ 181              	.LBB23:
+  91:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case HIGHPASS:  
+ 182              		.loc 1 91 3 is_stmt 1 view .LVU35
+  92:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from dspguide:
+ 183              		.loc 1 92 5 view .LVU36
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 7
+
+
+ 184              	.LBB15:
+  94:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 =  0.5*(1+x);
+ 185              		.loc 1 94 7 view .LVU37
+  94:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 =  0.5*(1+x);
+ 186              		.loc 1 94 33 is_stmt 0 view .LVU38
+ 187 0052 90ED0A0B 		vldr.64	d0, [r0, #40]
+ 188 0056 9FED4C7B 		vldr.64	d7, .L23
+ 189 005a 20EE070B 		vmul.f64	d0, d0, d7
+  94:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b0 =  0.5*(1+x);
+ 190              		.loc 1 94 21 view .LVU39
+ 191 005e 90ED127B 		vldr.64	d7, [r0, #72]
+ 192 0062 20EE070B 		vmul.f64	d0, d0, d7
+ 193 0066 FFF7FEFF 		bl	exp
+ 194              	.LVL6:
+  95:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = -0.5*(1+x);
+ 195              		.loc 1 95 7 is_stmt 1 view .LVU40
+  95:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = -0.5*(1+x);
+ 196              		.loc 1 95 16 is_stmt 0 view .LVU41
+ 197 006a B6EE007B 		vmov.f64	d7, #5.0e-1
+  95:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = -0.5*(1+x);
+ 198              		.loc 1 95 19 view .LVU42
+ 199 006e 30EE088B 		vadd.f64	d8, d0, d8
+  95:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = -0.5*(1+x);
+ 200              		.loc 1 95 16 view .LVU43
+ 201 0072 28EE078B 		vmul.f64	d8, d8, d7
+  96:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = x;
+ 202              		.loc 1 96 7 is_stmt 1 view .LVU44
+ 203 0076 B1EE489B 		vneg.f64	d9, d8
+  97:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 204              		.loc 1 97 7 view .LVU45
+ 205              	.LBE15:
+  99:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   case LOWSHELV:
+ 206              		.loc 1 99 5 view .LVU46
+ 207 007a E1E7     		b	.L4
+ 208              	.LVL7:
+ 209              	.L8:
+ 100:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 210              		.loc 1 100 3 view .LVU47
+ 101:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 211              		.loc 1 101 5 view .LVU48
+ 212              	.LBB16:
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 213              		.loc 1 103 7 view .LVU49
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 214              		.loc 1 104 24 is_stmt 0 view .LVU50
+ 215 007c 90ED0A0B 		vldr.64	d0, [r0, #40]
+ 216 0080 9FED457B 		vldr.64	d7, .L23+16
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 217              		.loc 1 103 23 view .LVU51
+ 218 0084 90ED0CAB 		vldr.64	d10, [r0, #48]
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 219              		.loc 1 103 14 view .LVU52
+ 220 0088 B6EE006B 		vmov.f64	d6, #5.0e-1
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 221              		.loc 1 104 24 view .LVU53
+ 222 008c 20EE070B 		vmul.f64	d0, d0, d7
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 8
+
+
+ 223              		.loc 1 103 35 view .LVU54
+ 224 0090 3AEE489B 		vsub.f64	d9, d10, d8
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 225              		.loc 1 104 21 view .LVU55
+ 226 0094 90ED127B 		vldr.64	d7, [r0, #72]
+ 103:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 227              		.loc 1 103 14 view .LVU56
+ 228 0098 29EE069B 		vmul.f64	d9, d9, d6
+ 229              	.LVL8:
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 230              		.loc 1 104 7 is_stmt 1 view .LVU57
+ 104:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 231              		.loc 1 104 21 is_stmt 0 view .LVU58
+ 232 009c 20EE070B 		vmul.f64	d0, d0, d7
+ 233 00a0 FFF7FEFF 		bl	tan
+ 234              	.LVL9:
+ 105:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       if( shelvingGain >= 1.0 )
+ 235              		.loc 1 105 7 is_stmt 1 view .LVU59
+ 106:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (t-1.0)/(t+1.0);
+ 236              		.loc 1 106 7 view .LVU60
+ 237 00a4 B4EEC8AB 		vcmpe.f64	d10, d8
+ 238 00a8 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 239 00ac 10DB     		blt	.L20
+ 107:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 240              		.loc 1 107 9 view .LVU61
+ 107:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 241              		.loc 1 107 15 is_stmt 0 view .LVU62
+ 242 00ae 30EE486B 		vsub.f64	d6, d0, d8
+ 107:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 243              		.loc 1 107 23 view .LVU63
+ 244 00b2 30EE087B 		vadd.f64	d7, d0, d8
+ 107:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 245              		.loc 1 107 11 view .LVU64
+ 246 00b6 86EE070B 		vdiv.f64	d0, d6, d7
+ 247              	.LVL10:
+ 248              	.L13:
+ 111:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = c + c*a + a;
+ 249              		.loc 1 111 7 is_stmt 1 view .LVU65
+ 111:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = c + c*a + a;
+ 250              		.loc 1 111 16 is_stmt 0 view .LVU66
+ 251 00ba 39EE088B 		vadd.f64	d8, d9, d8
+ 111:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = c + c*a + a;
+ 252              		.loc 1 111 20 view .LVU67
+ 253 00be A0EE098B 		vfma.f64	d8, d0, d9
+ 112:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 254              		.loc 1 112 7 is_stmt 1 view .LVU68
+ 112:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 255              		.loc 1 112 20 is_stmt 0 view .LVU69
+ 256 00c2 A0EE099B 		vfma.f64	d9, d0, d9
+ 257              	.LVL11:
+ 112:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 258              		.loc 1 112 20 view .LVU70
+ 259 00c6 39EE009B 		vadd.f64	d9, d9, d0
+ 113:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 260              		.loc 1 113 7 is_stmt 1 view .LVU71
+ 261              	.LVL12:
+ 262              	.L22:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 9
+
+
+ 113:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 263              		.loc 1 113 7 is_stmt 0 view .LVU72
+ 264              	.LBE16:
+ 265              	.LBB17:
+ 129:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 266              		.loc 1 129 7 is_stmt 1 view .LVU73
+ 129:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 267              		.loc 1 129 12 is_stmt 0 view .LVU74
+ 268 00ca B1EE400B 		vneg.f64	d0, d0
+ 269              	.LBE17:
+ 131:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 270              		.loc 1 131 5 is_stmt 1 view .LVU75
+ 271 00ce B7E7     		b	.L4
+ 272              	.LVL13:
+ 273              	.L20:
+ 274              	.LBB18:
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 275              		.loc 1 109 9 view .LVU76
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 276              		.loc 1 109 15 is_stmt 0 view .LVU77
+ 277 00d0 30EE4A7B 		vsub.f64	d7, d0, d10
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 278              		.loc 1 109 32 view .LVU78
+ 279 00d4 3AEE00AB 		vadd.f64	d10, d10, d0
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 280              		.loc 1 109 11 view .LVU79
+ 281 00d8 87EE0A0B 		vdiv.f64	d0, d7, d10
+ 282              	.LVL14:
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 283              		.loc 1 109 11 view .LVU80
+ 284 00dc EDE7     		b	.L13
+ 285              	.LVL15:
+ 286              	.L7:
+ 109:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 287              		.loc 1 109 11 view .LVU81
+ 288              	.LBE18:
+ 116:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 289              		.loc 1 116 3 is_stmt 1 view .LVU82
+ 117:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 290              		.loc 1 117 5 view .LVU83
+ 291              	.LBB19:
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 292              		.loc 1 119 7 view .LVU84
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 293              		.loc 1 119 23 is_stmt 0 view .LVU85
+ 294 00de 90ED0CAB 		vldr.64	d10, [r0, #48]
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 295              		.loc 1 119 14 view .LVU86
+ 296 00e2 B6EE007B 		vmov.f64	d7, #5.0e-1
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 297              		.loc 1 119 35 view .LVU87
+ 298 00e6 3AEE489B 		vsub.f64	d9, d10, d8
+ 120:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 299              		.loc 1 120 24 view .LVU88
+ 300 00ea 90ED0A0B 		vldr.64	d0, [r0, #40]
+ 119:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double t = tan(PI*cutoff*sampleRateRec);
+ 301              		.loc 1 119 14 view .LVU89
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 10
+
+
+ 302 00ee 29EE079B 		vmul.f64	d9, d9, d7
+ 303              	.LVL16:
+ 120:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 304              		.loc 1 120 7 is_stmt 1 view .LVU90
+ 120:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 305              		.loc 1 120 24 is_stmt 0 view .LVU91
+ 306 00f2 9FED297B 		vldr.64	d7, .L23+16
+ 307 00f6 20EE070B 		vmul.f64	d0, d0, d7
+ 120:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double a;
+ 308              		.loc 1 120 21 view .LVU92
+ 309 00fa 90ED127B 		vldr.64	d7, [r0, #72]
+ 310 00fe 20EE070B 		vmul.f64	d0, d0, d7
+ 311 0102 FFF7FEFF 		bl	tan
+ 312              	.LVL17:
+ 121:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       if( shelvingGain >= 1.0 )
+ 313              		.loc 1 121 7 is_stmt 1 view .LVU93
+ 122:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****         a = (t-1.0)/(t+1.0);
+ 314              		.loc 1 122 7 view .LVU94
+ 315 0106 B4EEC8AB 		vcmpe.f64	d10, d8
+ 316 010a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 317 010e 10DB     		blt	.L21
+ 123:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 318              		.loc 1 123 9 view .LVU95
+ 123:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 319              		.loc 1 123 15 is_stmt 0 view .LVU96
+ 320 0110 30EE486B 		vsub.f64	d6, d0, d8
+ 123:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 321              		.loc 1 123 23 view .LVU97
+ 322 0114 30EE087B 		vadd.f64	d7, d0, d8
+ 123:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       else
+ 323              		.loc 1 123 11 view .LVU98
+ 324 0118 86EE070B 		vdiv.f64	d0, d6, d7
+ 325              	.LVL18:
+ 326              	.L16:
+ 127:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = a + c*a - c;
+ 327              		.loc 1 127 7 is_stmt 1 view .LVU99
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 328              		.loc 1 128 20 is_stmt 0 view .LVU100
+ 329 011c B0EE407B 		vmov.f64	d7, d0
+ 127:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = a + c*a - c;
+ 330              		.loc 1 127 16 view .LVU101
+ 331 0120 39EE088B 		vadd.f64	d8, d9, d8
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 332              		.loc 1 128 20 view .LVU102
+ 333 0124 A0EE097B 		vfma.f64	d7, d0, d9
+ 127:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = a + c*a - c;
+ 334              		.loc 1 127 20 view .LVU103
+ 335 0128 A0EE498B 		vfms.f64	d8, d0, d9
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 336              		.loc 1 128 7 is_stmt 1 view .LVU104
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 337              		.loc 1 128 20 is_stmt 0 view .LVU105
+ 338 012c 37EE499B 		vsub.f64	d9, d7, d9
+ 339              	.LVL19:
+ 128:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -a;
+ 340              		.loc 1 128 20 view .LVU106
+ 341 0130 CBE7     		b	.L22
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 11
+
+
+ 342              	.LVL20:
+ 343              	.L21:
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 344              		.loc 1 125 9 is_stmt 1 view .LVU107
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 345              		.loc 1 125 28 is_stmt 0 view .LVU108
+ 346 0132 BFEE007B 		vmov.f64	d7, #-1.0e+0
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 347              		.loc 1 125 11 view .LVU109
+ 348 0136 B0EE486B 		vmov.f64	d6, d8
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 349              		.loc 1 125 28 view .LVU110
+ 350 013a AAEE007B 		vfma.f64	d7, d10, d0
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 351              		.loc 1 125 11 view .LVU111
+ 352 013e AAEE006B 		vfma.f64	d6, d10, d0
+ 353 0142 87EE060B 		vdiv.f64	d0, d7, d6
+ 354              	.LVL21:
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 355              		.loc 1 125 11 view .LVU112
+ 356 0146 E9E7     		b	.L16
+ 357              	.LVL22:
+ 358              	.L5:
+ 125:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 359              		.loc 1 125 11 view .LVU113
+ 360              	.LBE19:
+ 133:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     {
+ 361              		.loc 1 133 3 is_stmt 1 view .LVU114
+ 134:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       // formula from DAFX:
+ 362              		.loc 1 134 5 view .LVU115
+ 363              	.LBB20:
+ 136:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = (t-1.0) / (t+1.0);
+ 364              		.loc 1 136 7 view .LVU116
+ 136:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = (t-1.0) / (t+1.0);
+ 365              		.loc 1 136 24 is_stmt 0 view .LVU117
+ 366 0148 90ED0A0B 		vldr.64	d0, [r0, #40]
+ 367 014c 9FED127B 		vldr.64	d7, .L23+16
+ 368              	.LBE20:
+ 143:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 369              		.loc 1 143 5 view .LVU118
+ 370 0150 B7EE009B 		vmov.f64	d9, #1.0e+0
+ 371              	.LBB21:
+ 136:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = (t-1.0) / (t+1.0);
+ 372              		.loc 1 136 24 view .LVU119
+ 373 0154 20EE070B 		vmul.f64	d0, d0, d7
+ 136:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       double x = (t-1.0) / (t+1.0);
+ 374              		.loc 1 136 21 view .LVU120
+ 375 0158 90ED127B 		vldr.64	d7, [r0, #72]
+ 376 015c 20EE070B 		vmul.f64	d0, d0, d7
+ 377 0160 FFF7FEFF 		bl	tan
+ 378              	.LVL23:
+ 137:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 379              		.loc 1 137 7 is_stmt 1 view .LVU121
+ 137:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 380              		.loc 1 137 20 is_stmt 0 view .LVU122
+ 381 0164 30EE487B 		vsub.f64	d7, d0, d8
+ 137:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 12
+
+
+ 382              		.loc 1 137 30 view .LVU123
+ 383 0168 30EE080B 		vadd.f64	d0, d0, d8
+ 384              	.LVL24:
+ 137:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 385              		.loc 1 137 14 view .LVU124
+ 386 016c 87EE008B 		vdiv.f64	d8, d7, d0
+ 387              	.LVL25:
+ 139:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       b1 = 1.0;
+ 388              		.loc 1 139 7 is_stmt 1 view .LVU125
+ 140:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****       a1 = -x;
+ 389              		.loc 1 140 7 view .LVU126
+ 141:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 390              		.loc 1 141 7 view .LVU127
+ 141:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     }
+ 391              		.loc 1 141 12 is_stmt 0 view .LVU128
+ 392 0170 B1EE480B 		vneg.f64	d0, d8
+ 393              	.LBE21:
+ 143:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 394              		.loc 1 143 5 is_stmt 1 view .LVU129
+ 395 0174 64E7     		b	.L4
+ 396              	.LVL26:
+ 397              	.L17:
+ 143:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 398              		.loc 1 143 5 is_stmt 0 view .LVU130
+ 399              	.LBE23:
+  80:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   {
+ 400              		.loc 1 80 3 view .LVU131
+ 401 0176 9FED069B 		vldr.64	d9, .L23+8
+ 402 017a B7EE008B 		vmov.f64	d8, #1.0e+0
+ 403 017e B0EE490B 		vmov.f64	d0, d9
+ 404 0182 5DE7     		b	.L4
+ 405              	.L24:
+ 406 0184 AFF30080 		.align	3
+ 407              	.L23:
+ 408 0188 182D4454 		.word	1413754136
+ 409 018c FB2119C0 		.word	-1072094725
+ 410 0190 00000000 		.word	0
+ 411 0194 00000000 		.word	0
+ 412 0198 182D4454 		.word	1413754136
+ 413 019c FB210940 		.word	1074340347
+ 414              	.LBE26:
+ 415              		.cfi_endproc
+ 416              	.LFE629:
+ 418              		.section	.text._ZN5rosic13OnePoleFilter13setSampleRateEd,"ax",%progbits
+ 419              		.align	1
+ 420              		.global	_ZN5rosic13OnePoleFilter13setSampleRateEd
+ 421              		.syntax unified
+ 422              		.thumb
+ 423              		.thumb_func
+ 425              	_ZN5rosic13OnePoleFilter13setSampleRateEd:
+ 426              	.LVL27:
+ 427              	.LFB622:
+  20:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( newSampleRate > 0.0 )
+ 428              		.loc 1 20 1 is_stmt 1 view -0
+ 429              		.cfi_startproc
+ 430              		@ args = 0, pretend = 0, frame = 0
+ 431              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 13
+
+
+ 432              		@ link register save eliminated.
+  21:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     sampleRate = newSampleRate;
+ 433              		.loc 1 21 3 view .LVU133
+ 434 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 435 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 436 0008 01DD     		ble	.L26
+  22:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   sampleRateRec = 1.0 / sampleRate;
+ 437              		.loc 1 22 5 view .LVU134
+  22:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   sampleRateRec = 1.0 / sampleRate;
+ 438              		.loc 1 22 16 is_stmt 0 view .LVU135
+ 439 000a 80ED100B 		vstr.64	d0, [r0, #64]
+ 440              	.L26:
+  23:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 441              		.loc 1 23 3 is_stmt 1 view .LVU136
+  23:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 442              		.loc 1 23 23 is_stmt 0 view .LVU137
+ 443 000e 90ED106B 		vldr.64	d6, [r0, #64]
+ 444 0012 B7EE005B 		vmov.f64	d5, #1.0e+0
+ 445 0016 85EE067B 		vdiv.f64	d7, d5, d6
+  23:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 446              		.loc 1 23 17 view .LVU138
+ 447 001a 80ED127B 		vstr.64	d7, [r0, #72]
+  25:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 448              		.loc 1 25 3 is_stmt 1 view .LVU139
+  25:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 449              		.loc 1 25 13 is_stmt 0 view .LVU140
+ 450 001e FFF7FEBF 		b	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ 451              	.LVL28:
+  25:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 452              		.loc 1 25 13 view .LVU141
+ 453              		.cfi_endproc
+ 454              	.LFE622:
+ 456              		.section	.text._ZN5rosic13OnePoleFilter7setModeEi,"ax",%progbits
+ 457              		.align	1
+ 458              		.global	_ZN5rosic13OnePoleFilter7setModeEi
+ 459              		.syntax unified
+ 460              		.thumb
+ 461              		.thumb_func
+ 463              	_ZN5rosic13OnePoleFilter7setModeEi:
+ 464              	.LVL29:
+ 465              	.LFB623:
+  30:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   mode = newMode; // 0:bypass, 1:Low Pass, 2:High Pass
+ 466              		.loc 1 30 1 is_stmt 1 view -0
+ 467              		.cfi_startproc
+ 468              		@ args = 0, pretend = 0, frame = 0
+ 469              		@ frame_needed = 0, uses_anonymous_args = 0
+ 470              		@ link register save eliminated.
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+ 471              		.loc 1 31 3 view .LVU143
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+ 472              		.loc 1 31 8 is_stmt 0 view .LVU144
+ 473 0000 8163     		str	r1, [r0, #56]
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 474              		.loc 1 32 3 is_stmt 1 view .LVU145
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 475              		.loc 1 32 13 is_stmt 0 view .LVU146
+ 476 0002 FFF7FEBF 		b	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 14
+
+
+ 477              	.LVL30:
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 478              		.loc 1 32 13 view .LVU147
+ 479              		.cfi_endproc
+ 480              	.LFE623:
+ 482              		.section	.text._ZN5rosic13OnePoleFilter9setCutoffEd,"ax",%progbits
+ 483              		.align	1
+ 484              		.global	_ZN5rosic13OnePoleFilter9setCutoffEd
+ 485              		.syntax unified
+ 486              		.thumb
+ 487              		.thumb_func
+ 489              	_ZN5rosic13OnePoleFilter9setCutoffEd:
+ 490              	.LVL31:
+ 491              	.LFB624:
+  36:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( (newCutoff>0.0) && (newCutoff<=20000.0) )
+ 492              		.loc 1 36 1 is_stmt 1 view -0
+ 493              		.cfi_startproc
+ 494              		@ args = 0, pretend = 0, frame = 0
+ 495              		@ frame_needed = 0, uses_anonymous_args = 0
+ 496              		@ link register save eliminated.
+  37:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     cutoff = newCutoff;
+ 497              		.loc 1 37 3 view .LVU149
+ 498 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 499 0004 9FED087B 		vldr.64	d7, .L36
+ 500 0008 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 501 000c 05DD     		ble	.L31
+ 502 000e B4EEC07B 		vcmpe.f64	d7, d0
+ 503 0012 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 504 0016 20FE077B 		vselge.f64	d7, d0, d7
+ 505              	.L31:
+ 506 001a 80ED0A7B 		vstr.64	d7, [r0, #40]
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 507              		.loc 1 42 3 view .LVU150
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 508              		.loc 1 42 13 is_stmt 0 view .LVU151
+ 509 001e FFF7FEBF 		b	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ 510              	.LVL32:
+ 511              	.L37:
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 512              		.loc 1 42 13 view .LVU152
+ 513 0022 00BFAFF3 		.align	3
+ 513      0080
+ 514              	.L36:
+ 515 0028 00000000 		.word	0
+ 516 002c 0088D340 		.word	1087604736
+ 517              		.cfi_endproc
+ 518              	.LFE624:
+ 520              		.section	.text._ZN5rosic13OnePoleFilter15setShelvingGainEd,"ax",%progbits
+ 521              		.align	1
+ 522              		.global	_ZN5rosic13OnePoleFilter15setShelvingGainEd
+ 523              		.syntax unified
+ 524              		.thumb
+ 525              		.thumb_func
+ 527              	_ZN5rosic13OnePoleFilter15setShelvingGainEd:
+ 528              	.LVL33:
+ 529              	.LFB625:
+  47:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   if( newGain > 0.0 )
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 15
+
+
+ 530              		.loc 1 47 1 is_stmt 1 view -0
+ 531              		.cfi_startproc
+ 532              		@ args = 0, pretend = 0, frame = 0
+ 533              		@ frame_needed = 0, uses_anonymous_args = 0
+ 534              		@ link register save eliminated.
+  48:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   {
+ 535              		.loc 1 48 3 view .LVU154
+ 536 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 537 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 538 0008 03DD     		ble	.L42
+  50:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     calcCoeffs();
+ 539              		.loc 1 50 5 view .LVU155
+  50:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     calcCoeffs();
+ 540              		.loc 1 50 18 is_stmt 0 view .LVU156
+ 541 000a 80ED0C0B 		vstr.64	d0, [r0, #48]
+  51:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   }
+ 542              		.loc 1 51 5 is_stmt 1 view .LVU157
+  51:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   }
+ 543              		.loc 1 51 15 is_stmt 0 view .LVU158
+ 544 000e FFF7FEBF 		b	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ 545              	.LVL34:
+ 546              	.L42:
+  55:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 547              		.loc 1 55 1 view .LVU159
+ 548 0012 7047     		bx	lr
+ 549              		.cfi_endproc
+ 550              	.LFE625:
+ 552              		.section	.text._ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd,"ax",%progbits
+ 553              		.align	1
+ 554              		.global	_ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd
+ 555              		.syntax unified
+ 556              		.thumb
+ 557              		.thumb_func
+ 559              	_ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd:
+ 560              	.LVL35:
+ 561              	.LFB626:
+  58:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setShelvingGain(dB2amp(newGain));
+ 562              		.loc 1 58 1 is_stmt 1 view -0
+ 563              		.cfi_startproc
+ 564              		@ args = 0, pretend = 0, frame = 0
+ 565              		@ frame_needed = 0, uses_anonymous_args = 0
+  59:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 566              		.loc 1 59 3 view .LVU161
+ 567              	.LBB29:
+ 568              	.LBI29:
+ 569              		.file 2 "open303/Source/DSPCode/GlobalFunctions.h"
+   1:open303/Source/DSPCode/GlobalFunctions.h **** #ifndef GlobalFunctions_h
+   2:open303/Source/DSPCode/GlobalFunctions.h **** #define GlobalFunctions_h
+   3:open303/Source/DSPCode/GlobalFunctions.h **** 
+   4:open303/Source/DSPCode/GlobalFunctions.h **** #include <math.h>
+   5:open303/Source/DSPCode/GlobalFunctions.h **** #include <stdlib.h>
+   6:open303/Source/DSPCode/GlobalFunctions.h **** #include "GlobalDefinitions.h"
+   7:open303/Source/DSPCode/GlobalFunctions.h **** 
+   8:open303/Source/DSPCode/GlobalFunctions.h **** /** This file contains a bunch of useful macros and functions which are not wrapped into the
+   9:open303/Source/DSPCode/GlobalFunctions.h **** rosic namespace to facilitate their global use. */
+  10:open303/Source/DSPCode/GlobalFunctions.h **** 
+  11:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a raw amplitude value/factor to a value in decibels. */
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 16
+
+
+  12:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dB(double amp);
+  13:open303/Source/DSPCode/GlobalFunctions.h **** 
+  14:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a raw amplitude value/factor to a value in decibels with a check, if the amplitude is
+  15:open303/Source/DSPCode/GlobalFunctions.h **** close to zero (to avoid log-of-zero and related errors). */
+  16:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dBWithCheck(double amp, double lowAmplitude = 0.000001);
+  17:open303/Source/DSPCode/GlobalFunctions.h **** 
+  18:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the index of the maximum value in an array of doubles where the array should be of
+  19:open303/Source/DSPCode/GlobalFunctions.h **** length numValues. */
+  20:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+  21:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMaxIndex(T* theArray, int numValues);
+  22:open303/Source/DSPCode/GlobalFunctions.h **** 
+  23:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the index of the minimum value in an array of doubles where the array should be of
+  24:open303/Source/DSPCode/GlobalFunctions.h **** length numValues. */
+  25:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+  26:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMinIndex(T* theArray, int numValues);
+  27:open303/Source/DSPCode/GlobalFunctions.h **** 
+  28:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time-stamp given in beats into seconds acording to a tempo measured in beats per
+  29:open303/Source/DSPCode/GlobalFunctions.h **** minute (bpm). */
+  30:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double beatsToSeconds(double beat, double bpm);
+  31:open303/Source/DSPCode/GlobalFunctions.h **** 
+  32:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value in decibels to a raw amplitude value/factor. */
+  33:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double dB2amp(double x);
+  34:open303/Source/DSPCode/GlobalFunctions.h **** 
+  35:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts an angle in degrees into radiant. */
+  36:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double degreeToRadiant(double degrees);
+  37:open303/Source/DSPCode/GlobalFunctions.h **** 
+  38:open303/Source/DSPCode/GlobalFunctions.h **** /** Frees the memory associated with the pointer ans sets the poiter itself to NULL */
+  39:open303/Source/DSPCode/GlobalFunctions.h **** //INLINE void deleteAndNullifyPointer(void *pointer);
+  40:open303/Source/DSPCode/GlobalFunctions.h **** 
+  41:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the Euclidean distance between points at coordinates (x1,y1), (x2,y2). */
+  42:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double euclideanDistance(double x1, double y1, double x2, double y2);
+  43:open303/Source/DSPCode/GlobalFunctions.h **** 
+  44:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the exponential function with base 10. */
+  45:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double exp10(double x);
+  46:open303/Source/DSPCode/GlobalFunctions.h **** 
+  47:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the exponential function with base 2. */
+  48:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double exp2(double x);
+  49:open303/Source/DSPCode/GlobalFunctions.h **** 
+  50:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the factorial of some integer n >= 0. */
+  51:open303/Source/DSPCode/GlobalFunctions.h **** //INLINE int factorial(int n);
+  52:open303/Source/DSPCode/GlobalFunctions.h **** 
+  53:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a frequency in Hz into a MIDI-note value assuming A4 = 440 Hz. */
+  54:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double freqToPitch(double freq);
+  55:open303/Source/DSPCode/GlobalFunctions.h **** 
+  56:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a frequency in Hz into a MIDI-note value for tunings different than the
+  57:open303/Source/DSPCode/GlobalFunctions.h **** default 440 Hz. */
+  58:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double freqToPitch(double freq, double masterTuneA4);
+  59:open303/Source/DSPCode/GlobalFunctions.h **** 
+  60:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks a pointer for nullity and if it is not NULL, it calls delete for the associated object
+  61:open303/Source/DSPCode/GlobalFunctions.h **** and then sets the pointer to NULL. */
+  62:open303/Source/DSPCode/GlobalFunctions.h **** INLINE void ifNotNullDeleteAndSetNull(void* pointer);
+  63:open303/Source/DSPCode/GlobalFunctions.h **** 
+  64:open303/Source/DSPCode/GlobalFunctions.h **** /** Maps an integer index in the range 0...numIndices-1 into a normalized floating point number in 
+  65:open303/Source/DSPCode/GlobalFunctions.h **** the range 0...1. */
+  66:open303/Source/DSPCode/GlobalFunctions.h **** INLINE float indexToNormalizedValue(int index, int numIndices);
+  67:open303/Source/DSPCode/GlobalFunctions.h **** 
+  68:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is close to some target-value within some tolerance. */
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 17
+
+
+  69:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isCloseTo(double x, double targetValue, double tolerance);
+  70:open303/Source/DSPCode/GlobalFunctions.h **** 
+  71:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is even. */
+  72:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isEven(int x);
+  73:open303/Source/DSPCode/GlobalFunctions.h **** 
+  74:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is odd. */
+  75:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isOdd(int x);
+  76:open303/Source/DSPCode/GlobalFunctions.h **** 
+  77:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is a power of 2. */
+  78:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isPowerOfTwo(unsigned int x);
+  79:open303/Source/DSPCode/GlobalFunctions.h **** 
+  80:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the logarithm to base 2. */
+  81:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double log2(double x);
+  82:open303/Source/DSPCode/GlobalFunctions.h **** 
+  83:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates logarithm to an arbitrary base b. */
+  84:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double logB(double x, double b);
+  85:open303/Source/DSPCode/GlobalFunctions.h **** 
+  86:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value between inMin and inMax into a value between outMin and outMax where the
+  87:open303/Source/DSPCode/GlobalFunctions.h **** mapping is linear for the input and the output. Example: y = linToLin(x, 0.0, 1.0, -96.0, 24.0)
+  88:open303/Source/DSPCode/GlobalFunctions.h **** will map the input x assumed to lie inside 0.0...1.0 to the range between -96.0...24.0. This
+  89:open303/Source/DSPCode/GlobalFunctions.h **** function is useful to convert between parameter representations between 0.0...1.0 and the
+  90:open303/Source/DSPCode/GlobalFunctions.h **** clear-text parameters. */
+  91:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToLin(double in, double inMin, double inMax, double outMin, double outMax);
+  92:open303/Source/DSPCode/GlobalFunctions.h **** 
+  93:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value between inMin and inMax into a value between outMin and outMax where the
+  94:open303/Source/DSPCode/GlobalFunctions.h **** mapping of the output is exponential. Example: y = linToExp(x, 0.0, 1.0, 20.0, 20000.0) will map
+  95:open303/Source/DSPCode/GlobalFunctions.h **** the input x assumed to lie inside 0.0...1.0 to the range between 20.0...20000.0 where equal
+  96:open303/Source/DSPCode/GlobalFunctions.h **** differences in the input lead to equal factors in the output. Make sure that the outMin value is
+  97:open303/Source/DSPCode/GlobalFunctions.h **** greater than zero! */
+  98:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToExp(double in, double inMin, double inMax, double outMin, double outMax);
+  99:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 100:open303/Source/DSPCode/GlobalFunctions.h **** /** Same as linToExp but adds an offset afterwards and compensates for that offset by scaling the
+ 101:open303/Source/DSPCode/GlobalFunctions.h **** offsetted value so as to hit the outMax correctly. */
+ 102:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToExpWithOffset(double in, double inMin, double inMax, double outMin,
+ 103:open303/Source/DSPCode/GlobalFunctions.h ****                                  double outMax, double offset = 0.0);
+ 104:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 105:open303/Source/DSPCode/GlobalFunctions.h **** /** The Inverse of "linToExp" */
+ 106:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double expToLin(double in, double inMin, double inMax, double outMin, double outMax);
+ 107:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 108:open303/Source/DSPCode/GlobalFunctions.h **** /** The Inverse of "linToExpWithOffset" */
+ 109:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double expToLinWithOffset(double in, double inMin, double inMax, double outMin,
+ 110:open303/Source/DSPCode/GlobalFunctions.h ****                                  double outMax, double offset = 0.0);
+ 111:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 112:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns a power of two which is greater than or equal to the input argument. */
+ 113:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 114:open303/Source/DSPCode/GlobalFunctions.h **** INLINE T nextPowerOfTwo(T x);
+ 115:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 116:open303/Source/DSPCode/GlobalFunctions.h **** /** Maps a normalized floating point number in the range 0...1 into an integer index in the range 
+ 117:open303/Source/DSPCode/GlobalFunctions.h **** 0...numIndices-1. */
+ 118:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int normalizedValueToIndex(float normalizedValue, int numIndices);
+ 119:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 120:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a picth-offset in semitones value into a frequency multiplication factor. */
+ 121:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchOffsetToFreqFactor(double pitchOffset);
+ 122:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 123:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a MIDI-note value into a frequency in Hz assuming A4 = 440 Hz. */
+ 124:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchToFreq(double pitch);
+ 125:open303/Source/DSPCode/GlobalFunctions.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 18
+
+
+ 126:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a MIDI-note value into a frequency in Hz for arbitrary master-tunings of A4. */
+ 127:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchToFreq(double pitch, double masterTuneA4);
+ 128:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 129:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts an angle in radiant into degrees. */
+ 130:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double radiantToDegree(double radiant);
+ 131:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 132:open303/Source/DSPCode/GlobalFunctions.h **** /** Generates a random number that is uniformly distributed between min and max (inclusive). The
+ 133:open303/Source/DSPCode/GlobalFunctions.h **** underlying integer pseudo random number generator is a linear congruential with period length of 
+ 134:open303/Source/DSPCode/GlobalFunctions.h **** 2^32. It is based on Numerical Recipies in C (2nd edition), page 284. You may pass a seed to the 
+ 135:open303/Source/DSPCode/GlobalFunctions.h **** first call to initialize it - otherwise it will use 0 as seed. A negative number (as in the default
+ 136:open303/Source/DSPCode/GlobalFunctions.h **** argument) will indicate to not initialize the state and just generate a random number based on the 
+ 137:open303/Source/DSPCode/GlobalFunctions.h **** last state (which is the case for a typical call). */
+ 138:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double randomUniform(double min = 0.0, double max = 1.0, int seed = -1);
+ 139:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 140:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the nearest integer (as double, without typecast). */
+ 141:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double round(double x);
+ 142:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 143:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time value in seconds into a time value measured in beats. */
+ 144:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double secondsToBeats(double timeInSeconds, double bpm);
+ 145:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 146:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the sign of x as double. */
+ 147:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double sign(double x);
+ 148:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 149:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time-stamp given in whole notes into seconds according to a tempo measured in
+ 150:open303/Source/DSPCode/GlobalFunctions.h **** beats per minute (bpm). */
+ 151:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double wholeNotesToSeconds(double noteValue, double bpm);
+ 152:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 153:open303/Source/DSPCode/GlobalFunctions.h **** //=================================================================================================
+ 154:open303/Source/DSPCode/GlobalFunctions.h **** //implementation:
+ 155:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 156:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dB(double amp)
+ 157:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 158:open303/Source/DSPCode/GlobalFunctions.h ****   return 8.6858896380650365530225783783321 * log(amp);
+ 159:open303/Source/DSPCode/GlobalFunctions.h ****   //return 20*log10(amp); // naive version
+ 160:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 161:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 162:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dBWithCheck(double amp, double lowAmplitude)
+ 163:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 164:open303/Source/DSPCode/GlobalFunctions.h ****   if( amp >= lowAmplitude )
+ 165:open303/Source/DSPCode/GlobalFunctions.h ****     return 8.6858896380650365530225783783321 * log(amp);
+ 166:open303/Source/DSPCode/GlobalFunctions.h ****   else
+ 167:open303/Source/DSPCode/GlobalFunctions.h ****     return 8.6858896380650365530225783783321 * log(lowAmplitude);
+ 168:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 169:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 170:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 171:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMaxIndex(T* theArray, int numValues)
+ 172:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 173:open303/Source/DSPCode/GlobalFunctions.h ****   int    maxIndex = 0;
+ 174:open303/Source/DSPCode/GlobalFunctions.h ****   double maxValue = theArray[0];
+ 175:open303/Source/DSPCode/GlobalFunctions.h ****   for(int i=0; i<numValues; i++)
+ 176:open303/Source/DSPCode/GlobalFunctions.h ****   {
+ 177:open303/Source/DSPCode/GlobalFunctions.h ****     if( theArray[i] > maxValue )
+ 178:open303/Source/DSPCode/GlobalFunctions.h ****     {
+ 179:open303/Source/DSPCode/GlobalFunctions.h ****       maxValue = theArray[i];
+ 180:open303/Source/DSPCode/GlobalFunctions.h ****       maxIndex = i;
+ 181:open303/Source/DSPCode/GlobalFunctions.h ****     }
+ 182:open303/Source/DSPCode/GlobalFunctions.h ****   }
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 19
+
+
+ 183:open303/Source/DSPCode/GlobalFunctions.h ****   return maxIndex;
+ 184:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 185:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 186:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 187:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMinIndex(T* theArray, int numValues)
+ 188:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 189:open303/Source/DSPCode/GlobalFunctions.h ****   int    minIndex = 0;
+ 190:open303/Source/DSPCode/GlobalFunctions.h ****   double minValue = theArray[0];
+ 191:open303/Source/DSPCode/GlobalFunctions.h ****   for(int i=0; i<numValues; i++)
+ 192:open303/Source/DSPCode/GlobalFunctions.h ****   {
+ 193:open303/Source/DSPCode/GlobalFunctions.h ****     if( theArray[i] < minValue )
+ 194:open303/Source/DSPCode/GlobalFunctions.h ****     {
+ 195:open303/Source/DSPCode/GlobalFunctions.h ****       minValue = theArray[i];
+ 196:open303/Source/DSPCode/GlobalFunctions.h ****       minIndex = i;
+ 197:open303/Source/DSPCode/GlobalFunctions.h ****     }
+ 198:open303/Source/DSPCode/GlobalFunctions.h ****   }
+ 199:open303/Source/DSPCode/GlobalFunctions.h ****   return minIndex;
+ 200:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 201:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 202:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double beatsToSeconds(double beat, double bpm)
+ 203:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 204:open303/Source/DSPCode/GlobalFunctions.h ****   return (60.0/bpm)*beat;
+ 205:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 206:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 207:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double dB2amp(double dB)
+ 570              		.loc 2 207 15 view .LVU162
+ 571              	.LBB30:
+ 208:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 209:open303/Source/DSPCode/GlobalFunctions.h ****   return exp(dB * 0.11512925464970228420089957273422);
+ 572              		.loc 2 209 3 view .LVU163
+ 573              		.loc 2 209 13 is_stmt 0 view .LVU164
+ 574 0000 9FED077B 		vldr.64	d7, .L44
+ 575              	.LBE30:
+ 576              	.LBE29:
+  58:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setShelvingGain(dB2amp(newGain));
+ 577              		.loc 1 58 1 view .LVU165
+ 578 0004 10B5     		push	{r4, lr}
+ 579              		.cfi_def_cfa_offset 8
+ 580              		.cfi_offset 4, -8
+ 581              		.cfi_offset 14, -4
+  58:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setShelvingGain(dB2amp(newGain));
+ 582              		.loc 1 58 1 view .LVU166
+ 583 0006 0446     		mov	r4, r0
+ 584              	.LBB32:
+ 585              	.LBB31:
+ 586              		.loc 2 209 13 view .LVU167
+ 587 0008 20EE070B 		vmul.f64	d0, d0, d7
+ 588              	.LVL36:
+ 589              		.loc 2 209 13 view .LVU168
+ 590 000c FFF7FEFF 		bl	exp
+ 591              	.LVL37:
+ 592              		.loc 2 209 13 view .LVU169
+ 593              	.LBE31:
+ 594              	.LBE32:
+  59:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 595              		.loc 1 59 18 discriminator 1 view .LVU170
+ 596 0010 2046     		mov	r0, r4
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 20
+
+
+  60:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 597              		.loc 1 60 1 view .LVU171
+ 598 0012 BDE81040 		pop	{r4, lr}
+ 599              		.cfi_restore 14
+ 600              		.cfi_restore 4
+ 601              		.cfi_def_cfa_offset 0
+ 602              	.LVL38:
+  59:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 603              		.loc 1 59 18 discriminator 1 view .LVU172
+ 604 0016 FFF7FEBF 		b	_ZN5rosic13OnePoleFilter15setShelvingGainEd
+ 605              	.LVL39:
+ 606              	.L45:
+  59:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 607              		.loc 1 59 18 discriminator 1 view .LVU173
+ 608 001a 00BFAFF3 		.align	3
+ 608      0080
+ 609              	.L44:
+ 610 0020 2288885F 		.word	1602783266
+ 611 0024 1C79BD3F 		.word	1069381916
+ 612              		.cfi_endproc
+ 613              	.LFE626:
+ 615              		.section	.text._ZN5rosic13OnePoleFilterC2Ev,"ax",%progbits
+ 616              		.align	1
+ 617              		.global	_ZN5rosic13OnePoleFilterC2Ev
+ 618              		.syntax unified
+ 619              		.thumb
+ 620              		.thumb_func
+ 622              	_ZN5rosic13OnePoleFilterC2Ev:
+ 623              	.LVL40:
+ 624              	.LFB620:
+   7:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 625              		.loc 1 7 1 is_stmt 1 view -0
+ 626              		.cfi_startproc
+ 627              		@ args = 0, pretend = 0, frame = 0
+ 628              		@ frame_needed = 0, uses_anonymous_args = 0
+ 629              	.LBB33:
+   9:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setSampleRate(44100.0);  // sampleRate = 44100 Hz by default
+ 630              		.loc 1 9 3 view .LVU175
+   9:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setSampleRate(44100.0);  // sampleRate = 44100 Hz by default
+ 631              		.loc 1 9 16 is_stmt 0 view .LVU176
+ 632 0000 0022     		movs	r2, #0
+ 633 0002 134B     		ldr	r3, .L47+16
+ 634              	.LBE33:
+   7:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 635              		.loc 1 7 1 view .LVU177
+ 636 0004 10B5     		push	{r4, lr}
+ 637              		.cfi_def_cfa_offset 8
+ 638              		.cfi_offset 4, -8
+ 639              		.cfi_offset 14, -4
+ 640              	.LBB42:
+  10:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setMode      (0);        // bypass by default
+ 641              		.loc 1 10 16 view .LVU178
+ 642 0006 9FED0E0B 		vldr.64	d0, .L47
+   9:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setSampleRate(44100.0);  // sampleRate = 44100 Hz by default
+ 643              		.loc 1 9 16 view .LVU179
+ 644 000a C0E90C23 		strd	r2, [r0, #48]
+  10:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setMode      (0);        // bypass by default
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 21
+
+
+ 645              		.loc 1 10 3 is_stmt 1 view .LVU180
+ 646              	.LBE42:
+   7:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 647              		.loc 1 7 1 is_stmt 0 view .LVU181
+ 648 000e 0446     		mov	r4, r0
+ 649              	.LBB43:
+  10:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setMode      (0);        // bypass by default
+ 650              		.loc 1 10 16 view .LVU182
+ 651 0010 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter13setSampleRateEd
+ 652              	.LVL41:
+  11:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   setCutoff    (20000.0);  // cutoff = 20000 Hz by default
+ 653              		.loc 1 11 3 is_stmt 1 view .LVU183
+ 654              	.LBB34:
+ 655              	.LBI34:
+  29:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 656              		.loc 1 29 6 view .LVU184
+ 657              	.LBB35:
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+ 658              		.loc 1 31 3 view .LVU185
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+ 659              		.loc 1 31 8 is_stmt 0 view .LVU186
+ 660 0014 0023     		movs	r3, #0
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 661              		.loc 1 32 13 view .LVU187
+ 662 0016 2046     		mov	r0, r4
+  31:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   calcCoeffs();
+ 663              		.loc 1 31 8 view .LVU188
+ 664 0018 A363     		str	r3, [r4, #56]
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 665              		.loc 1 32 3 is_stmt 1 view .LVU189
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 666              		.loc 1 32 13 is_stmt 0 view .LVU190
+ 667 001a FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ 668              	.LVL42:
+  32:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 669              		.loc 1 32 13 view .LVU191
+ 670              	.LBE35:
+ 671              	.LBE34:
+  12:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   reset();                 // reset memorized samples to zero
+ 672              		.loc 1 12 3 is_stmt 1 view .LVU192
+ 673              	.LBB36:
+ 674              	.LBI36:
+  35:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 675              		.loc 1 35 6 view .LVU193
+ 676              	.LBB37:
+  37:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****     cutoff = newCutoff;
+ 677              		.loc 1 37 3 view .LVU194
+  38:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   else
+ 678              		.loc 1 38 5 view .LVU195
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 679              		.loc 1 42 13 is_stmt 0 view .LVU196
+ 680 001e 2046     		mov	r0, r4
+  38:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   else
+ 681              		.loc 1 38 12 view .LVU197
+ 682 0020 09A3     		adr	r3, .L47+8
+ 683 0022 D3E90023 		ldrd	r2, [r3]
+ 684 0026 C4E90A23 		strd	r2, [r4, #40]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 22
+
+
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 685              		.loc 1 42 3 is_stmt 1 view .LVU198
+  42:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   return;
+ 686              		.loc 1 42 13 is_stmt 0 view .LVU199
+ 687 002a FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter10calcCoeffsEv
+ 688              	.LVL43:
+  43:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 689              		.loc 1 43 3 is_stmt 1 view .LVU200
+  43:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 690              		.loc 1 43 3 is_stmt 0 view .LVU201
+ 691              	.LBE37:
+ 692              	.LBE36:
+  13:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 693              		.loc 1 13 3 is_stmt 1 view .LVU202
+ 694              	.LBB38:
+ 695              	.LBI38:
+ 153:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 154:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** void OnePoleFilter::reset()
+ 696              		.loc 1 154 6 view .LVU203
+ 697              	.LBB39:
+ 155:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 156:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   x1 = 0.0;
+ 698              		.loc 1 156 3 view .LVU204
+ 699              		.loc 1 156 6 is_stmt 0 view .LVU205
+ 700 002e 0022     		movs	r2, #0
+ 701 0030 0023     		movs	r3, #0
+ 702              	.LBE39:
+ 703              	.LBE38:
+ 704              	.LBE43:
+  14:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 705              		.loc 1 14 1 view .LVU206
+ 706 0032 2046     		mov	r0, r4
+ 707              	.LBB44:
+ 708              	.LBB41:
+ 709              	.LBB40:
+ 710              		.loc 1 156 6 view .LVU207
+ 711 0034 C4E90023 		strd	r2, [r4]
+ 157:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   y1 = 0.0;
+ 712              		.loc 1 157 3 is_stmt 1 view .LVU208
+ 713              		.loc 1 157 6 is_stmt 0 view .LVU209
+ 714 0038 C4E90223 		strd	r2, [r4, #8]
+ 715              	.LVL44:
+ 716              		.loc 1 157 6 view .LVU210
+ 717              	.LBE40:
+ 718              	.LBE41:
+ 719              	.LBE44:
+  14:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 720              		.loc 1 14 1 view .LVU211
+ 721 003c 10BD     		pop	{r4, pc}
+ 722              	.LVL45:
+ 723              	.L48:
+  14:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** 
+ 724              		.loc 1 14 1 view .LVU212
+ 725 003e 00BF     		.align	3
+ 726              	.L47:
+ 727 0040 00000000 		.word	0
+ 728 0044 8088E540 		.word	1088784512
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 23
+
+
+ 729 0048 00000000 		.word	0
+ 730 004c 0088D340 		.word	1087604736
+ 731 0050 0000F03F 		.word	1072693248
+ 732              		.cfi_endproc
+ 733              	.LFE620:
+ 735              		.global	_ZN5rosic13OnePoleFilterC1Ev
+ 736              		.thumb_set _ZN5rosic13OnePoleFilterC1Ev,_ZN5rosic13OnePoleFilterC2Ev
+ 737              		.section	.text._ZN5rosic13OnePoleFilter5resetEv,"ax",%progbits
+ 738              		.align	1
+ 739              		.global	_ZN5rosic13OnePoleFilter5resetEv
+ 740              		.syntax unified
+ 741              		.thumb
+ 742              		.thumb_func
+ 744              	_ZN5rosic13OnePoleFilter5resetEv:
+ 745              	.LVL46:
+ 746              	.LFB630:
+ 155:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** {
+ 747              		.loc 1 155 1 is_stmt 1 view -0
+ 748              		.cfi_startproc
+ 749              		@ args = 0, pretend = 0, frame = 0
+ 750              		@ frame_needed = 0, uses_anonymous_args = 0
+ 751              		@ link register save eliminated.
+ 156:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   y1 = 0.0;
+ 752              		.loc 1 156 3 view .LVU214
+ 156:open303/Source/DSPCode/rosic_OnePoleFilter.cpp ****   y1 = 0.0;
+ 753              		.loc 1 156 6 is_stmt 0 view .LVU215
+ 754 0000 0022     		movs	r2, #0
+ 755 0002 0023     		movs	r3, #0
+ 756 0004 C0E90023 		strd	r2, [r0]
+ 757              		.loc 1 157 3 is_stmt 1 view .LVU216
+ 758              		.loc 1 157 6 is_stmt 0 view .LVU217
+ 759 0008 C0E90223 		strd	r2, [r0, #8]
+ 158:open303/Source/DSPCode/rosic_OnePoleFilter.cpp **** }
+ 760              		.loc 1 158 1 view .LVU218
+ 761 000c 7047     		bx	lr
+ 762              		.cfi_endproc
+ 763              	.LFE630:
+ 765              		.text
+ 766              	.Letext0:
+ 767              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 768              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 769              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 770              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/includ
+ 771              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 772              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 773              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ma
+ 774              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/s
+ 775              		.file 11 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 776              		.file 12 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 777              		.file 13 "open303/Source/DSPCode/rosic_OnePoleFilter.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s 			page 24
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_OnePoleFilter.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:20     .text._ZN5rosic13OnePoleFilter15setCoefficientsEddd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:26     .text._ZN5rosic13OnePoleFilter15setCoefficientsEddd:00000000 _ZN5rosic13OnePoleFilter15setCoefficientsEddd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:49     .text._ZN5rosic13OnePoleFilter16setInternalStateEdd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:55     .text._ZN5rosic13OnePoleFilter16setInternalStateEdd:00000000 _ZN5rosic13OnePoleFilter16setInternalStateEdd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:75     .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:81     .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:00000000 _ZN5rosic13OnePoleFilter10calcCoeffsEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:114    .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:0000001a $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:408    .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:00000188 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:419    .text._ZN5rosic13OnePoleFilter13setSampleRateEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:425    .text._ZN5rosic13OnePoleFilter13setSampleRateEd:00000000 _ZN5rosic13OnePoleFilter13setSampleRateEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:457    .text._ZN5rosic13OnePoleFilter7setModeEi:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:463    .text._ZN5rosic13OnePoleFilter7setModeEi:00000000 _ZN5rosic13OnePoleFilter7setModeEi
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:483    .text._ZN5rosic13OnePoleFilter9setCutoffEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:489    .text._ZN5rosic13OnePoleFilter9setCutoffEd:00000000 _ZN5rosic13OnePoleFilter9setCutoffEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:515    .text._ZN5rosic13OnePoleFilter9setCutoffEd:00000028 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:521    .text._ZN5rosic13OnePoleFilter15setShelvingGainEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:527    .text._ZN5rosic13OnePoleFilter15setShelvingGainEd:00000000 _ZN5rosic13OnePoleFilter15setShelvingGainEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:553    .text._ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:559    .text._ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd:00000000 _ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:610    .text._ZN5rosic13OnePoleFilter25setShelvingGainInDecibelsEd:00000020 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:616    .text._ZN5rosic13OnePoleFilterC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:622    .text._ZN5rosic13OnePoleFilterC2Ev:00000000 _ZN5rosic13OnePoleFilterC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:727    .text._ZN5rosic13OnePoleFilterC2Ev:00000040 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:622    .text._ZN5rosic13OnePoleFilterC2Ev:00000000 _ZN5rosic13OnePoleFilterC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:738    .text._ZN5rosic13OnePoleFilter5resetEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:744    .text._ZN5rosic13OnePoleFilter5resetEv:00000000 _ZN5rosic13OnePoleFilter5resetEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:119    .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:0000001f $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccMnGsjg.s:119    .text._ZN5rosic13OnePoleFilter10calcCoeffsEv:00000020 $t
+
+UNDEFINED SYMBOLS
+exp
+tan

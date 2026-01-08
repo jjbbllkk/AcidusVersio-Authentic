@@ -1,0 +1,759 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_BlendOscillator.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_BlendOscillator.cpp"
+  19              		.section	.text._ZN5rosic15BlendOscillatorD2Ev,"ax",%progbits
+  20              		.align	1
+  21              		.global	_ZN5rosic15BlendOscillatorD2Ev
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic15BlendOscillatorD2Ev:
+  27              	.LVL0:
+  28              	.LFB1312:
+   1:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** #include "rosic_BlendOscillator.h"
+   2:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+   4:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+   7:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** BlendOscillator::BlendOscillator()
+   8:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+   9:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   // init member variables:
+  10:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   tableLengthDbl       = (double) MipMappedWaveTable::tableLength;  // typecasted version
+  11:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRate           = 44100.0;
+  12:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   freq                 = 440.0;
+  13:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   increment            = (tableLengthDbl*freq)/sampleRate;
+  14:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   phaseIndex           = 0.0;
+  15:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   startIndex           = 0.0;
+  16:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable1           = NULL;
+  17:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable2           = NULL;
+  18:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  19:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   // somewhat redundant:
+  20:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setSampleRate(44100.0);          // sampleRate = 44100 Hz by default
+  21:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setFrequency (440.0);            // frequency = 440 Hz by default
+  22:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setStartPhase(0.0);              // sartPhase = 0 by default
+  23:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  24:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setWaveForm1(MipMappedWaveTable::SAW);
+  25:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setWaveForm2(MipMappedWaveTable::SQUARE);
+  26:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  27:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   resetPhase();
+  28:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  29:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  30:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** BlendOscillator::~BlendOscillator()
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 2
+
+
+  29              		.loc 1 30 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  31:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  32:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  33:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  34              		.loc 1 33 1 is_stmt 0 view .LVU1
+  35 0000 7047     		bx	lr
+  36              		.cfi_endproc
+  37              	.LFE1312:
+  39              		.global	_ZN5rosic15BlendOscillatorD1Ev
+  40              		.thumb_set _ZN5rosic15BlendOscillatorD1Ev,_ZN5rosic15BlendOscillatorD2Ev
+  41              		.section	.text._ZN5rosic15BlendOscillator13setSampleRateEd,"ax",%progbits
+  42              		.align	1
+  43              		.global	_ZN5rosic15BlendOscillator13setSampleRateEd
+  44              		.syntax unified
+  45              		.thumb
+  46              		.thumb_func
+  48              	_ZN5rosic15BlendOscillator13setSampleRateEd:
+  49              	.LVL1:
+  50              	.LFB1314:
+  34:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  35:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** //-------------------------------------------------------------------------------------------------
+  36:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** // parameter settings:
+  37:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  38:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setSampleRate(double newSampleRate)
+  39:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  51              		.loc 1 39 1 is_stmt 1 view -0
+  52              		.cfi_startproc
+  53              		@ args = 0, pretend = 0, frame = 0
+  54              		@ frame_needed = 0, uses_anonymous_args = 0
+  55              		@ link register save eliminated.
+  40:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   if( newSampleRate > 0.0 )
+  56              		.loc 1 40 3 view .LVU3
+  57 0000 B5EEC00B 		vcmpe.f64	d0, #0
+  58 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  59 0008 01DD     		ble	.L3
+  41:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     sampleRate = newSampleRate;
+  60              		.loc 1 41 5 view .LVU4
+  61              		.loc 1 41 16 is_stmt 0 view .LVU5
+  62 000a 80ED0C0B 		vstr.64	d0, [r0, #48]
+  63              	.L3:
+  42:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRateRec = 1.0 / sampleRate;
+  64              		.loc 1 42 3 is_stmt 1 view .LVU6
+  65              		.loc 1 42 23 is_stmt 0 view .LVU7
+  66 000e 90ED0C7B 		vldr.64	d7, [r0, #48]
+  67 0012 B7EE005B 		vmov.f64	d5, #1.0e+0
+  68 0016 85EE076B 		vdiv.f64	d6, d5, d7
+  43:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   increment = tableLengthDbl*freq*sampleRateRec;
+  69              		.loc 1 43 29 view .LVU8
+  70 001a 90ED007B 		vldr.64	d7, [r0]
+  71 001e 90ED045B 		vldr.64	d5, [r0, #16]
+  72 0022 27EE057B 		vmul.f64	d7, d7, d5
+  73              		.loc 1 43 34 view .LVU9
+  74 0026 27EE067B 		vmul.f64	d7, d7, d6
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 3
+
+
+  42:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRateRec = 1.0 / sampleRate;
+  75              		.loc 1 42 17 view .LVU10
+  76 002a 80ED0E6B 		vstr.64	d6, [r0, #56]
+  77              		.loc 1 43 3 is_stmt 1 view .LVU11
+  78              		.loc 1 43 13 is_stmt 0 view .LVU12
+  79 002e 80ED067B 		vstr.64	d7, [r0, #24]
+  44:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  80              		.loc 1 44 1 view .LVU13
+  81 0032 7047     		bx	lr
+  82              		.cfi_endproc
+  83              	.LFE1314:
+  85              		.section	.text._ZN5rosic15BlendOscillator12setWaveForm1Ei,"ax",%progbits
+  86              		.align	1
+  87              		.global	_ZN5rosic15BlendOscillator12setWaveForm1Ei
+  88              		.syntax unified
+  89              		.thumb
+  90              		.thumb_func
+  92              	_ZN5rosic15BlendOscillator12setWaveForm1Ei:
+  93              	.LVL2:
+  94              	.LFB1315:
+  45:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  46:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setWaveForm1(int newWaveForm1)
+  47:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  95              		.loc 1 47 1 is_stmt 1 view -0
+  96              		.cfi_startproc
+  97              		@ args = 0, pretend = 0, frame = 0
+  98              		@ frame_needed = 0, uses_anonymous_args = 0
+  99              		@ link register save eliminated.
+  48:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   if( waveTable1 != NULL )
+ 100              		.loc 1 48 3 view .LVU15
+ 101              		.loc 1 48 7 is_stmt 0 view .LVU16
+ 102 0000 006C     		ldr	r0, [r0, #64]
+ 103              	.LVL3:
+ 104              		.loc 1 48 3 view .LVU17
+ 105 0002 08B1     		cbz	r0, .L6
+  49:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     waveTable1->setWaveform(newWaveForm1);
+ 106              		.loc 1 49 5 is_stmt 1 view .LVU18
+ 107              		.loc 1 49 28 is_stmt 0 view .LVU19
+ 108 0004 FFF7FEBF 		b	_ZN5rosic18MipMappedWaveTable11setWaveformEi
+ 109              	.LVL4:
+ 110              	.L6:
+  50:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 111              		.loc 1 50 1 view .LVU20
+ 112 0008 7047     		bx	lr
+ 113              		.cfi_endproc
+ 114              	.LFE1315:
+ 116              		.section	.text._ZN5rosic15BlendOscillator12setWaveForm2Ei,"ax",%progbits
+ 117              		.align	1
+ 118              		.global	_ZN5rosic15BlendOscillator12setWaveForm2Ei
+ 119              		.syntax unified
+ 120              		.thumb
+ 121              		.thumb_func
+ 123              	_ZN5rosic15BlendOscillator12setWaveForm2Ei:
+ 124              	.LVL5:
+ 125              	.LFB1316:
+  51:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  52:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setWaveForm2(int newWaveForm2)
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 4
+
+
+  53:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 126              		.loc 1 53 1 is_stmt 1 view -0
+ 127              		.cfi_startproc
+ 128              		@ args = 0, pretend = 0, frame = 0
+ 129              		@ frame_needed = 0, uses_anonymous_args = 0
+ 130              		@ link register save eliminated.
+  54:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   if( waveTable2 != NULL )
+ 131              		.loc 1 54 3 view .LVU22
+ 132              		.loc 1 54 7 is_stmt 0 view .LVU23
+ 133 0000 406C     		ldr	r0, [r0, #68]
+ 134              	.LVL6:
+ 135              		.loc 1 54 3 view .LVU24
+ 136 0002 08B1     		cbz	r0, .L8
+  55:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     waveTable2->setWaveform(newWaveForm2);
+ 137              		.loc 1 55 5 is_stmt 1 view .LVU25
+ 138              		.loc 1 55 28 is_stmt 0 view .LVU26
+ 139 0004 FFF7FEBF 		b	_ZN5rosic18MipMappedWaveTable11setWaveformEi
+ 140              	.LVL7:
+ 141              	.L8:
+  56:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 142              		.loc 1 56 1 view .LVU27
+ 143 0008 7047     		bx	lr
+ 144              		.cfi_endproc
+ 145              	.LFE1316:
+ 147              		.section	.text._ZN5rosic15BlendOscillatorC2Ev,"ax",%progbits
+ 148              		.align	1
+ 149              		.global	_ZN5rosic15BlendOscillatorC2Ev
+ 150              		.syntax unified
+ 151              		.thumb
+ 152              		.thumb_func
+ 154              	_ZN5rosic15BlendOscillatorC2Ev:
+ 155              	.LVL8:
+ 156              	.LFB1309:
+   7:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 157              		.loc 1 7 1 is_stmt 1 view -0
+ 158              		.cfi_startproc
+ 159              		@ args = 0, pretend = 0, frame = 0
+ 160              		@ frame_needed = 0, uses_anonymous_args = 0
+ 161              	.LBB17:
+  10:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRate           = 44100.0;
+ 162              		.loc 1 10 3 view .LVU29
+  10:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRate           = 44100.0;
+ 163              		.loc 1 10 24 is_stmt 0 view .LVU30
+ 164 0000 0022     		movs	r2, #0
+ 165 0002 154B     		ldr	r3, .L11+8
+  24:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setWaveForm2(MipMappedWaveTable::SQUARE);
+ 166              		.loc 1 24 15 view .LVU31
+ 167 0004 0421     		movs	r1, #4
+ 168              	.LBE17:
+   7:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 169              		.loc 1 7 1 view .LVU32
+ 170 0006 10B5     		push	{r4, lr}
+ 171              		.cfi_def_cfa_offset 8
+ 172              		.cfi_offset 4, -8
+ 173              		.cfi_offset 14, -4
+ 174              	.LBB24:
+  10:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   sampleRate           = 44100.0;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 5
+
+
+ 175              		.loc 1 10 24 view .LVU33
+ 176 0008 C0E90023 		strd	r2, [r0]
+  11:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   freq                 = 440.0;
+ 177              		.loc 1 11 3 is_stmt 1 view .LVU34
+  12:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   increment            = (tableLengthDbl*freq)/sampleRate;
+ 178              		.loc 1 12 24 is_stmt 0 view .LVU35
+ 179 000c 0022     		movs	r2, #0
+ 180 000e 134B     		ldr	r3, .L11+12
+ 181              	.LBE24:
+   7:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 182              		.loc 1 7 1 view .LVU36
+ 183 0010 0446     		mov	r4, r0
+ 184              	.LBB25:
+  12:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   increment            = (tableLengthDbl*freq)/sampleRate;
+ 185              		.loc 1 12 24 view .LVU37
+ 186 0012 C0E90423 		strd	r2, [r0, #16]
+  14:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   startIndex           = 0.0;
+ 187              		.loc 1 14 24 view .LVU38
+ 188 0016 0022     		movs	r2, #0
+ 189 0018 0023     		movs	r3, #0
+  11:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   freq                 = 440.0;
+ 190              		.loc 1 11 24 view .LVU39
+ 191 001a 9FED0D0B 		vldr.64	d0, .L11
+  14:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   startIndex           = 0.0;
+ 192              		.loc 1 14 24 view .LVU40
+ 193 001e C0E90223 		strd	r2, [r0, #8]
+  15:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable1           = NULL;
+ 194              		.loc 1 15 24 view .LVU41
+ 195 0022 C0E90A23 		strd	r2, [r0, #40]
+  16:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable2           = NULL;
+ 196              		.loc 1 16 24 view .LVU42
+ 197 0026 0023     		movs	r3, #0
+  11:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   freq                 = 440.0;
+ 198              		.loc 1 11 24 view .LVU43
+ 199 0028 80ED0C0B 		vstr.64	d0, [r0, #48]
+  12:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   increment            = (tableLengthDbl*freq)/sampleRate;
+ 200              		.loc 1 12 3 is_stmt 1 view .LVU44
+  13:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   phaseIndex           = 0.0;
+ 201              		.loc 1 13 3 view .LVU45
+  14:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   startIndex           = 0.0;
+ 202              		.loc 1 14 3 view .LVU46
+  15:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable1           = NULL;
+ 203              		.loc 1 15 3 view .LVU47
+  16:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable2           = NULL;
+ 204              		.loc 1 16 3 view .LVU48
+  17:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 205              		.loc 1 17 24 is_stmt 0 view .LVU49
+ 206 002c C0E91033 		strd	r3, r3, [r0, #64]
+  20:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setFrequency (440.0);            // frequency = 440 Hz by default
+ 207              		.loc 1 20 3 is_stmt 1 view .LVU50
+  20:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setFrequency (440.0);            // frequency = 440 Hz by default
+ 208              		.loc 1 20 16 is_stmt 0 view .LVU51
+ 209 0030 FFF7FEFF 		bl	_ZN5rosic15BlendOscillator13setSampleRateEd
+ 210              	.LVL9:
+  21:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setStartPhase(0.0);              // sartPhase = 0 by default
+ 211              		.loc 1 21 3 is_stmt 1 view .LVU52
+ 212              	.LBB18:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 6
+
+
+ 213              	.LBI18:
+ 214              		.file 2 "open303/Source/DSPCode/rosic_BlendOscillator.h"
+   1:open303/Source/DSPCode/rosic_BlendOscillator.h **** #ifndef rosic_BlendOscillator_h
+   2:open303/Source/DSPCode/rosic_BlendOscillator.h **** #define rosic_BlendOscillator_h
+   3:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+   4:open303/Source/DSPCode/rosic_BlendOscillator.h **** // rosic-indcludes:
+   5:open303/Source/DSPCode/rosic_BlendOscillator.h **** #include "rosic_MipMappedWaveTable.h"
+   6:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+   7:open303/Source/DSPCode/rosic_BlendOscillator.h **** namespace rosic
+   8:open303/Source/DSPCode/rosic_BlendOscillator.h **** {
+   9:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  10:open303/Source/DSPCode/rosic_BlendOscillator.h ****   /**
+  11:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  12:open303/Source/DSPCode/rosic_BlendOscillator.h ****   This is an oscillator that can continuously blend between two waveforms - this is more efficient
+  13:open303/Source/DSPCode/rosic_BlendOscillator.h ****   than using two separate oscillators because the phase-accumulator has to be calculated only once
+  14:open303/Source/DSPCode/rosic_BlendOscillator.h ****   for both waveforms.
+  15:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  16:open303/Source/DSPCode/rosic_BlendOscillator.h ****   */
+  17:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  18:open303/Source/DSPCode/rosic_BlendOscillator.h ****   class BlendOscillator
+  19:open303/Source/DSPCode/rosic_BlendOscillator.h ****   {
+  20:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  21:open303/Source/DSPCode/rosic_BlendOscillator.h ****   public:
+  22:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  23:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //---------------------------------------------------------------------------------------------
+  24:open303/Source/DSPCode/rosic_BlendOscillator.h ****     // construction/destruction:
+  25:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  26:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Constructor. */
+  27:open303/Source/DSPCode/rosic_BlendOscillator.h ****     BlendOscillator();
+  28:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  29:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Destructor. */
+  30:open303/Source/DSPCode/rosic_BlendOscillator.h ****     ~BlendOscillator();
+  31:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  32:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //---------------------------------------------------------------------------------------------
+  33:open303/Source/DSPCode/rosic_BlendOscillator.h ****     // parameter settings:
+  34:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  35:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the sample-rateRate(). */
+  36:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setSampleRate(double newSampleRate);
+  37:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  38:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the 1st waveform of the oscillator. */
+  39:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setWaveForm1(int newWaveForm1);
+  40:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  41:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the 2nd waveform of the oscillator. */
+  42:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setWaveForm2(int newWaveForm2);
+  43:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  44:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Set start phase (range 0 - 360 degrees). */
+  45:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setStartPhase(double StartPhase);
+  46:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  47:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** An object of class WaveTable should be passed with this function which will be used in the 
+  48:open303/Source/DSPCode/rosic_BlendOscillator.h ****     oscillator. Not to have "our own" WaveTable-object as member-variable avoids the need to have 
+  49:open303/Source/DSPCode/rosic_BlendOscillator.h ****     the same waveform for different synth-voices multiple times in the memory. This function sets 
+  50:open303/Source/DSPCode/rosic_BlendOscillator.h ****     the 1st wavetable. */
+  51:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setWaveTable1(MipMappedWaveTable* newWaveTable1);
+  52:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  53:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the 2nd wavetable. @see setWaveTable1 */
+  54:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setWaveTable2(MipMappedWaveTable* newWaveTable2);
+  55:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 7
+
+
+  56:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the blend/mix factor between the two waveforms. The value is expected between 0...1
+  57:open303/Source/DSPCode/rosic_BlendOscillator.h ****     where 0 means waveform1 only, 1 means waveform2 only - in between there will be a linear blend
+  58:open303/Source/DSPCode/rosic_BlendOscillator.h ****     between the two waveforms. */
+  59:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setBlendFactor(double newBlendFactor) { blend = newBlendFactor; }
+  60:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  61:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the frequency of the oscillator. */
+  62:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE void setFrequency(double newFrequency);
+  63:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  64:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the pulse width (or symmetry) of the oscillator. */
+  65:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE void setPulseWidth(double newPulseWidth);
+  66:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  67:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Sets the phase increment from outside. */
+  68:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE void setIncrement(double newIncrement) { increment = newIncrement; }
+  69:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  70:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //---------------------------------------------------------------------------------------------
+  71:open303/Source/DSPCode/rosic_BlendOscillator.h ****     // inquiry:
+  72:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  73:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Returns the blend/mix factor between the two waveforms as a value between 0...1 where 0 
+  74:open303/Source/DSPCode/rosic_BlendOscillator.h ****     means waveform1 only, 1 means waveform2 only - in between there will be a linear blend between 
+  75:open303/Source/DSPCode/rosic_BlendOscillator.h ****     the two waveforms. */
+  76:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double getBlendFactor() const { return blend; }
+  77:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  78:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Returns the phase increment. */
+  79:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE double getIncrement() const { return increment; }
+  80:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  81:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //---------------------------------------------------------------------------------------------
+  82:open303/Source/DSPCode/rosic_BlendOscillator.h ****     // audio processing:
+  83:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  84:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Calculates one output sample at a time. */
+  85:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE double getSample();
+  86:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  87:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //---------------------------------------------------------------------------------------------
+  88:open303/Source/DSPCode/rosic_BlendOscillator.h ****     // others:
+  89:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  90:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Calculates the phase-increments for first and second half-period according to freq and 
+  91:open303/Source/DSPCode/rosic_BlendOscillator.h ****     pulseWidth. */
+  92:open303/Source/DSPCode/rosic_BlendOscillator.h ****     INLINE void calculateIncrement();
+  93:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  94:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Resets the phaseIndex to startIndex. */
+  95:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void resetPhase();
+  96:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+  97:open303/Source/DSPCode/rosic_BlendOscillator.h ****     /** Reset the phaseIndex to startIndex+PhaseIndex. */
+  98:open303/Source/DSPCode/rosic_BlendOscillator.h ****     void setPhase(double PhaseIndex);
+  99:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 100:open303/Source/DSPCode/rosic_BlendOscillator.h ****     //=============================================================================================
+ 101:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 102:open303/Source/DSPCode/rosic_BlendOscillator.h ****   protected:
+ 103:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 104:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double tableLengthDbl;    // tableLength as double variable
+ 105:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double phaseIndex;        // current phase index
+ 106:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double freq;              // frequency of the oscillator
+ 107:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double increment;         // phase increment per sample
+ 108:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double blend;             // the blend factor between the two waveforms
+ 109:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double startIndex;        // start-phase-index of the osc (range: 0 - tableLength)
+ 110:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double sampleRate;        // the samplerate
+ 111:open303/Source/DSPCode/rosic_BlendOscillator.h ****     double sampleRateRec;     // 1/sampleRate
+ 112:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 8
+
+
+ 113:open303/Source/DSPCode/rosic_BlendOscillator.h ****     MipMappedWaveTable *waveTable1, *waveTable2; // the 2 wavetables between which we blend
+ 114:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 115:open303/Source/DSPCode/rosic_BlendOscillator.h ****   };
+ 116:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 117:open303/Source/DSPCode/rosic_BlendOscillator.h ****   //-----------------------------------------------------------------------------------------------
+ 118:open303/Source/DSPCode/rosic_BlendOscillator.h ****   // inlined functions:
+ 119:open303/Source/DSPCode/rosic_BlendOscillator.h **** 
+ 120:open303/Source/DSPCode/rosic_BlendOscillator.h ****   INLINE void BlendOscillator::setFrequency(double newFrequency)
+ 215              		.loc 2 120 15 view .LVU53
+ 121:open303/Source/DSPCode/rosic_BlendOscillator.h ****   {
+ 122:open303/Source/DSPCode/rosic_BlendOscillator.h ****     if( (newFrequency > 0.0) && (newFrequency < 20000.0) )
+ 216              		.loc 2 122 5 view .LVU54
+ 123:open303/Source/DSPCode/rosic_BlendOscillator.h ****       freq = newFrequency;
+ 217              		.loc 2 123 7 view .LVU55
+ 218              		.loc 2 123 7 is_stmt 0 view .LVU56
+ 219              	.LBE18:
+  22:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 220              		.loc 1 22 3 is_stmt 1 view .LVU57
+ 221              	.LBB19:
+ 222              	.LBI19:
+  57:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  58:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setWaveTable1(MipMappedWaveTable* newWaveTable1)
+  59:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  60:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable1 = newWaveTable1;
+  61:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  62:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  63:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setWaveTable2(MipMappedWaveTable* newWaveTable2)
+  64:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  65:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable2 = newWaveTable2;
+  66:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  67:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  68:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setStartPhase(double StartPhase)
+ 223              		.loc 1 68 6 view .LVU58
+  69:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  70:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   if( (StartPhase>=0) && (StartPhase<=360) )
+ 224              		.loc 1 70 3 view .LVU59
+ 225              		.loc 1 70 3 is_stmt 0 view .LVU60
+ 226              	.LBE19:
+  24:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setWaveForm2(MipMappedWaveTable::SQUARE);
+ 227              		.loc 1 24 3 is_stmt 1 view .LVU61
+  24:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   setWaveForm2(MipMappedWaveTable::SQUARE);
+ 228              		.loc 1 24 15 is_stmt 0 view .LVU62
+ 229 0034 FFF7FEFF 		bl	_ZN5rosic15BlendOscillator12setWaveForm1Ei
+ 230              	.LVL10:
+  25:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 231              		.loc 1 25 3 is_stmt 1 view .LVU63
+  25:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 232              		.loc 1 25 15 is_stmt 0 view .LVU64
+ 233 0038 2046     		mov	r0, r4
+ 234 003a 0321     		movs	r1, #3
+ 235 003c FFF7FEFF 		bl	_ZN5rosic15BlendOscillator12setWaveForm2Ei
+ 236              	.LVL11:
+  27:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 237              		.loc 1 27 3 is_stmt 1 view .LVU65
+ 238              	.LBB20:
+ 239              	.LBI20:
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     startIndex = (StartPhase/360.0)*tableLengthDbl;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 9
+
+
+  72:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+  73:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  74:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** //-------------------------------------------------------------------------------------------------
+  75:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** // event processing:
+  76:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  77:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::resetPhase()
+ 240              		.loc 1 77 6 view .LVU66
+ 241              	.LBB21:
+  78:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+  79:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   phaseIndex = startIndex;
+ 242              		.loc 1 79 3 view .LVU67
+ 243              	.LBE21:
+ 244              	.LBE20:
+ 245              	.LBE25:
+  28:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 246              		.loc 1 28 1 is_stmt 0 view .LVU68
+ 247 0040 2046     		mov	r0, r4
+ 248              	.LBB26:
+ 249              	.LBB23:
+ 250              	.LBB22:
+ 251              		.loc 1 79 14 view .LVU69
+ 252 0042 D4E90A23 		ldrd	r2, [r4, #40]
+ 253 0046 C4E90223 		strd	r2, [r4, #8]
+ 254              	.LVL12:
+ 255              		.loc 1 79 14 view .LVU70
+ 256              	.LBE22:
+ 257              	.LBE23:
+ 258              	.LBE26:
+  28:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 259              		.loc 1 28 1 view .LVU71
+ 260 004a 10BD     		pop	{r4, pc}
+ 261              	.LVL13:
+ 262              	.L12:
+  28:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 263              		.loc 1 28 1 view .LVU72
+ 264 004c AFF30080 		.align	3
+ 265              	.L11:
+ 266 0050 00000000 		.word	0
+ 267 0054 8088E540 		.word	1088784512
+ 268 0058 00009040 		.word	1083179008
+ 269 005c 00807B40 		.word	1081835520
+ 270              		.cfi_endproc
+ 271              	.LFE1309:
+ 273              		.global	_ZN5rosic15BlendOscillatorC1Ev
+ 274              		.thumb_set _ZN5rosic15BlendOscillatorC1Ev,_ZN5rosic15BlendOscillatorC2Ev
+ 275              		.section	.text._ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE,"ax",%progbits
+ 276              		.align	1
+ 277              		.global	_ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE
+ 278              		.syntax unified
+ 279              		.thumb
+ 280              		.thumb_func
+ 282              	_ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE:
+ 283              	.LVL14:
+ 284              	.LFB1317:
+  59:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable1 = newWaveTable1;
+ 285              		.loc 1 59 1 is_stmt 1 view -0
+ 286              		.cfi_startproc
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 10
+
+
+ 287              		@ args = 0, pretend = 0, frame = 0
+ 288              		@ frame_needed = 0, uses_anonymous_args = 0
+ 289              		@ link register save eliminated.
+  60:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 290              		.loc 1 60 3 view .LVU74
+  60:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 291              		.loc 1 60 14 is_stmt 0 view .LVU75
+ 292 0000 0164     		str	r1, [r0, #64]
+  61:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 293              		.loc 1 61 1 view .LVU76
+ 294 0002 7047     		bx	lr
+ 295              		.cfi_endproc
+ 296              	.LFE1317:
+ 298              		.section	.text._ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE,"ax",%progbits
+ 299              		.align	1
+ 300              		.global	_ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE
+ 301              		.syntax unified
+ 302              		.thumb
+ 303              		.thumb_func
+ 305              	_ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE:
+ 306              	.LVL15:
+ 307              	.LFB1318:
+  64:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   waveTable2 = newWaveTable2;
+ 308              		.loc 1 64 1 is_stmt 1 view -0
+ 309              		.cfi_startproc
+ 310              		@ args = 0, pretend = 0, frame = 0
+ 311              		@ frame_needed = 0, uses_anonymous_args = 0
+ 312              		@ link register save eliminated.
+  65:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 313              		.loc 1 65 3 view .LVU78
+  65:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 314              		.loc 1 65 14 is_stmt 0 view .LVU79
+ 315 0000 4164     		str	r1, [r0, #68]
+  66:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 316              		.loc 1 66 1 view .LVU80
+ 317 0002 7047     		bx	lr
+ 318              		.cfi_endproc
+ 319              	.LFE1318:
+ 321              		.section	.text._ZN5rosic15BlendOscillator13setStartPhaseEd,"ax",%progbits
+ 322              		.align	1
+ 323              		.global	_ZN5rosic15BlendOscillator13setStartPhaseEd
+ 324              		.syntax unified
+ 325              		.thumb
+ 326              		.thumb_func
+ 328              	_ZN5rosic15BlendOscillator13setStartPhaseEd:
+ 329              	.LVL16:
+ 330              	.LFB1319:
+  69:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   if( (StartPhase>=0) && (StartPhase<=360) )
+ 331              		.loc 1 69 1 is_stmt 1 view -0
+ 332              		.cfi_startproc
+ 333              		@ args = 0, pretend = 0, frame = 0
+ 334              		@ frame_needed = 0, uses_anonymous_args = 0
+ 335              		@ link register save eliminated.
+  70:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     startIndex = (StartPhase/360.0)*tableLengthDbl;
+ 336              		.loc 1 70 3 view .LVU82
+ 337 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 338 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 11
+
+
+ 339 0008 0EDB     		blt	.L15
+  70:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****     startIndex = (StartPhase/360.0)*tableLengthDbl;
+ 340              		.loc 1 70 23 is_stmt 0 discriminator 1 view .LVU83
+ 341 000a 9FED097B 		vldr.64	d7, .L21
+ 342 000e B4EEC70B 		vcmpe.f64	d0, d7
+ 343 0012 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 344 0016 07D8     		bhi	.L15
+ 345              	.LVL17:
+ 346              	.LBB29:
+ 347              	.LBI29:
+  68:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 348              		.loc 1 68 6 is_stmt 1 view .LVU84
+ 349              	.LBB30:
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 350              		.loc 1 71 5 view .LVU85
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 351              		.loc 1 71 29 is_stmt 0 view .LVU86
+ 352 0018 80EE076B 		vdiv.f64	d6, d0, d7
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 353              		.loc 1 71 36 view .LVU87
+ 354 001c 90ED007B 		vldr.64	d7, [r0]
+ 355 0020 27EE067B 		vmul.f64	d7, d7, d6
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 356              		.loc 1 71 16 view .LVU88
+ 357 0024 80ED0A7B 		vstr.64	d7, [r0, #40]
+ 358              	.LVL18:
+ 359              	.L15:
+  71:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 360              		.loc 1 71 16 view .LVU89
+ 361              	.LBE30:
+ 362              	.LBE29:
+  72:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+ 363              		.loc 1 72 1 view .LVU90
+ 364 0028 7047     		bx	lr
+ 365              	.L22:
+ 366 002a 00BFAFF3 		.align	3
+ 366      0080
+ 367              	.L21:
+ 368 0030 00000000 		.word	0
+ 369 0034 00807640 		.word	1081507840
+ 370              		.cfi_endproc
+ 371              	.LFE1319:
+ 373              		.section	.text._ZN5rosic15BlendOscillator10resetPhaseEv,"ax",%progbits
+ 374              		.align	1
+ 375              		.global	_ZN5rosic15BlendOscillator10resetPhaseEv
+ 376              		.syntax unified
+ 377              		.thumb
+ 378              		.thumb_func
+ 380              	_ZN5rosic15BlendOscillator10resetPhaseEv:
+ 381              	.LVL19:
+ 382              	.LFB1320:
+  78:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   phaseIndex = startIndex;
+ 383              		.loc 1 78 1 is_stmt 1 view -0
+ 384              		.cfi_startproc
+ 385              		@ args = 0, pretend = 0, frame = 0
+ 386              		@ frame_needed = 0, uses_anonymous_args = 0
+ 387              		@ link register save eliminated.
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 12
+
+
+ 388              		.loc 1 79 3 view .LVU92
+ 389              		.loc 1 79 14 is_stmt 0 view .LVU93
+ 390 0000 D0E90A23 		ldrd	r2, [r0, #40]
+ 391 0004 C0E90223 		strd	r2, [r0, #8]
+  80:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 392              		.loc 1 80 1 view .LVU94
+ 393 0008 7047     		bx	lr
+ 394              		.cfi_endproc
+ 395              	.LFE1320:
+ 397              		.section	.text._ZN5rosic15BlendOscillator8setPhaseEd,"ax",%progbits
+ 398              		.align	1
+ 399              		.global	_ZN5rosic15BlendOscillator8setPhaseEd
+ 400              		.syntax unified
+ 401              		.thumb
+ 402              		.thumb_func
+ 404              	_ZN5rosic15BlendOscillator8setPhaseEd:
+ 405              	.LVL20:
+ 406              	.LFB1321:
+  81:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** 
+  82:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** void BlendOscillator::setPhase(double PhaseIndex)
+  83:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** {
+ 407              		.loc 1 83 1 is_stmt 1 view -0
+ 408              		.cfi_startproc
+ 409              		@ args = 0, pretend = 0, frame = 0
+ 410              		@ frame_needed = 0, uses_anonymous_args = 0
+ 411              		@ link register save eliminated.
+  84:open303/Source/DSPCode/rosic_BlendOscillator.cpp ****   phaseIndex = startIndex+PhaseIndex;
+ 412              		.loc 1 84 3 view .LVU96
+ 413              		.loc 1 84 26 is_stmt 0 view .LVU97
+ 414 0000 90ED0A7B 		vldr.64	d7, [r0, #40]
+ 415 0004 37EE007B 		vadd.f64	d7, d7, d0
+ 416              		.loc 1 84 14 view .LVU98
+ 417 0008 80ED027B 		vstr.64	d7, [r0, #8]
+  85:open303/Source/DSPCode/rosic_BlendOscillator.cpp **** }
+ 418              		.loc 1 85 1 view .LVU99
+ 419 000c 7047     		bx	lr
+ 420              		.cfi_endproc
+ 421              	.LFE1321:
+ 423              		.text
+ 424              	.Letext0:
+ 425              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 426              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 427              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 428              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ty
+ 429              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 430              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 431              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/de
+ 432              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/c
+ 433              		.file 11 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/b
+ 434              		.file 12 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/inclu
+ 435              		.file 13 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 436              		.file 14 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 437              		.file 15 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/m
+ 438              		.file 16 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/s
+ 439              		.file 17 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 440              		.file 18 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/b
+ 441              		.file 19 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/string.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 13
+
+
+ 442              		.file 20 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 443              		.file 21 "open303/Source/DSPCode/rosic_Complex.h"
+ 444              		.file 22 "open303/Source/DSPCode/rosic_FourierTransformerRadix2.h"
+ 445              		.file 23 "open303/Source/DSPCode/rosic_MipMappedWaveTable.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s 			page 14
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_BlendOscillator.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:20     .text._ZN5rosic15BlendOscillatorD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:26     .text._ZN5rosic15BlendOscillatorD2Ev:00000000 _ZN5rosic15BlendOscillatorD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:26     .text._ZN5rosic15BlendOscillatorD2Ev:00000000 _ZN5rosic15BlendOscillatorD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:42     .text._ZN5rosic15BlendOscillator13setSampleRateEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:48     .text._ZN5rosic15BlendOscillator13setSampleRateEd:00000000 _ZN5rosic15BlendOscillator13setSampleRateEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:86     .text._ZN5rosic15BlendOscillator12setWaveForm1Ei:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:92     .text._ZN5rosic15BlendOscillator12setWaveForm1Ei:00000000 _ZN5rosic15BlendOscillator12setWaveForm1Ei
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:117    .text._ZN5rosic15BlendOscillator12setWaveForm2Ei:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:123    .text._ZN5rosic15BlendOscillator12setWaveForm2Ei:00000000 _ZN5rosic15BlendOscillator12setWaveForm2Ei
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:148    .text._ZN5rosic15BlendOscillatorC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:154    .text._ZN5rosic15BlendOscillatorC2Ev:00000000 _ZN5rosic15BlendOscillatorC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:266    .text._ZN5rosic15BlendOscillatorC2Ev:00000050 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:154    .text._ZN5rosic15BlendOscillatorC2Ev:00000000 _ZN5rosic15BlendOscillatorC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:276    .text._ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:282    .text._ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE:00000000 _ZN5rosic15BlendOscillator13setWaveTable1EPNS_18MipMappedWaveTableE
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:299    .text._ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:305    .text._ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE:00000000 _ZN5rosic15BlendOscillator13setWaveTable2EPNS_18MipMappedWaveTableE
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:322    .text._ZN5rosic15BlendOscillator13setStartPhaseEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:328    .text._ZN5rosic15BlendOscillator13setStartPhaseEd:00000000 _ZN5rosic15BlendOscillator13setStartPhaseEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:368    .text._ZN5rosic15BlendOscillator13setStartPhaseEd:00000030 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:374    .text._ZN5rosic15BlendOscillator10resetPhaseEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:380    .text._ZN5rosic15BlendOscillator10resetPhaseEv:00000000 _ZN5rosic15BlendOscillator10resetPhaseEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:398    .text._ZN5rosic15BlendOscillator8setPhaseEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccKmEeW5.s:404    .text._ZN5rosic15BlendOscillator8setPhaseEd:00000000 _ZN5rosic15BlendOscillator8setPhaseEd
+
+UNDEFINED SYMBOLS
+_ZN5rosic18MipMappedWaveTable11setWaveformEi

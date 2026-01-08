@@ -49,7 +49,12 @@ namespace rosic
         MidiNoteEvent newNote(noteNumber, velocity);
         noteList.push_front(newNote);
     }
-    
+
+    // --- RE-ADD ATTACK FIX ---
+    void setAttack(double newAttack) { mainEnv.setAttack(newAttack); }
+    void setAmpAttack(double newAttack) { ampEnv.setAttack(newAttack); }
+    // -------------------------
+
     // ---------------------------------------------
 
     /** Destructor. */

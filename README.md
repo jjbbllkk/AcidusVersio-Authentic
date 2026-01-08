@@ -5,11 +5,13 @@ This is a heavily modified version of the AcidusVersio firmware. It moves the Op
 ## Key Changes in this Version
 * **SDRAM Architecture:** The engine now runs in the 64MB external SDRAM, fixing the "Flash Overflow" errors and allowing for future expansion.
 * **Authentic Envelopes:** * Volume Envelope extended to ~4 seconds (matching original 303 spec).
+    * Attack:** Locked to ~3ms (exponential curve) to simulate the physical capacitor charge time of the original analog circuit.
     * Filter Decay ranges corrected (Normal: 200ms-2s, Devilfish: 30ms-3s).
     * Accents now trigger a fixed, snappy decay time (ignoring the knob), just like the hardware.
 * **Accent Thresholding:** Fixed the "Always On" accent bug. The Accent Knob now acts as an intensity control, while the Accent Gate input (or turning the knob past 90%) triggers the actual "snap" velocity.
 * **Variable Slide:** Slide knob now controls the Portamento time (Slew Rate), allowing for slow drags or fast slides.
 * **Crash Fixes:** Added 16-byte memory alignment to prevent Hard Faults on startup.
+
 
 ## How to Flash (IMPORTANT)
 **The flashing process has changed.** Because this firmware uses the external SDRAM, you must use the **Daisy Bootloader**, not the standard System DFU.

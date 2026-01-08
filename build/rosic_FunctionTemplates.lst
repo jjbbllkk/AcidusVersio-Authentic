@@ -1,0 +1,47 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccLtyUYb.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_FunctionTemplates.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_FunctionTemplates.cpp"
+  19              	.Letext0:
+  20              		.file 2 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+  21              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+  22              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+  23              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ty
+  24              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+  25              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+  26              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/de
+  27              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+  28              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/b
+  29              		.file 11 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/inclu
+  30              		.file 12 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+  31              		.file 13 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+  32              		.file 14 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/m
+  33              		.file 15 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/s
+  34              		.file 16 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+  35              		.file 17 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/b
+  36              		.file 18 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/string.h"
+  37              		.file 19 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccLtyUYb.s 			page 2
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_FunctionTemplates.cpp
+
+NO UNDEFINED SYMBOLS

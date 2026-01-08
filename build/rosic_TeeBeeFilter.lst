@@ -1,0 +1,2361 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_TeeBeeFilter.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_TeeBeeFilter.cpp"
+  19              		.section	.text._ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv,"axG",%progbits,_ZN5rosic12Te
+  20              		.align	1
+  21              		.weak	_ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv:
+  27              	.LVL0:
+  28              	.LFB627:
+  29              		.file 2 "open303/Source/DSPCode/rosic_TeeBeeFilter.h"
+   1:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** #ifndef rosic_TeeBeeFilter_h
+   2:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** #define rosic_TeeBeeFilter_h
+   3:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+   4:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** // standard-library includes:
+   5:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** #include <stdlib.h>          // for the NULL macro
+   6:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** // rosic-indcludes:
+   8:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** #include "rosic_OnePoleFilter.h"
+   9:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  10:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** namespace rosic
+  11:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** {
+  12:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  13:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   /**
+  14:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  15:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   This class is a filter that aims to emulate the filter in the Roland TB 303. It's a variation of 
+  16:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   the Moog ladder filter which includes a highpass in the feedback path that reduces the resonance
+  17:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   on low cutoff frequencies. Moreover, it has a highpass and an allpass filter in the input path to
+  18:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   pre-shape the input signal (important for the sonic character of internal and subsequent 
+  19:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   nonlinearities).
+  20:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  21:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   ...18 vs. 24 dB? blah?
+  22:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  23:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   */
+  24:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  25:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   class TeeBeeFilter
+  26:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   {
+  27:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  28:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   public:
+  29:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 2
+
+
+  30:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Enumeration of the available filter modes. */
+  31:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     enum modes
+  32:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     {
+  33:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       FLAT = 0,
+  34:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       LP_6,
+  35:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       LP_12,
+  36:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       LP_18,
+  37:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       LP_24,
+  38:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       HP_6,
+  39:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       HP_12,
+  40:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       HP_18,
+  41:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       HP_24,
+  42:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_12_12,
+  43:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_6_18,
+  44:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_18_6,
+  45:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_6_12,
+  46:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_12_6,
+  47:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       BP_6_6,
+  48:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       TB_303,      // ala mystran & kunn (page 40 in the kvr-thread)
+  49:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  50:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       NUM_MODES
+  51:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     };
+  52:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  53:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //---------------------------------------------------------------------------------------------
+  54:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // construction/destruction:
+  55:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  56:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Constructor. */
+  57:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     TeeBeeFilter();
+  58:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Destructor. */
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     ~TeeBeeFilter();
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //---------------------------------------------------------------------------------------------
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // parameter settings:
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the sample-rate for this filter. */
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     void setSampleRate(double newSampleRate);
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the cutoff frequency for this filter - the actual coefficient calculation may be 
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     supressed by passing 'false' as second parameter, in this case, it should be triggered
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     manually later by calling calculateCoefficients. */
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE void setCutoff(double newCutoff, bool updateCoefficients = true);
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  73:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the resonance in percent where 100% is self oscillation. */
+  74:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE void setResonance(double newResonance, bool updateCoefficients = true);
+  75:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  76:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the input drive in decibels. */
+  77:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     void setDrive(double newDrive);
+  78:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  79:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the mode of the filter, @see: modes */
+  80:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     void setMode(int newMode);
+  81:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  82:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Sets the cutoff frequency for the highpass filter in the feedback path. */
+  83:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     void setFeedbackHighpassCutoff(double newCutoff) { feedbackHighpass.setCutoff(newCutoff); }
+  84:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  85:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //---------------------------------------------------------------------------------------------
+  86:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // inquiry:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 3
+
+
+  87:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  88:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Returns the cutoff frequency of this filter. */
+  89:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double getCutoff() const { return cutoff; }
+  90:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  91:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Returns the resonance parameter of this filter. */
+  92:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double getResonance() const { return 100.0 * resonanceRaw; }
+  93:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  94:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Returns the drive parameter in decibels. */
+  95:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double getDrive() const { return drive; }
+  96:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+  97:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Returns the slected filter mode. */
+  98:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     int getMode() const { return mode; }
+  99:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 100:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Returns the cutoff frequency for the highpass filter in the feedback path. */
+ 101:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double getFeedbackHighpassCutoff() const { return feedbackHighpass.getCutoff(); }
+ 102:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 103:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //---------------------------------------------------------------------------------------------
+ 104:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // audio processing:
+ 105:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 106:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Calculates one output sample at a time. */
+ 107:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE double getSample(double in);
+ 108:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 109:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //---------------------------------------------------------------------------------------------
+ 110:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // others:
+ 111:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 112:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Causes the filter to re-calculate the coeffiecients via the exact formulas. */
+ 113:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE void calculateCoefficientsExact();
+ 114:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 115:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Causes the filter to re-calculate the coeffiecients using an approximation that is valid
+ 116:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     for normalized radian cutoff frequencies up to pi/4. */
+ 117:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE void calculateCoefficientsApprox4();
+ 118:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 119:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Implements the waveshaping nonlinearity between the stages. */
+ 120:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     INLINE double shape(double x);
+ 121:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 122:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     /** Resets the internal state variables. */
+ 123:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     void reset();
+ 124:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 125:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     //=============================================================================================
+ 126:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 127:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   protected:
+ 128:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 129:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double b0, a1;              // coefficients for the first order sections
+ 130:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double y1, y2, y3, y4;      // output signals of the 4 filter stages 
+ 131:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double c0, c1, c2, c3, c4;  // coefficients for combining various ouput stages
+ 132:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double k;                   // feedback factor in the loop
+ 133:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double g;                   // output gain
+ 134:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double driveFactor;         // filter drive as raw factor
+ 135:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double cutoff;              // cutoff frequency
+ 136:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double drive;               // filter drive in decibels
+ 137:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double resonanceRaw;        // resonance parameter (normalized to 0...1)
+ 138:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double resonanceSkewed;     // mapped resonance parameter to make it behave more musical
+ 139:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double sampleRate;          // the sample rate in Hz
+ 140:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double twoPiOverSampleRate; // 2*PI/sampleRate
+ 141:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     int    mode;                // the selected filter-mode
+ 142:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 143:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     OnePoleFilter feedbackHighpass;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 4
+
+
+ 144:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 145:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   };
+ 146:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 147:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   //-----------------------------------------------------------------------------------------------
+ 148:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   // inlined functions:
+ 149:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 150:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   INLINE void TeeBeeFilter::setCutoff(double newCutoff, bool updateCoefficients)
+ 151:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   {
+ 152:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     if( newCutoff != cutoff )
+ 153:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     {
+ 154:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       if( newCutoff < 200.0 )  // an absolute floor for the cutoff frequency - tweakable
+ 155:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****         cutoff = 200.0;  
+ 156:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       else if( newCutoff > 20000.0 )
+ 157:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****         cutoff = 20000.0;
+ 158:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       else
+ 159:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****         cutoff = newCutoff;
+ 160:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 161:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       if( updateCoefficients == true )
+ 162:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****         calculateCoefficientsApprox4();
+ 163:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     }
+ 164:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   }
+ 165:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 166:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   INLINE void TeeBeeFilter::setResonance(double newResonance, bool updateCoefficients)
+ 167:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   {
+ 168:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     resonanceRaw    = 0.01 * newResonance;
+ 169:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     resonanceSkewed = (1.0-exp(-3.0*resonanceRaw)) / (1.0-exp(-3.0));
+ 170:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     if( updateCoefficients == true )
+ 171:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       calculateCoefficientsApprox4();
+ 172:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   }
+ 173:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 174:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   INLINE void TeeBeeFilter::calculateCoefficientsExact()
+ 175:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   {
+  30              		.loc 2 175 3 view -0
+  31              		.cfi_startproc
+  32              		@ args = 0, pretend = 0, frame = 0
+  33              		@ frame_needed = 0, uses_anonymous_args = 0
+ 176:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate intermediate variables:
+ 177:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double wc = twoPiOverSampleRate * cutoff;
+  34              		.loc 2 177 5 view .LVU1
+  35              		.loc 2 177 12 is_stmt 0 view .LVU2
+  36 0000 90ED1C7B 		vldr.64	d7, [r0, #112]
+ 175:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate intermediate variables:
+  37              		.loc 2 175 3 view .LVU3
+  38 0004 10B5     		push	{r4, lr}
+  39              		.cfi_def_cfa_offset 8
+  40              		.cfi_offset 4, -8
+  41              		.cfi_offset 14, -4
+  42 0006 2DED0A8B 		vpush.64	{d8, d9, d10, d11, d12}
+  43              		.cfi_def_cfa_offset 48
+  44              		.cfi_offset 80, -48
+  45              		.cfi_offset 81, -44
+  46              		.cfi_offset 82, -40
+  47              		.cfi_offset 83, -36
+  48              		.cfi_offset 84, -32
+  49              		.cfi_offset 85, -28
+  50              		.cfi_offset 86, -24
+  51              		.cfi_offset 87, -20
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 5
+
+
+  52              		.cfi_offset 88, -16
+  53              		.cfi_offset 89, -12
+  54              		.loc 2 177 12 view .LVU4
+  55 000a 90ED268B 		vldr.64	d8, [r0, #152]
+ 175:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate intermediate variables:
+  56              		.loc 2 175 3 view .LVU5
+  57 000e 0446     		mov	r4, r0
+  58              		.loc 2 177 12 view .LVU6
+  59 0010 28EE078B 		vmul.f64	d8, d8, d7
+  60              	.LVL1:
+ 178:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double s, c;
+  61              		.loc 2 178 5 is_stmt 1 view .LVU7
+ 179:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     sinCos(wc, &s, &c);             // c = cos(wc); s = sin(wc);
+  62              		.loc 2 179 5 view .LVU8
+  63              	.LBB4:
+  64              	.LBI4:
+  65              		.file 3 "open303/Source/DSPCode/rosic_RealFunctions.h"
+   1:open303/Source/DSPCode/rosic_RealFunctions.h **** #ifndef rosic_RealFunctions_h
+   2:open303/Source/DSPCode/rosic_RealFunctions.h **** #define rosic_RealFunctions_h
+   3:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+   4:open303/Source/DSPCode/rosic_RealFunctions.h **** // standard library includes:
+   5:open303/Source/DSPCode/rosic_RealFunctions.h **** #include <math.h>
+   6:open303/Source/DSPCode/rosic_RealFunctions.h **** #include <stdlib.h>
+   7:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+   8:open303/Source/DSPCode/rosic_RealFunctions.h **** // rosic includes:
+   9:open303/Source/DSPCode/rosic_RealFunctions.h **** #include "GlobalFunctions.h"
+  10:open303/Source/DSPCode/rosic_RealFunctions.h **** #include "rosic_NumberManipulations.h"
+  11:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  12:open303/Source/DSPCode/rosic_RealFunctions.h **** namespace rosic
+  13:open303/Source/DSPCode/rosic_RealFunctions.h **** {
+  14:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  15:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Inverse hyperbolic sine. */
+  16:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double asinh(double x);
+  17:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  18:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Returns -1.0 if x is below low, 0.0 if x is between low and high and 1.0 if x is above high. 
+  19:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double belowOrAbove(double x, double low, double high);
+  20:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  21:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Clips x into the range min...max. */
+  22:open303/Source/DSPCode/rosic_RealFunctions.h ****   template <class T>
+  23:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE T clip(T x, T min, T max);
+  24:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  25:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Evaluates the quartic polynomial y = a4*x^4 + a3*x^3 + a2*x^2 + a1*x + a0 at x. */
+  26:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double evaluateQuartic(double x, double a0, double a1, double a2, double a3, double a4);
+  27:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  28:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** foldover at the specified value */
+  29:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double foldOver(double x, double min, double max);
+  30:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  31:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Computes an integer power of x by successively multiplying x with itself. */
+  32:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double integerPower(double x, int exponent);
+  33:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  34:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a pseudo-random number between min and max. */
+  35:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double random(double min=0.0, double max=1.0);
+  36:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  37:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic saw wave. */
+  38:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sawWave(double x);
+  39:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  40:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Calculates sine and cosine of x - this is more efficient than calling sin(x) and
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 6
+
+
+  41:open303/Source/DSPCode/rosic_RealFunctions.h ****   cos(x) seperately. */
+  42:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCos(double x, double* sinResult, double* cosResult);
+  43:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  44:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Calculates a parabolic approximation of the sine and cosine of x. */
+  45:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCosApprox(double x, double* sinResult, double* cosResult);
+  46:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  47:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic square wave. */
+  48:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sqrWave(double x);
+  49:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  50:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Rational approximation of the hyperbolic tangent. */
+  51:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double tanhApprox(double x);
+  52:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  53:open303/Source/DSPCode/rosic_RealFunctions.h ****   /** Generates a 2*pi periodic triangle wave. */
+  54:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double triWave(double x);
+  55:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  56:open303/Source/DSPCode/rosic_RealFunctions.h ****   //===============================================================================================
+  57:open303/Source/DSPCode/rosic_RealFunctions.h ****   // implementation:
+  58:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  59:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double asinh(double x)
+  60:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  61:open303/Source/DSPCode/rosic_RealFunctions.h ****     return log(x + sqrt(x*x+1) );
+  62:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  63:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  64:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double belowOrAbove(double x, double low, double high)
+  65:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  66:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x < low )
+  67:open303/Source/DSPCode/rosic_RealFunctions.h ****       return -1.0;
+  68:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if ( x > high )
+  69:open303/Source/DSPCode/rosic_RealFunctions.h ****       return 1.0;
+  70:open303/Source/DSPCode/rosic_RealFunctions.h ****     else
+  71:open303/Source/DSPCode/rosic_RealFunctions.h ****       return 0.0;
+  72:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  73:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  74:open303/Source/DSPCode/rosic_RealFunctions.h ****   template <class T>
+  75:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE T clip(T x, T min, T max)
+  76:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  77:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x > max )
+  78:open303/Source/DSPCode/rosic_RealFunctions.h ****       return max;
+  79:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if ( x < min )
+  80:open303/Source/DSPCode/rosic_RealFunctions.h ****       return min;
+  81:open303/Source/DSPCode/rosic_RealFunctions.h ****     else return x;
+  82:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  83:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  84:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double evaluateQuartic(double x, double a0, double a1, double a2, double a3, double a4)
+  85:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  86:open303/Source/DSPCode/rosic_RealFunctions.h ****     double x2 = x*x;
+  87:open303/Source/DSPCode/rosic_RealFunctions.h ****     return x*(a3*x2+a1) + x2*(a4*x2+a2) + a0;
+  88:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+  89:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  90:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double foldOver(double x, double min, double max)
+  91:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+  92:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( x > max )
+  93:open303/Source/DSPCode/rosic_RealFunctions.h ****       return max - (x-max);
+  94:open303/Source/DSPCode/rosic_RealFunctions.h ****     else if( x < min )
+  95:open303/Source/DSPCode/rosic_RealFunctions.h ****       return min - (x-min);
+  96:open303/Source/DSPCode/rosic_RealFunctions.h ****     else return x;
+  97:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 7
+
+
+  98:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+  99:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double integerPower(double x, int exponent)
+ 100:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 101:open303/Source/DSPCode/rosic_RealFunctions.h ****     double accu = 1.0;
+ 102:open303/Source/DSPCode/rosic_RealFunctions.h ****     for(int i=0; i<exponent; i++)
+ 103:open303/Source/DSPCode/rosic_RealFunctions.h ****       accu *= x;
+ 104:open303/Source/DSPCode/rosic_RealFunctions.h ****     return accu;
+ 105:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 106:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 107:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double random(double min, double max)
+ 108:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 109:open303/Source/DSPCode/rosic_RealFunctions.h ****     double tmp = (1.0/RAND_MAX) * rand() ;  // between 0...1
+ 110:open303/Source/DSPCode/rosic_RealFunctions.h ****     return linToLin(tmp, 0.0, 1.0, min, max);
+ 111:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 112:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 113:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE double sawWave(double x)
+ 114:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 115:open303/Source/DSPCode/rosic_RealFunctions.h ****     double tmp = fmod(x, 2*PI);
+ 116:open303/Source/DSPCode/rosic_RealFunctions.h ****     if( tmp < PI )
+ 117:open303/Source/DSPCode/rosic_RealFunctions.h ****       return tmp/PI;
+ 118:open303/Source/DSPCode/rosic_RealFunctions.h ****     else
+ 119:open303/Source/DSPCode/rosic_RealFunctions.h ****       return (tmp/PI)-2.0;
+ 120:open303/Source/DSPCode/rosic_RealFunctions.h ****   }
+ 121:open303/Source/DSPCode/rosic_RealFunctions.h **** 
+ 122:open303/Source/DSPCode/rosic_RealFunctions.h ****   INLINE void sinCos(double x, double* sinResult, double* cosResult)
+  66              		.loc 3 122 15 view .LVU9
+  67              	.LBB5:
+ 123:open303/Source/DSPCode/rosic_RealFunctions.h ****   {
+ 124:open303/Source/DSPCode/rosic_RealFunctions.h ****     #ifdef __GNUC__  // \todo assembly-version causes compiler errors on gcc
+ 125:open303/Source/DSPCode/rosic_RealFunctions.h ****       *sinResult = sin(x);
+  68              		.loc 3 125 7 view .LVU10
+  69              		.loc 3 125 23 is_stmt 0 view .LVU11
+  70 0014 B0EE480B 		vmov.f64	d0, d8
+  71 0018 FFF7FEFF 		bl	sin
+  72              	.LVL2:
+  73              		.loc 3 125 23 view .LVU12
+  74 001c B0EE40BB 		vmov.f64	d11, d0
+  75              	.LVL3:
+ 126:open303/Source/DSPCode/rosic_RealFunctions.h ****       *cosResult = cos(x);
+  76              		.loc 3 126 7 is_stmt 1 view .LVU13
+  77              		.loc 3 126 23 is_stmt 0 view .LVU14
+  78 0020 B0EE480B 		vmov.f64	d0, d8
+  79              	.LVL4:
+  80              		.loc 3 126 23 view .LVU15
+  81 0024 FFF7FEFF 		bl	cos
+  82              	.LVL5:
+  83 0028 B0EE40AB 		vmov.f64	d10, d0
+  84              	.LVL6:
+  85              		.loc 3 126 23 view .LVU16
+  86              	.LBE5:
+  87              	.LBE4:
+ 180:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double t  = tan(0.25*(wc-PI));
+  88              		.loc 2 180 5 is_stmt 1 view .LVU17
+  89              		.loc 2 180 20 is_stmt 0 view .LVU18
+  90 002c B5EE000B 		vmov.f64	d0, #2.5e-1
+  91              	.LVL7:
+  92              		.loc 2 180 29 view .LVU19
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 8
+
+
+  93 0030 9FED1F7B 		vldr.64	d7, .L3
+  94 0034 38EE477B 		vsub.f64	d7, d8, d7
+  95              		.loc 2 180 20 view .LVU20
+  96 0038 27EE000B 		vmul.f64	d0, d7, d0
+  97 003c FFF7FEFF 		bl	tan
+  98              	.LVL8:
+  99 0040 B0EE40CB 		vmov.f64	d12, d0
+ 100              	.LVL9:
+ 181:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double r  = resonanceSkewed;
+ 101              		.loc 2 181 5 is_stmt 1 view .LVU21
+ 182:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 183:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate filter a1-coefficient tuned such the resonance frequency is just right:
+ 184:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double a1_fullRes = t / (s-c*t);
+ 185:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 186:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate filter a1-coefficient as if there were no resonance:
+ 187:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double x        = exp(-wc);
+ 102              		.loc 2 187 26 is_stmt 0 view .LVU22
+ 103 0044 B1EE480B 		vneg.f64	d0, d8
+ 104              	.LVL10:
+ 181:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double r  = resonanceSkewed;
+ 105              		.loc 2 181 12 view .LVU23
+ 106 0048 94ED229B 		vldr.64	d9, [r4, #136]
+ 107              	.LVL11:
+ 184:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 108              		.loc 2 184 5 is_stmt 1 view .LVU24
+ 109              		.loc 2 187 5 view .LVU25
+ 110              		.loc 2 187 26 is_stmt 0 view .LVU26
+ 111 004c FFF7FEFF 		bl	exp
+ 112              	.LVL12:
+ 188:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double a1_noRes = -x;
+ 113              		.loc 2 188 5 is_stmt 1 view .LVU27
+ 189:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 190:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // use a weighted sum between the resonance-tuned and no-resonance coefficient:
+ 191:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1 = r*a1_fullRes + (1.0-r)*a1_noRes;
+ 114              		.loc 2 191 5 view .LVU28
+ 184:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 115              		.loc 2 184 12 is_stmt 0 view .LVU29
+ 116 0050 ACEE4ABB 		vfms.f64	d11, d12, d10
+ 117              	.LVL13:
+ 192:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 193:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate the b0-coefficient from the condition that each stage should be a leaky
+ 194:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // integrator:
+ 195:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0 = 1.0+a1;
+ 196:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 197:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate feedback factor by dividing the resonance parameter by the magnitude at the
+ 198:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // resonant frequency:
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double gsq = b0*b0 / (1.0 + a1*a1 + 2.0*a1*c);
+ 200:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 201:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 202:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     if( mode == TB_303 )
+ 118              		.loc 2 202 5 view .LVU30
+ 119 0054 D4F8A030 		ldr	r3, [r4, #160]
+ 120 0058 0F2B     		cmp	r3, #15
+ 191:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 121              		.loc 2 191 29 view .LVU31
+ 122 005a B7EE007B 		vmov.f64	d7, #1.0e+0
+ 123 005e 37EE495B 		vsub.f64	d5, d7, d9
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 9
+
+
+ 184:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 124              		.loc 2 184 12 view .LVU32
+ 125 0062 8CEE0B6B 		vdiv.f64	d6, d12, d11
+ 191:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 126              		.loc 2 191 32 view .LVU33
+ 127 0066 20EE450B 		vnmul.f64	d0, d0, d5
+ 128              	.LVL14:
+ 191:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 129              		.loc 2 191 23 view .LVU34
+ 130 006a A9EE060B 		vfma.f64	d0, d9, d6
+ 195:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 131              		.loc 2 195 13 view .LVU35
+ 132 006e 30EE076B 		vadd.f64	d6, d0, d7
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 133              		.loc 2 199 12 view .LVU36
+ 134 0072 A0EE007B 		vfma.f64	d7, d0, d0
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 135              		.loc 2 199 44 view .LVU37
+ 136 0076 30EE005B 		vadd.f64	d5, d0, d0
+ 195:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 137              		.loc 2 195 8 view .LVU38
+ 138 007a 84ED006B 		vstr.64	d6, [r4]
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 139              		.loc 2 199 20 view .LVU39
+ 140 007e 26EE066B 		vmul.f64	d6, d6, d6
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 141              		.loc 2 199 12 view .LVU40
+ 142 0082 A5EE0A7B 		vfma.f64	d7, d5, d10
+ 191:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 143              		.loc 2 191 8 view .LVU41
+ 144 0086 84ED020B 		vstr.64	d0, [r4, #8]
+ 195:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 145              		.loc 2 195 5 is_stmt 1 view .LVU42
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 146              		.loc 2 199 5 view .LVU43
+ 199:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k          = r / (gsq*gsq);
+ 147              		.loc 2 199 12 is_stmt 0 view .LVU44
+ 148 008a 86EE075B 		vdiv.f64	d5, d6, d7
+ 149              	.LVL15:
+ 200:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 150              		.loc 2 200 5 is_stmt 1 view .LVU45
+ 200:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 151              		.loc 2 200 26 is_stmt 0 view .LVU46
+ 152 008e 25EE055B 		vmul.f64	d5, d5, d5
+ 153              	.LVL16:
+ 200:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 154              		.loc 2 200 20 view .LVU47
+ 155 0092 89EE057B 		vdiv.f64	d7, d9, d5
+ 156              	.LVL17:
+ 200:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 157              		.loc 2 200 16 view .LVU48
+ 158 0096 84ED167B 		vstr.64	d7, [r4, #88]
+ 159              		.loc 2 202 5 is_stmt 1 view .LVU49
+ 160 009a 05D1     		bne	.L1
+ 203:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k *= (17.0/4.0);
+ 161              		.loc 2 203 7 view .LVU50
+ 162              		.loc 2 203 9 is_stmt 0 view .LVU51
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 10
+
+
+ 163 009c B1EE016B 		vmov.f64	d6, #4.25e+0
+ 164              	.LVL18:
+ 165              		.loc 2 203 9 view .LVU52
+ 166 00a0 27EE067B 		vmul.f64	d7, d7, d6
+ 167 00a4 84ED167B 		vstr.64	d7, [r4, #88]
+ 168              	.LVL19:
+ 169              	.L1:
+ 204:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   }
+ 170              		.loc 2 204 3 view .LVU53
+ 171 00a8 BDEC0A8B 		vldm	sp!, {d8-d12}
+ 172              		.cfi_restore 88
+ 173              		.cfi_restore 89
+ 174              		.cfi_restore 86
+ 175              		.cfi_restore 87
+ 176              		.cfi_restore 84
+ 177              		.cfi_restore 85
+ 178              		.cfi_restore 82
+ 179              		.cfi_restore 83
+ 180              		.cfi_restore 80
+ 181              		.cfi_restore 81
+ 182              		.cfi_def_cfa_offset 8
+ 183              	.LVL20:
+ 184              		.loc 2 204 3 view .LVU54
+ 185 00ac 10BD     		pop	{r4, pc}
+ 186              	.LVL21:
+ 187              	.L4:
+ 188              		.loc 2 204 3 view .LVU55
+ 189 00ae 00BF     		.align	3
+ 190              	.L3:
+ 191 00b0 182D4454 		.word	1413754136
+ 192 00b4 FB210940 		.word	1074340347
+ 193              		.cfi_endproc
+ 194              	.LFE627:
+ 196              		.section	.text._ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev,"axG",%progbits,_ZN5rosic12
+ 197              		.align	1
+ 198              		.weak	_ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev
+ 199              		.syntax unified
+ 200              		.thumb
+ 201              		.thumb_func
+ 203              	_ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev:
+ 204              	.LVL22:
+ 205              	.LFB628:
+ 205:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 206:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   INLINE void TeeBeeFilter::calculateCoefficientsApprox4()
+ 207:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   {
+ 206              		.loc 2 207 3 is_stmt 1 view -0
+ 207              		.cfi_startproc
+ 208              		@ args = 0, pretend = 0, frame = 0
+ 209              		@ frame_needed = 0, uses_anonymous_args = 0
+ 210              		@ link register save eliminated.
+ 208:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // calculate intermediate variables:
+ 209:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double wc  = twoPiOverSampleRate * cutoff;
+ 211              		.loc 2 209 5 view .LVU57
+ 212              		.loc 2 209 12 is_stmt 0 view .LVU58
+ 213 0000 90ED1C6B 		vldr.64	d6, [r0, #112]
+ 214 0004 90ED267B 		vldr.64	d7, [r0, #152]
+ 210:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double wc2 = wc*wc;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 11
+
+
+ 211:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double r   = resonanceSkewed;
+ 212:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double tmp;
+ 213:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 214:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // compute the filter coefficient via a 12th order polynomial approximation (polynomial 
+ 215:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // evaluation is done with a Horner-rule alike scheme with nested quadratic factors in the hope
+ 216:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // for potentially better parallelization compared to Horner's rule as is):
+ 217:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa12 = -1.341281325101042e-02;
+ 218:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa11 =  8.168739417977708e-02;
+ 219:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa10 = -2.365036766021623e-01;
+ 220:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa09 =  4.439739664918068e-01;
+ 221:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa08 = -6.297350825423579e-01;
+ 222:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa07 =  7.529691648678890e-01;
+ 223:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa06 = -8.249882473764324e-01;
+ 224:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa05 =  8.736418933533319e-01;
+ 225:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa04 = -9.164580250284832e-01;
+ 226:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa03 =  9.583192455599817e-01;
+ 227:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa02 = -9.999994950291231e-01;
+ 228:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa01 =  9.999999927726119e-01;
+ 229:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa00 = -9.999999999857464e-01;
+ 230:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*pa12 + pa11*wc + pa10;
+ 215              		.loc 2 230 27 view .LVU59
+ 216 0008 9FED653B 		vldr.64	d3, .L7
+ 217              		.loc 2 230 10 view .LVU60
+ 218 000c 9FED665B 		vldr.64	d5, .L7+8
+ 209:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double wc2 = wc*wc;
+ 219              		.loc 2 209 12 view .LVU61
+ 220 0010 27EE067B 		vmul.f64	d7, d7, d6
+ 221              	.LVL23:
+ 210:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double wc2 = wc*wc;
+ 222              		.loc 2 210 5 is_stmt 1 view .LVU62
+ 223              	.LBB6:
+ 231:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa09*wc + pa08;
+ 232:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa07*wc + pa06;
+ 233:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa05*wc + pa04;
+ 234:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa03*wc + pa02;
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1   = wc2*tmp  + pa01*wc + pa00;
+ 236:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 237:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 238:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // compute the scale factor for the resonance parameter (the factor to obtain k from r) via an
+ 239:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     // 8th order polynomial approximation:
+ 240:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr8 = -4.554677015609929e-05;
+ 241:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr7 = -2.022131730719448e-05;
+ 242:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr6 =  2.784706718370008e-03;
+ 243:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr5 =  2.079921151733780e-03;
+ 244:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr4 = -8.333236384240325e-02;
+ 245:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr3 = -1.666668203490468e-01;
+ 246:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr2 =  1.000000012124230e+00;
+ 247:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr1 =  3.999999999650040e+00;
+ 248:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr0 =  4.000000000000113e+00;
+ 249:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*pr8 + pr7*wc + pr6;
+ 250:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr5*wc + pr4;
+ 251:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr3*wc + pr2;
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr1*wc + pr0; // this is now the scale factor
+ 253:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 254:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     g    = 1.0;
+ 255:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 256:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     if( mode == TB_303 )
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 12
+
+
+ 224              		.loc 2 256 5 is_stmt 0 view .LVU63
+ 225 0014 D0F8A030 		ldr	r3, [r0, #160]
+ 226 0018 0F2B     		cmp	r3, #15
+ 227              	.LBE6:
+ 249:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr5*wc + pr4;
+ 228              		.loc 2 249 25 view .LVU64
+ 229 001a 9FED652B 		vldr.64	d2, .L7+16
+ 211:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double tmp;
+ 230              		.loc 2 211 12 view .LVU65
+ 231 001e 90ED224B 		vldr.64	d4, [r0, #136]
+ 210:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double r   = resonanceSkewed;
+ 232              		.loc 2 210 12 view .LVU66
+ 233 0022 27EE076B 		vmul.f64	d6, d7, d7
+ 234              	.LVL24:
+ 211:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     double tmp;
+ 235              		.loc 2 211 5 is_stmt 1 view .LVU67
+ 212:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 236              		.loc 2 212 5 view .LVU68
+ 217:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa11 =  8.168739417977708e-02;
+ 237              		.loc 2 217 5 view .LVU69
+ 218:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa10 = -2.365036766021623e-01;
+ 238              		.loc 2 218 5 view .LVU70
+ 219:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa09 =  4.439739664918068e-01;
+ 239              		.loc 2 219 5 view .LVU71
+ 220:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa08 = -6.297350825423579e-01;
+ 240              		.loc 2 220 5 view .LVU72
+ 221:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa07 =  7.529691648678890e-01;
+ 241              		.loc 2 221 5 view .LVU73
+ 222:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa06 = -8.249882473764324e-01;
+ 242              		.loc 2 222 5 view .LVU74
+ 223:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa05 =  8.736418933533319e-01;
+ 243              		.loc 2 223 5 view .LVU75
+ 224:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa04 = -9.164580250284832e-01;
+ 244              		.loc 2 224 5 view .LVU76
+ 225:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa03 =  9.583192455599817e-01;
+ 245              		.loc 2 225 5 view .LVU77
+ 226:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa02 = -9.999994950291231e-01;
+ 246              		.loc 2 226 5 view .LVU78
+ 227:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa01 =  9.999999927726119e-01;
+ 247              		.loc 2 227 5 view .LVU79
+ 228:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pa00 = -9.999999999857464e-01;
+ 248              		.loc 2 228 5 view .LVU80
+ 229:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*pa12 + pa11*wc + pa10;
+ 249              		.loc 2 229 5 view .LVU81
+ 230:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa09*wc + pa08;
+ 250              		.loc 2 230 5 view .LVU82
+ 231:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa07*wc + pa06;
+ 251              		.loc 2 231 5 view .LVU83
+ 230:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa09*wc + pa08;
+ 252              		.loc 2 230 27 is_stmt 0 view .LVU84
+ 253 0026 27EE033B 		vmul.f64	d3, d7, d3
+ 249:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr5*wc + pr4;
+ 254              		.loc 2 249 25 view .LVU85
+ 255 002a 27EE022B 		vmul.f64	d2, d7, d2
+ 230:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa09*wc + pa08;
+ 256              		.loc 2 230 10 view .LVU86
+ 257 002e A6EE053B 		vfma.f64	d3, d6, d5
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 13
+
+
+ 258 0032 9FED615B 		vldr.64	d5, .L7+24
+ 259 0036 33EE453B 		vsub.f64	d3, d3, d5
+ 231:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa07*wc + pa06;
+ 260              		.loc 2 231 27 view .LVU87
+ 261 003a 9FED615B 		vldr.64	d5, .L7+32
+ 262 003e 27EE055B 		vmul.f64	d5, d7, d5
+ 231:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa07*wc + pa06;
+ 263              		.loc 2 231 21 view .LVU88
+ 264 0042 A6EE035B 		vfma.f64	d5, d6, d3
+ 265              	.LVL25:
+ 232:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa05*wc + pa04;
+ 266              		.loc 2 232 5 is_stmt 1 view .LVU89
+ 231:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa07*wc + pa06;
+ 267              		.loc 2 231 10 is_stmt 0 view .LVU90
+ 268 0046 9FED603B 		vldr.64	d3, .L7+40
+ 269 004a 35EE435B 		vsub.f64	d5, d5, d3
+ 270              	.LVL26:
+ 232:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa05*wc + pa04;
+ 271              		.loc 2 232 27 view .LVU91
+ 272 004e 9FED603B 		vldr.64	d3, .L7+48
+ 273 0052 27EE033B 		vmul.f64	d3, d7, d3
+ 232:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa05*wc + pa04;
+ 274              		.loc 2 232 21 view .LVU92
+ 275 0056 A6EE053B 		vfma.f64	d3, d6, d5
+ 276              	.LVL27:
+ 233:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa03*wc + pa02;
+ 277              		.loc 2 233 5 is_stmt 1 view .LVU93
+ 232:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa05*wc + pa04;
+ 278              		.loc 2 232 10 is_stmt 0 view .LVU94
+ 279 005a 9FED5F5B 		vldr.64	d5, .L7+56
+ 280 005e 33EE453B 		vsub.f64	d3, d3, d5
+ 281              	.LVL28:
+ 233:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa03*wc + pa02;
+ 282              		.loc 2 233 27 view .LVU95
+ 283 0062 9FED5F5B 		vldr.64	d5, .L7+64
+ 284 0066 27EE055B 		vmul.f64	d5, d7, d5
+ 233:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa03*wc + pa02;
+ 285              		.loc 2 233 21 view .LVU96
+ 286 006a A6EE035B 		vfma.f64	d5, d6, d3
+ 287              	.LVL29:
+ 234:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1   = wc2*tmp  + pa01*wc + pa00;
+ 288              		.loc 2 234 5 is_stmt 1 view .LVU97
+ 233:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp  + pa03*wc + pa02;
+ 289              		.loc 2 233 10 is_stmt 0 view .LVU98
+ 290 006e 9FED5E3B 		vldr.64	d3, .L7+72
+ 291 0072 35EE435B 		vsub.f64	d5, d5, d3
+ 292              	.LVL30:
+ 234:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1   = wc2*tmp  + pa01*wc + pa00;
+ 293              		.loc 2 234 27 view .LVU99
+ 294 0076 9FED5E3B 		vldr.64	d3, .L7+80
+ 295 007a 27EE033B 		vmul.f64	d3, d7, d3
+ 234:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1   = wc2*tmp  + pa01*wc + pa00;
+ 296              		.loc 2 234 21 view .LVU100
+ 297 007e A6EE053B 		vfma.f64	d3, d6, d5
+ 298              	.LVL31:
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 299              		.loc 2 235 5 is_stmt 1 view .LVU101
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 14
+
+
+ 234:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     a1   = wc2*tmp  + pa01*wc + pa00;
+ 300              		.loc 2 234 10 is_stmt 0 view .LVU102
+ 301 0082 9FED5D5B 		vldr.64	d5, .L7+88
+ 302 0086 33EE453B 		vsub.f64	d3, d3, d5
+ 303              	.LVL32:
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 304              		.loc 2 235 27 view .LVU103
+ 305 008a 9FED5D5B 		vldr.64	d5, .L7+96
+ 306 008e 27EE055B 		vmul.f64	d5, d7, d5
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 307              		.loc 2 235 31 view .LVU104
+ 308 0092 A6EE035B 		vfma.f64	d5, d6, d3
+ 309 0096 9FED5C3B 		vldr.64	d3, .L7+104
+ 310              	.LVL33:
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 311              		.loc 2 235 31 view .LVU105
+ 312 009a 35EE435B 		vsub.f64	d5, d5, d3
+ 236:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 313              		.loc 2 236 16 view .LVU106
+ 314 009e B7EE003B 		vmov.f64	d3, #1.0e+0
+ 235:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     b0   = 1.0 + a1;
+ 315              		.loc 2 235 10 view .LVU107
+ 316 00a2 80ED025B 		vstr.64	d5, [r0, #8]
+ 236:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 317              		.loc 2 236 5 is_stmt 1 view .LVU108
+ 236:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 318              		.loc 2 236 16 is_stmt 0 view .LVU109
+ 319 00a6 35EE035B 		vadd.f64	d5, d5, d3
+ 254:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 320              		.loc 2 254 10 view .LVU110
+ 321 00aa 80ED183B 		vstr.64	d3, [r0, #96]
+ 236:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 322              		.loc 2 236 10 view .LVU111
+ 323 00ae 80ED005B 		vstr.64	d5, [r0]
+ 240:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr7 = -2.022131730719448e-05;
+ 324              		.loc 2 240 5 is_stmt 1 view .LVU112
+ 325              	.LVL34:
+ 241:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr6 =  2.784706718370008e-03;
+ 326              		.loc 2 241 5 view .LVU113
+ 242:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr5 =  2.079921151733780e-03;
+ 327              		.loc 2 242 5 view .LVU114
+ 243:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr4 = -8.333236384240325e-02;
+ 328              		.loc 2 243 5 view .LVU115
+ 244:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr3 = -1.666668203490468e-01;
+ 329              		.loc 2 244 5 view .LVU116
+ 245:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr2 =  1.000000012124230e+00;
+ 330              		.loc 2 245 5 view .LVU117
+ 246:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr1 =  3.999999999650040e+00;
+ 331              		.loc 2 246 5 view .LVU118
+ 247:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     const double pr0 =  4.000000000000113e+00;
+ 332              		.loc 2 247 5 view .LVU119
+ 248:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*pr8 + pr7*wc + pr6;
+ 333              		.loc 2 248 5 view .LVU120
+ 249:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr5*wc + pr4;
+ 334              		.loc 2 249 5 view .LVU121
+ 250:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr3*wc + pr2;
+ 335              		.loc 2 250 5 view .LVU122
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 15
+
+
+ 249:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr5*wc + pr4;
+ 336              		.loc 2 249 10 is_stmt 0 view .LVU123
+ 337 00b2 9FED575B 		vldr.64	d5, .L7+112
+ 338 00b6 A6EE052B 		vfma.f64	d2, d6, d5
+ 339 00ba 9FED575B 		vldr.64	d5, .L7+120
+ 340 00be 32EE052B 		vadd.f64	d2, d2, d5
+ 250:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr3*wc + pr2;
+ 341              		.loc 2 250 25 view .LVU124
+ 342 00c2 9FED575B 		vldr.64	d5, .L7+128
+ 343 00c6 27EE055B 		vmul.f64	d5, d7, d5
+ 250:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr3*wc + pr2;
+ 344              		.loc 2 250 20 view .LVU125
+ 345 00ca A6EE025B 		vfma.f64	d5, d6, d2
+ 346              	.LVL35:
+ 251:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr1*wc + pr0; // this is now the scale factor
+ 347              		.loc 2 251 5 is_stmt 1 view .LVU126
+ 250:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr3*wc + pr2;
+ 348              		.loc 2 250 10 is_stmt 0 view .LVU127
+ 349 00ce 9FED562B 		vldr.64	d2, .L7+136
+ 350 00d2 35EE425B 		vsub.f64	d5, d5, d2
+ 351              	.LVL36:
+ 251:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr1*wc + pr0; // this is now the scale factor
+ 352              		.loc 2 251 25 view .LVU128
+ 353 00d6 9FED562B 		vldr.64	d2, .L7+144
+ 354 00da 27EE022B 		vmul.f64	d2, d7, d2
+ 251:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr1*wc + pr0; // this is now the scale factor
+ 355              		.loc 2 251 20 view .LVU129
+ 356 00de A6EE052B 		vfma.f64	d2, d6, d5
+ 357              	.LVL37:
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 358              		.loc 2 252 5 is_stmt 1 view .LVU130
+ 251:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     tmp  = wc2*tmp + pr1*wc + pr0; // this is now the scale factor
+ 359              		.loc 2 251 10 is_stmt 0 view .LVU131
+ 360 00e2 9FED555B 		vldr.64	d5, .L7+152
+ 361 00e6 32EE052B 		vadd.f64	d2, d2, d5
+ 362              	.LVL38:
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 363              		.loc 2 252 25 view .LVU132
+ 364 00ea 9FED555B 		vldr.64	d5, .L7+160
+ 365 00ee 27EE055B 		vmul.f64	d5, d7, d5
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 366              		.loc 2 252 20 view .LVU133
+ 367 00f2 A6EE025B 		vfma.f64	d5, d6, d2
+ 368              	.LVL39:
+ 253:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     g    = 1.0;
+ 369              		.loc 2 253 5 is_stmt 1 view .LVU134
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 370              		.loc 2 252 10 is_stmt 0 view .LVU135
+ 371 00f6 9FED546B 		vldr.64	d6, .L7+168
+ 372              	.LVL40:
+ 252:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     k    = r * tmp;
+ 373              		.loc 2 252 10 view .LVU136
+ 374 00fa 35EE066B 		vadd.f64	d6, d5, d6
+ 375              	.LVL41:
+ 253:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     g    = 1.0;
+ 376              		.loc 2 253 14 view .LVU137
+ 377 00fe 26EE046B 		vmul.f64	d6, d6, d4
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 16
+
+
+ 378              	.LVL42:
+ 253:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     g    = 1.0;
+ 379              		.loc 2 253 10 view .LVU138
+ 380 0102 80ED166B 		vstr.64	d6, [r0, #88]
+ 254:open303/Source/DSPCode/rosic_TeeBeeFilter.h **** 
+ 381              		.loc 2 254 5 is_stmt 1 view .LVU139
+ 382              		.loc 2 256 5 view .LVU140
+ 383              	.LBB8:
+ 384 0106 47D1     		bne	.L5
+ 385              	.LBB7:
+ 257:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     {
+ 258:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       double fx = wc * ONE_OVER_SQRT2/(2*PI); 
+ 386              		.loc 2 258 7 view .LVU141
+ 387              		.loc 2 258 22 is_stmt 0 view .LVU142
+ 388 0108 9FED516B 		vldr.64	d6, .L7+176
+ 389              		.loc 2 258 14 view .LVU143
+ 390 010c 9FED525B 		vldr.64	d5, .L7+184
+ 391              	.LVL43:
+ 259:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       b0 = (0.00045522346 + 6.1922189 * fx) / (1.0 + 12.358354 * fx + 4.4156345 * (fx * fx)); 
+ 392              		.loc 2 259 45 view .LVU144
+ 393 0110 9FED532B 		vldr.64	d2, .L7+192
+ 394              	.LVL44:
+ 258:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       b0 = (0.00045522346 + 6.1922189 * fx) / (1.0 + 12.358354 * fx + 4.4156345 * (fx * fx)); 
+ 395              		.loc 2 258 22 view .LVU145
+ 396 0114 27EE067B 		vmul.f64	d7, d7, d6
+ 397              	.LVL45:
+ 258:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       b0 = (0.00045522346 + 6.1922189 * fx) / (1.0 + 12.358354 * fx + 4.4156345 * (fx * fx)); 
+ 398              		.loc 2 258 14 view .LVU146
+ 399 0118 87EE056B 		vdiv.f64	d6, d7, d5
+ 400              	.LVL46:
+ 401              		.loc 2 259 7 is_stmt 1 view .LVU147
+ 402              		.loc 2 259 45 is_stmt 0 view .LVU148
+ 403 011c 9FED527B 		vldr.64	d7, .L7+200
+ 404 0120 9FED535B 		vldr.64	d5, .L7+208
+ 405 0124 A6EE075B 		vfma.f64	d5, d6, d7
+ 406 0128 B0EE437B 		vmov.f64	d7, d3
+ 407              		.loc 2 259 87 view .LVU149
+ 408 012c 26EE061B 		vmul.f64	d1, d6, d6
+ 409              		.loc 2 259 45 view .LVU150
+ 410 0130 A6EE027B 		vfma.f64	d7, d6, d2
+ 411 0134 9FED502B 		vldr.64	d2, .L7+216
+ 412 0138 A1EE027B 		vfma.f64	d7, d1, d2
+ 413 013c 85EE072B 		vdiv.f64	d2, d5, d7
+ 260:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = fx*(fx*(fx*(fx*(fx*(fx+7198.6997)-5837.7917)-476.47308)+614.95611)+213.87126)+16.998792;
+ 414              		.loc 2 260 34 view .LVU151
+ 415 0140 9FED4F5B 		vldr.64	d5, .L7+224
+ 416              		.loc 2 260 89 view .LVU152
+ 417 0144 9FED507B 		vldr.64	d7, .L7+232
+ 418              		.loc 2 260 34 view .LVU153
+ 419 0148 36EE055B 		vadd.f64	d5, d6, d5
+ 420              		.loc 2 260 89 view .LVU154
+ 421 014c A5EE067B 		vfma.f64	d7, d5, d6
+ 422 0150 9FED4F5B 		vldr.64	d5, .L7+240
+ 423 0154 A7EE065B 		vfma.f64	d5, d7, d6
+ 424 0158 9FED4F7B 		vldr.64	d7, .L7+248
+ 425 015c A5EE067B 		vfma.f64	d7, d5, d6
+ 426 0160 9FED4F5B 		vldr.64	d5, .L7+256
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 17
+
+
+ 259:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       b0 = (0.00045522346 + 6.1922189 * fx) / (1.0 + 12.358354 * fx + 4.4156345 * (fx * fx)); 
+ 427              		.loc 2 259 10 view .LVU155
+ 428 0164 80ED002B 		vstr.64	d2, [r0]
+ 429              		.loc 2 260 7 is_stmt 1 view .LVU156
+ 261:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       g  = k * 0.058823529411764705882352941176471; // 17 reciprocal 
+ 262:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       g  = (g - 1.0) * r + 1.0;                     // r is 0 to 1.0
+ 263:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       g  = (g * (1.0 + r)); 
+ 430              		.loc 2 263 15 is_stmt 0 view .LVU157
+ 431 0168 9FED4F2B 		vldr.64	d2, .L7+264
+ 260:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = fx*(fx*(fx*(fx*(fx*(fx+7198.6997)-5837.7917)-476.47308)+614.95611)+213.87126)+16.998792;
+ 432              		.loc 2 260 89 view .LVU158
+ 433 016c A7EE065B 		vfma.f64	d5, d7, d6
+ 434 0170 9FED4F7B 		vldr.64	d7, .L7+272
+ 435 0174 A5EE067B 		vfma.f64	d7, d5, d6
+ 261:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       g  = k * 0.058823529411764705882352941176471; // 17 reciprocal 
+ 436              		.loc 2 261 7 is_stmt 1 view .LVU159
+ 262:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       g  = (g * (1.0 + r)); 
+ 437              		.loc 2 262 7 view .LVU160
+ 438              		.loc 2 263 7 view .LVU161
+ 439              		.loc 2 263 15 is_stmt 0 view .LVU162
+ 440 0178 BFEE005B 		vmov.f64	d5, #-1.0e+0
+ 441              		.loc 2 263 22 view .LVU163
+ 442 017c 34EE036B 		vadd.f64	d6, d4, d3
+ 443              	.LVL47:
+ 444              		.loc 2 263 15 view .LVU164
+ 445 0180 A7EE025B 		vfma.f64	d5, d7, d2
+ 264:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = k * r;                                   // k is ready now 
+ 446              		.loc 2 264 14 view .LVU165
+ 447 0184 27EE047B 		vmul.f64	d7, d7, d4
+ 263:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = k * r;                                   // k is ready now 
+ 448              		.loc 2 263 15 view .LVU166
+ 449 0188 A5EE043B 		vfma.f64	d3, d5, d4
+ 450              		.loc 2 264 10 view .LVU167
+ 451 018c 80ED167B 		vstr.64	d7, [r0, #88]
+ 263:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = k * r;                                   // k is ready now 
+ 452              		.loc 2 263 15 view .LVU168
+ 453 0190 26EE036B 		vmul.f64	d6, d6, d3
+ 263:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****       k  = k * r;                                   // k is ready now 
+ 454              		.loc 2 263 10 view .LVU169
+ 455 0194 80ED186B 		vstr.64	d6, [r0, #96]
+ 456              		.loc 2 264 7 is_stmt 1 view .LVU170
+ 457              	.LVL48:
+ 458              	.L5:
+ 459              		.loc 2 264 7 is_stmt 0 view .LVU171
+ 460              	.LBE7:
+ 461              	.LBE8:
+ 265:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****     }
+ 266:open303/Source/DSPCode/rosic_TeeBeeFilter.h ****   }
+ 462              		.loc 2 266 3 view .LVU172
+ 463 0198 7047     		bx	lr
+ 464              	.L8:
+ 465 019a 00BFAFF3 		.align	3
+ 465      0080
+ 466              	.L7:
+ 467 01a0 EE627F0E 		.word	243229422
+ 468 01a4 77E9B43F 		.word	1068820855
+ 469 01a8 4A641552 		.word	1377133642
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 18
+
+
+ 470 01ac 2D788BBF 		.word	-1081378771
+ 471 01b0 239F2158 		.word	1478598435
+ 472 01b4 1E34F5BE 		.word	-1091226594
+ 473 01b8 13ED31A2 		.word	-1573786349
+ 474 01bc C045CE3F 		.word	1070482880
+ 475 01c0 B9E496C8 		.word	-929635143
+ 476 01c4 116ADC3F 		.word	1071409681
+ 477 01c8 A7391530 		.word	806697383
+ 478 01cc CA26E43F 		.word	1071916746
+ 479 01d0 E52040CA 		.word	-901766939
+ 480 01d4 5218E83F 		.word	1072175186
+ 481 01d8 C71DC2C0 		.word	-1061020217
+ 482 01dc 4D66EA3F 		.word	1072326221
+ 483 01e0 50C70BD8 		.word	-670316720
+ 484 01e4 DFF4EB3F 		.word	1072428255
+ 485 01e8 43EEB4C7 		.word	-944443837
+ 486 01ec 9F53ED3F 		.word	1072518047
+ 487 01f0 29D7591F 		.word	525981481
+ 488 01f4 8DAAEE3F 		.word	1072605837
+ 489 01f8 C654E5F0 		.word	-253406010
+ 490 01fc FEFFEF3F 		.word	1072693246
+ 491 0200 E3AC1EFC 		.word	-65098525
+ 492 0204 FFFFEF3F 		.word	1072693247
+ 493 0208 7F0AFEFF 		.word	-128385
+ 494 020c FFFFEF3F 		.word	1072693247
+ 495 0210 1D78271B 		.word	455571485
+ 496 0214 2FE107BF 		.word	-1090002641
+ 497 0218 92661909 		.word	152659602
+ 498 021c F4CF663F 		.word	1063702516
+ 499 0220 8708662A 		.word	711329927
+ 500 0224 E909613F 		.word	1063324137
+ 501 0228 5EC86611 		.word	291948638
+ 502 022c 4555B53F 		.word	1068848453
+ 503 0230 851D5D9F 		.word	-1621287547
+ 504 0234 5655C5BF 		.word	-1077586602
+ 505 0238 B62B4103 		.word	54602678
+ 506 023c 0000F03F 		.word	1072693248
+ 507 0240 B8F9F3FF 		.word	-788040
+ 508 0244 FFFF0F40 		.word	1074790399
+ 509 0248 7F000000 		.word	127
+ 510 024c 00001040 		.word	1074790400
+ 511 0250 CD3B7F66 		.word	1719614413
+ 512 0254 9EA0E63F 		.word	1072079006
+ 513 0258 182D4454 		.word	1413754136
+ 514 025c FB211940 		.word	1075388923
+ 515 0260 15C8EC2C 		.word	753715221
+ 516 0264 7AB72840 		.word	1076410234
+ 517 0268 40B10408 		.word	134525248
+ 518 026c D5C41840 		.word	1075365077
+ 519 0270 EDA481DF 		.word	-545151763
+ 520 0274 61D53D3F 		.word	1061016929
+ 521 0278 755B2217 		.word	388127605
+ 522 027c 9CA91140 		.word	1074899356
+ 523 0280 03098A1F 		.word	529139971
+ 524 0284 B31EBC40 		.word	1086070451
+ 525 0288 3EE8D9AC 		.word	-1395005378
+ 526 028c CACDB6C0 		.word	-1061761590
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 19
+
+
+ 527 0290 448655BC 		.word	-1135245756
+ 528 0294 91C77DC0 		.word	-1065498735
+ 529 0298 07EBFF1C 		.word	486533895
+ 530 029c A6378340 		.word	1082341286
+ 531 02a0 04CAA65C 		.word	1554434564
+ 532 02a4 E1BB6A40 		.word	1080736737
+ 533 02a8 1E1E1E1E 		.word	505290270
+ 534 02ac 1E1EAE3F 		.word	1068375582
+ 535 02b0 A6811FD5 		.word	-719355482
+ 536 02b4 B0FF3040 		.word	1076953008
+ 537              		.cfi_endproc
+ 538              	.LFE628:
+ 540              		.section	.text._ZN5rosic12TeeBeeFilterD2Ev,"ax",%progbits
+ 541              		.align	1
+ 542              		.global	_ZN5rosic12TeeBeeFilterD2Ev
+ 543              		.syntax unified
+ 544              		.thumb
+ 545              		.thumb_func
+ 547              	_ZN5rosic12TeeBeeFilterD2Ev:
+ 548              	.LVL49:
+ 549              	.LFB635:
+   1:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** #include "rosic_TeeBeeFilter.h"
+   2:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+   4:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** TeeBeeFilter::TeeBeeFilter()
+   8:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+   9:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   cutoff              =  1000.0;
+  10:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive               =     0.0;
+  11:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   driveFactor         =     1.0;
+  12:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceRaw        =     0.0;
+  13:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceSkewed     =     0.0;
+  14:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   g                   =     1.0;
+  15:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   sampleRate          = 44100.0;
+  16:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+  17:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  18:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.setMode(OnePoleFilter::HIGHPASS);
+  19:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.setCutoff(150.0);
+  20:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  21:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   //setMode(LP_18);
+  22:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   setMode(TB_303);
+  23:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   calculateCoefficientsExact();
+  24:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   reset();
+  25:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+  26:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  27:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** TeeBeeFilter::~TeeBeeFilter()
+ 550              		.loc 1 27 1 is_stmt 1 view -0
+ 551              		.cfi_startproc
+ 552              		@ args = 0, pretend = 0, frame = 0
+ 553              		@ frame_needed = 0, uses_anonymous_args = 0
+ 554              		@ link register save eliminated.
+  28:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+  29:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  30:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 555              		.loc 1 30 1 is_stmt 0 view .LVU174
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 20
+
+
+ 556 0000 7047     		bx	lr
+ 557              		.cfi_endproc
+ 558              	.LFE635:
+ 560              		.global	_ZN5rosic12TeeBeeFilterD1Ev
+ 561              		.thumb_set _ZN5rosic12TeeBeeFilterD1Ev,_ZN5rosic12TeeBeeFilterD2Ev
+ 562              		.section	.text._ZN5rosic12TeeBeeFilter13setSampleRateEd,"ax",%progbits
+ 563              		.align	1
+ 564              		.global	_ZN5rosic12TeeBeeFilter13setSampleRateEd
+ 565              		.syntax unified
+ 566              		.thumb
+ 567              		.thumb_func
+ 569              	_ZN5rosic12TeeBeeFilter13setSampleRateEd:
+ 570              	.LVL50:
+ 571              	.LFB637:
+  31:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  32:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** //-------------------------------------------------------------------------------------------------
+  33:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** // parameter settings:
+  34:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  35:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** void TeeBeeFilter::setSampleRate(double newSampleRate)
+  36:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 572              		.loc 1 36 1 is_stmt 1 view -0
+ 573              		.cfi_startproc
+ 574              		@ args = 0, pretend = 0, frame = 0
+ 575              		@ frame_needed = 0, uses_anonymous_args = 0
+  37:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   if( newSampleRate > 0.0 )
+ 576              		.loc 1 37 3 view .LVU176
+ 577 0000 B5EEC00B 		vcmpe.f64	d0, #0
+  36:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   if( newSampleRate > 0.0 )
+ 578              		.loc 1 36 1 is_stmt 0 view .LVU177
+ 579 0004 10B5     		push	{r4, lr}
+ 580              		.cfi_def_cfa_offset 8
+ 581              		.cfi_offset 4, -8
+ 582              		.cfi_offset 14, -4
+ 583              		.loc 1 37 3 view .LVU178
+ 584 0006 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  36:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   if( newSampleRate > 0.0 )
+ 585              		.loc 1 36 1 view .LVU179
+ 586 000a 0446     		mov	r4, r0
+ 587              		.loc 1 37 3 view .LVU180
+ 588 000c 01DD     		ble	.L11
+  38:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     sampleRate = newSampleRate;
+ 589              		.loc 1 38 5 is_stmt 1 view .LVU181
+ 590              		.loc 1 38 16 is_stmt 0 view .LVU182
+ 591 000e 80ED240B 		vstr.64	d0, [r0, #144]
+ 592              	.L11:
+  39:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 593              		.loc 1 39 3 is_stmt 1 view .LVU183
+ 594              		.loc 1 39 31 is_stmt 0 view .LVU184
+ 595 0012 94ED246B 		vldr.64	d6, [r4, #144]
+ 596 0016 9FED085B 		vldr.64	d5, .L14
+  40:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.setSampleRate(newSampleRate);
+ 597              		.loc 1 40 33 view .LVU185
+ 598 001a 04F1A800 		add	r0, r4, #168
+ 599              	.LVL51:
+  39:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 600              		.loc 1 39 31 view .LVU186
+ 601 001e 85EE067B 		vdiv.f64	d7, d5, d6
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 21
+
+
+  39:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 602              		.loc 1 39 23 view .LVU187
+ 603 0022 84ED267B 		vstr.64	d7, [r4, #152]
+ 604              		.loc 1 40 3 is_stmt 1 view .LVU188
+ 605              		.loc 1 40 33 is_stmt 0 view .LVU189
+ 606 0026 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter13setSampleRateEd
+ 607              	.LVL52:
+  41:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   calculateCoefficientsExact();
+ 608              		.loc 1 41 3 is_stmt 1 view .LVU190
+ 609              		.loc 1 41 29 is_stmt 0 view .LVU191
+ 610 002a 2046     		mov	r0, r4
+ 611 002c FFF7FEFF 		bl	_ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv
+ 612              	.LVL53:
+  42:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 613              		.loc 1 42 1 view .LVU192
+ 614 0030 10BD     		pop	{r4, pc}
+ 615              	.LVL54:
+ 616              	.L15:
+ 617              		.loc 1 42 1 view .LVU193
+ 618 0032 00BFAFF3 		.align	3
+ 618      0080
+ 619              	.L14:
+ 620 0038 182D4454 		.word	1413754136
+ 621 003c FB211940 		.word	1075388923
+ 622              		.cfi_endproc
+ 623              	.LFE637:
+ 625              		.section	.text._ZN5rosic12TeeBeeFilter8setDriveEd,"ax",%progbits
+ 626              		.align	1
+ 627              		.global	_ZN5rosic12TeeBeeFilter8setDriveEd
+ 628              		.syntax unified
+ 629              		.thumb
+ 630              		.thumb_func
+ 632              	_ZN5rosic12TeeBeeFilter8setDriveEd:
+ 633              	.LVL55:
+ 634              	.LFB638:
+  43:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  44:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** void TeeBeeFilter::setDrive(double newDrive)
+  45:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 635              		.loc 1 45 1 is_stmt 1 view -0
+ 636              		.cfi_startproc
+ 637              		@ args = 0, pretend = 0, frame = 0
+ 638              		@ frame_needed = 0, uses_anonymous_args = 0
+  46:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive       = newDrive;
+ 639              		.loc 1 46 3 view .LVU195
+ 640              	.LBB11:
+ 641              	.LBB12:
+ 642              		.file 4 "open303/Source/DSPCode/GlobalFunctions.h"
+   1:open303/Source/DSPCode/GlobalFunctions.h **** #ifndef GlobalFunctions_h
+   2:open303/Source/DSPCode/GlobalFunctions.h **** #define GlobalFunctions_h
+   3:open303/Source/DSPCode/GlobalFunctions.h **** 
+   4:open303/Source/DSPCode/GlobalFunctions.h **** #include <math.h>
+   5:open303/Source/DSPCode/GlobalFunctions.h **** #include <stdlib.h>
+   6:open303/Source/DSPCode/GlobalFunctions.h **** #include "GlobalDefinitions.h"
+   7:open303/Source/DSPCode/GlobalFunctions.h **** 
+   8:open303/Source/DSPCode/GlobalFunctions.h **** /** This file contains a bunch of useful macros and functions which are not wrapped into the
+   9:open303/Source/DSPCode/GlobalFunctions.h **** rosic namespace to facilitate their global use. */
+  10:open303/Source/DSPCode/GlobalFunctions.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 22
+
+
+  11:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a raw amplitude value/factor to a value in decibels. */
+  12:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dB(double amp);
+  13:open303/Source/DSPCode/GlobalFunctions.h **** 
+  14:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a raw amplitude value/factor to a value in decibels with a check, if the amplitude is
+  15:open303/Source/DSPCode/GlobalFunctions.h **** close to zero (to avoid log-of-zero and related errors). */
+  16:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dBWithCheck(double amp, double lowAmplitude = 0.000001);
+  17:open303/Source/DSPCode/GlobalFunctions.h **** 
+  18:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the index of the maximum value in an array of doubles where the array should be of
+  19:open303/Source/DSPCode/GlobalFunctions.h **** length numValues. */
+  20:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+  21:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMaxIndex(T* theArray, int numValues);
+  22:open303/Source/DSPCode/GlobalFunctions.h **** 
+  23:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the index of the minimum value in an array of doubles where the array should be of
+  24:open303/Source/DSPCode/GlobalFunctions.h **** length numValues. */
+  25:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+  26:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMinIndex(T* theArray, int numValues);
+  27:open303/Source/DSPCode/GlobalFunctions.h **** 
+  28:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time-stamp given in beats into seconds acording to a tempo measured in beats per
+  29:open303/Source/DSPCode/GlobalFunctions.h **** minute (bpm). */
+  30:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double beatsToSeconds(double beat, double bpm);
+  31:open303/Source/DSPCode/GlobalFunctions.h **** 
+  32:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value in decibels to a raw amplitude value/factor. */
+  33:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double dB2amp(double x);
+  34:open303/Source/DSPCode/GlobalFunctions.h **** 
+  35:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts an angle in degrees into radiant. */
+  36:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double degreeToRadiant(double degrees);
+  37:open303/Source/DSPCode/GlobalFunctions.h **** 
+  38:open303/Source/DSPCode/GlobalFunctions.h **** /** Frees the memory associated with the pointer ans sets the poiter itself to NULL */
+  39:open303/Source/DSPCode/GlobalFunctions.h **** //INLINE void deleteAndNullifyPointer(void *pointer);
+  40:open303/Source/DSPCode/GlobalFunctions.h **** 
+  41:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the Euclidean distance between points at coordinates (x1,y1), (x2,y2). */
+  42:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double euclideanDistance(double x1, double y1, double x2, double y2);
+  43:open303/Source/DSPCode/GlobalFunctions.h **** 
+  44:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the exponential function with base 10. */
+  45:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double exp10(double x);
+  46:open303/Source/DSPCode/GlobalFunctions.h **** 
+  47:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the exponential function with base 2. */
+  48:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double exp2(double x);
+  49:open303/Source/DSPCode/GlobalFunctions.h **** 
+  50:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the factorial of some integer n >= 0. */
+  51:open303/Source/DSPCode/GlobalFunctions.h **** //INLINE int factorial(int n);
+  52:open303/Source/DSPCode/GlobalFunctions.h **** 
+  53:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a frequency in Hz into a MIDI-note value assuming A4 = 440 Hz. */
+  54:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double freqToPitch(double freq);
+  55:open303/Source/DSPCode/GlobalFunctions.h **** 
+  56:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a frequency in Hz into a MIDI-note value for tunings different than the
+  57:open303/Source/DSPCode/GlobalFunctions.h **** default 440 Hz. */
+  58:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double freqToPitch(double freq, double masterTuneA4);
+  59:open303/Source/DSPCode/GlobalFunctions.h **** 
+  60:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks a pointer for nullity and if it is not NULL, it calls delete for the associated object
+  61:open303/Source/DSPCode/GlobalFunctions.h **** and then sets the pointer to NULL. */
+  62:open303/Source/DSPCode/GlobalFunctions.h **** INLINE void ifNotNullDeleteAndSetNull(void* pointer);
+  63:open303/Source/DSPCode/GlobalFunctions.h **** 
+  64:open303/Source/DSPCode/GlobalFunctions.h **** /** Maps an integer index in the range 0...numIndices-1 into a normalized floating point number in 
+  65:open303/Source/DSPCode/GlobalFunctions.h **** the range 0...1. */
+  66:open303/Source/DSPCode/GlobalFunctions.h **** INLINE float indexToNormalizedValue(int index, int numIndices);
+  67:open303/Source/DSPCode/GlobalFunctions.h **** 
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 23
+
+
+  68:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is close to some target-value within some tolerance. */
+  69:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isCloseTo(double x, double targetValue, double tolerance);
+  70:open303/Source/DSPCode/GlobalFunctions.h **** 
+  71:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is even. */
+  72:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isEven(int x);
+  73:open303/Source/DSPCode/GlobalFunctions.h **** 
+  74:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is odd. */
+  75:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isOdd(int x);
+  76:open303/Source/DSPCode/GlobalFunctions.h **** 
+  77:open303/Source/DSPCode/GlobalFunctions.h **** /** Checks, if x is a power of 2. */
+  78:open303/Source/DSPCode/GlobalFunctions.h **** INLINE bool isPowerOfTwo(unsigned int x);
+  79:open303/Source/DSPCode/GlobalFunctions.h **** 
+  80:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates the logarithm to base 2. */
+  81:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double log2(double x);
+  82:open303/Source/DSPCode/GlobalFunctions.h **** 
+  83:open303/Source/DSPCode/GlobalFunctions.h **** /** Calculates logarithm to an arbitrary base b. */
+  84:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double logB(double x, double b);
+  85:open303/Source/DSPCode/GlobalFunctions.h **** 
+  86:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value between inMin and inMax into a value between outMin and outMax where the
+  87:open303/Source/DSPCode/GlobalFunctions.h **** mapping is linear for the input and the output. Example: y = linToLin(x, 0.0, 1.0, -96.0, 24.0)
+  88:open303/Source/DSPCode/GlobalFunctions.h **** will map the input x assumed to lie inside 0.0...1.0 to the range between -96.0...24.0. This
+  89:open303/Source/DSPCode/GlobalFunctions.h **** function is useful to convert between parameter representations between 0.0...1.0 and the
+  90:open303/Source/DSPCode/GlobalFunctions.h **** clear-text parameters. */
+  91:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToLin(double in, double inMin, double inMax, double outMin, double outMax);
+  92:open303/Source/DSPCode/GlobalFunctions.h **** 
+  93:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a value between inMin and inMax into a value between outMin and outMax where the
+  94:open303/Source/DSPCode/GlobalFunctions.h **** mapping of the output is exponential. Example: y = linToExp(x, 0.0, 1.0, 20.0, 20000.0) will map
+  95:open303/Source/DSPCode/GlobalFunctions.h **** the input x assumed to lie inside 0.0...1.0 to the range between 20.0...20000.0 where equal
+  96:open303/Source/DSPCode/GlobalFunctions.h **** differences in the input lead to equal factors in the output. Make sure that the outMin value is
+  97:open303/Source/DSPCode/GlobalFunctions.h **** greater than zero! */
+  98:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToExp(double in, double inMin, double inMax, double outMin, double outMax);
+  99:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 100:open303/Source/DSPCode/GlobalFunctions.h **** /** Same as linToExp but adds an offset afterwards and compensates for that offset by scaling the
+ 101:open303/Source/DSPCode/GlobalFunctions.h **** offsetted value so as to hit the outMax correctly. */
+ 102:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double linToExpWithOffset(double in, double inMin, double inMax, double outMin,
+ 103:open303/Source/DSPCode/GlobalFunctions.h ****                                  double outMax, double offset = 0.0);
+ 104:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 105:open303/Source/DSPCode/GlobalFunctions.h **** /** The Inverse of "linToExp" */
+ 106:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double expToLin(double in, double inMin, double inMax, double outMin, double outMax);
+ 107:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 108:open303/Source/DSPCode/GlobalFunctions.h **** /** The Inverse of "linToExpWithOffset" */
+ 109:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double expToLinWithOffset(double in, double inMin, double inMax, double outMin,
+ 110:open303/Source/DSPCode/GlobalFunctions.h ****                                  double outMax, double offset = 0.0);
+ 111:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 112:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns a power of two which is greater than or equal to the input argument. */
+ 113:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 114:open303/Source/DSPCode/GlobalFunctions.h **** INLINE T nextPowerOfTwo(T x);
+ 115:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 116:open303/Source/DSPCode/GlobalFunctions.h **** /** Maps a normalized floating point number in the range 0...1 into an integer index in the range 
+ 117:open303/Source/DSPCode/GlobalFunctions.h **** 0...numIndices-1. */
+ 118:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int normalizedValueToIndex(float normalizedValue, int numIndices);
+ 119:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 120:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a picth-offset in semitones value into a frequency multiplication factor. */
+ 121:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchOffsetToFreqFactor(double pitchOffset);
+ 122:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 123:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a MIDI-note value into a frequency in Hz assuming A4 = 440 Hz. */
+ 124:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchToFreq(double pitch);
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 24
+
+
+ 125:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 126:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a MIDI-note value into a frequency in Hz for arbitrary master-tunings of A4. */
+ 127:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double pitchToFreq(double pitch, double masterTuneA4);
+ 128:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 129:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts an angle in radiant into degrees. */
+ 130:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double radiantToDegree(double radiant);
+ 131:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 132:open303/Source/DSPCode/GlobalFunctions.h **** /** Generates a random number that is uniformly distributed between min and max (inclusive). The
+ 133:open303/Source/DSPCode/GlobalFunctions.h **** underlying integer pseudo random number generator is a linear congruential with period length of 
+ 134:open303/Source/DSPCode/GlobalFunctions.h **** 2^32. It is based on Numerical Recipies in C (2nd edition), page 284. You may pass a seed to the 
+ 135:open303/Source/DSPCode/GlobalFunctions.h **** first call to initialize it - otherwise it will use 0 as seed. A negative number (as in the default
+ 136:open303/Source/DSPCode/GlobalFunctions.h **** argument) will indicate to not initialize the state and just generate a random number based on the 
+ 137:open303/Source/DSPCode/GlobalFunctions.h **** last state (which is the case for a typical call). */
+ 138:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double randomUniform(double min = 0.0, double max = 1.0, int seed = -1);
+ 139:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 140:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the nearest integer (as double, without typecast). */
+ 141:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double round(double x);
+ 142:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 143:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time value in seconds into a time value measured in beats. */
+ 144:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double secondsToBeats(double timeInSeconds, double bpm);
+ 145:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 146:open303/Source/DSPCode/GlobalFunctions.h **** /** Returns the sign of x as double. */
+ 147:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double sign(double x);
+ 148:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 149:open303/Source/DSPCode/GlobalFunctions.h **** /** Converts a time-stamp given in whole notes into seconds according to a tempo measured in
+ 150:open303/Source/DSPCode/GlobalFunctions.h **** beats per minute (bpm). */
+ 151:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double wholeNotesToSeconds(double noteValue, double bpm);
+ 152:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 153:open303/Source/DSPCode/GlobalFunctions.h **** //=================================================================================================
+ 154:open303/Source/DSPCode/GlobalFunctions.h **** //implementation:
+ 155:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 156:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dB(double amp)
+ 157:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 158:open303/Source/DSPCode/GlobalFunctions.h ****   return 8.6858896380650365530225783783321 * log(amp);
+ 159:open303/Source/DSPCode/GlobalFunctions.h ****   //return 20*log10(amp); // naive version
+ 160:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 161:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 162:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double amp2dBWithCheck(double amp, double lowAmplitude)
+ 163:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 164:open303/Source/DSPCode/GlobalFunctions.h ****   if( amp >= lowAmplitude )
+ 165:open303/Source/DSPCode/GlobalFunctions.h ****     return 8.6858896380650365530225783783321 * log(amp);
+ 166:open303/Source/DSPCode/GlobalFunctions.h ****   else
+ 167:open303/Source/DSPCode/GlobalFunctions.h ****     return 8.6858896380650365530225783783321 * log(lowAmplitude);
+ 168:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 169:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 170:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 171:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMaxIndex(T* theArray, int numValues)
+ 172:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 173:open303/Source/DSPCode/GlobalFunctions.h ****   int    maxIndex = 0;
+ 174:open303/Source/DSPCode/GlobalFunctions.h ****   double maxValue = theArray[0];
+ 175:open303/Source/DSPCode/GlobalFunctions.h ****   for(int i=0; i<numValues; i++)
+ 176:open303/Source/DSPCode/GlobalFunctions.h ****   {
+ 177:open303/Source/DSPCode/GlobalFunctions.h ****     if( theArray[i] > maxValue )
+ 178:open303/Source/DSPCode/GlobalFunctions.h ****     {
+ 179:open303/Source/DSPCode/GlobalFunctions.h ****       maxValue = theArray[i];
+ 180:open303/Source/DSPCode/GlobalFunctions.h ****       maxIndex = i;
+ 181:open303/Source/DSPCode/GlobalFunctions.h ****     }
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 25
+
+
+ 182:open303/Source/DSPCode/GlobalFunctions.h ****   }
+ 183:open303/Source/DSPCode/GlobalFunctions.h ****   return maxIndex;
+ 184:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 185:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 186:open303/Source/DSPCode/GlobalFunctions.h **** template <class T>
+ 187:open303/Source/DSPCode/GlobalFunctions.h **** INLINE int arrayMinIndex(T* theArray, int numValues)
+ 188:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 189:open303/Source/DSPCode/GlobalFunctions.h ****   int    minIndex = 0;
+ 190:open303/Source/DSPCode/GlobalFunctions.h ****   double minValue = theArray[0];
+ 191:open303/Source/DSPCode/GlobalFunctions.h ****   for(int i=0; i<numValues; i++)
+ 192:open303/Source/DSPCode/GlobalFunctions.h ****   {
+ 193:open303/Source/DSPCode/GlobalFunctions.h ****     if( theArray[i] < minValue )
+ 194:open303/Source/DSPCode/GlobalFunctions.h ****     {
+ 195:open303/Source/DSPCode/GlobalFunctions.h ****       minValue = theArray[i];
+ 196:open303/Source/DSPCode/GlobalFunctions.h ****       minIndex = i;
+ 197:open303/Source/DSPCode/GlobalFunctions.h ****     }
+ 198:open303/Source/DSPCode/GlobalFunctions.h ****   }
+ 199:open303/Source/DSPCode/GlobalFunctions.h ****   return minIndex;
+ 200:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 201:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 202:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double beatsToSeconds(double beat, double bpm)
+ 203:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 204:open303/Source/DSPCode/GlobalFunctions.h ****   return (60.0/bpm)*beat;
+ 205:open303/Source/DSPCode/GlobalFunctions.h **** }
+ 206:open303/Source/DSPCode/GlobalFunctions.h **** 
+ 207:open303/Source/DSPCode/GlobalFunctions.h **** INLINE double dB2amp(double dB)
+ 208:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 209:open303/Source/DSPCode/GlobalFunctions.h ****   return exp(dB * 0.11512925464970228420089957273422);
+ 643              		.loc 4 209 13 is_stmt 0 view .LVU196
+ 644 0000 9FED077B 		vldr.64	d7, .L17
+ 645              	.LBE12:
+ 646              	.LBE11:
+  45:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive       = newDrive;
+ 647              		.loc 1 45 1 view .LVU197
+ 648 0004 10B5     		push	{r4, lr}
+ 649              		.cfi_def_cfa_offset 8
+ 650              		.cfi_offset 4, -8
+ 651              		.cfi_offset 14, -4
+  45:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive       = newDrive;
+ 652              		.loc 1 45 1 view .LVU198
+ 653 0006 0446     		mov	r4, r0
+ 654              		.loc 1 46 15 view .LVU199
+ 655 0008 80ED1E0B 		vstr.64	d0, [r0, #120]
+  47:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   driveFactor = dB2amp(drive);
+ 656              		.loc 1 47 3 is_stmt 1 view .LVU200
+ 657              	.LVL56:
+ 658              	.LBB14:
+ 659              	.LBI11:
+ 207:open303/Source/DSPCode/GlobalFunctions.h **** {
+ 660              		.loc 4 207 15 view .LVU201
+ 661              	.LBB13:
+ 662              		.loc 4 209 3 view .LVU202
+ 663              		.loc 4 209 13 is_stmt 0 view .LVU203
+ 664 000c 20EE070B 		vmul.f64	d0, d0, d7
+ 665              	.LVL57:
+ 666              		.loc 4 209 13 view .LVU204
+ 667 0010 FFF7FEFF 		bl	exp
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 26
+
+
+ 668              	.LVL58:
+ 669              		.loc 4 209 13 view .LVU205
+ 670              	.LBE13:
+ 671              	.LBE14:
+ 672              		.loc 1 47 15 discriminator 1 view .LVU206
+ 673 0014 84ED1A0B 		vstr.64	d0, [r4, #104]
+  48:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 674              		.loc 1 48 1 view .LVU207
+ 675 0018 10BD     		pop	{r4, pc}
+ 676              	.LVL59:
+ 677              	.L18:
+ 678              		.loc 1 48 1 view .LVU208
+ 679 001a 00BFAFF3 		.align	3
+ 679      0080
+ 680              	.L17:
+ 681 0020 2288885F 		.word	1602783266
+ 682 0024 1C79BD3F 		.word	1069381916
+ 683              		.cfi_endproc
+ 684              	.LFE638:
+ 686              		.section	.text._ZN5rosic12TeeBeeFilter7setModeEi,"ax",%progbits
+ 687              		.align	1
+ 688              		.global	_ZN5rosic12TeeBeeFilter7setModeEi
+ 689              		.syntax unified
+ 690              		.thumb
+ 691              		.thumb_func
+ 693              	_ZN5rosic12TeeBeeFilter7setModeEi:
+ 694              	.LVL60:
+ 695              	.LFB639:
+  49:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  50:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** void TeeBeeFilter::setMode(int newMode)
+  51:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 696              		.loc 1 51 1 is_stmt 1 view -0
+ 697              		.cfi_startproc
+ 698              		@ args = 0, pretend = 0, frame = 0
+ 699              		@ frame_needed = 0, uses_anonymous_args = 0
+  52:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   if( newMode >= 0 && newMode < NUM_MODES )
+ 700              		.loc 1 52 3 view .LVU210
+ 701 0000 0F29     		cmp	r1, #15
+  51:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   if( newMode >= 0 && newMode < NUM_MODES )
+ 702              		.loc 1 51 1 is_stmt 0 view .LVU211
+ 703 0002 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 704              		.cfi_def_cfa_offset 24
+ 705              		.cfi_offset 3, -24
+ 706              		.cfi_offset 4, -20
+ 707              		.cfi_offset 5, -16
+ 708              		.cfi_offset 6, -12
+ 709              		.cfi_offset 7, -8
+ 710              		.cfi_offset 14, -4
+ 711              		.loc 1 52 3 view .LVU212
+ 712 0004 37D8     		bhi	.L20
+  53:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   {
+  54:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     mode = newMode;
+ 713              		.loc 1 54 5 is_stmt 1 view .LVU213
+ 714 0006 0022     		movs	r2, #0
+ 715 0008 644B     		ldr	r3, .L47
+ 716              		.loc 1 54 10 is_stmt 0 view .LVU214
+ 717 000a C0F8A010 		str	r1, [r0, #160]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 27
+
+
+  55:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     switch(mode)
+ 718              		.loc 1 55 5 is_stmt 1 view .LVU215
+ 719 000e 0E29     		cmp	r1, #14
+ 720 0010 00F2BC80 		bhi	.L21
+ 721 0014 DFE811F0 		tbh	[pc, r1, lsl #1]
+ 722              	.L23:
+ 723 0018 BA00     		.2byte	(.L21-.L23)/2
+ 724 001a 0F00     		.2byte	(.L36-.L23)/2
+ 725 001c 1A00     		.2byte	(.L35-.L23)/2
+ 726 001e 2300     		.2byte	(.L34-.L23)/2
+ 727 0020 3200     		.2byte	(.L33-.L23)/2
+ 728 0022 3D00     		.2byte	(.L32-.L23)/2
+ 729 0024 4800     		.2byte	(.L31-.L23)/2
+ 730 0026 5600     		.2byte	(.L30-.L23)/2
+ 731 0028 6900     		.2byte	(.L29-.L23)/2
+ 732 002a 7400     		.2byte	(.L28-.L23)/2
+ 733 002c 8000     		.2byte	(.L27-.L23)/2
+ 734 002e 8D00     		.2byte	(.L26-.L23)/2
+ 735 0030 9A00     		.2byte	(.L25-.L23)/2
+ 736 0032 A500     		.2byte	(.L24-.L23)/2
+ 737 0034 B100     		.2byte	(.L22-.L23)/2
+ 738              		.p2align 1
+ 739              	.L36:
+  56:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     {
+  57:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case FLAT:      c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+  58:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_6:      c0 =  0.0; c1 =  1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 740              		.loc 1 58 5 view .LVU216
+ 741              		.loc 1 58 21 view .LVU217
+ 742              		.loc 1 58 24 is_stmt 0 view .LVU218
+ 743 0036 0024     		movs	r4, #0
+ 744 0038 0025     		movs	r5, #0
+ 745              		.loc 1 58 35 view .LVU219
+ 746 003a C0E90E23 		strd	r2, [r0, #56]
+ 747              		.loc 1 58 24 view .LVU220
+ 748 003e C0E90C45 		strd	r4, [r0, #48]
+ 749              		.loc 1 58 32 is_stmt 1 view .LVU221
+ 750              		.loc 1 58 43 view .LVU222
+ 751              		.loc 1 58 46 is_stmt 0 view .LVU223
+ 752 0042 C0E91045 		strd	r4, [r0, #64]
+ 753              		.loc 1 58 54 is_stmt 1 view .LVU224
+ 754              	.L38:
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_18:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 =  0.0;  break;
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 755              		.loc 1 71 54 view .LVU225
+ 756              		.loc 1 71 57 is_stmt 0 view .LVU226
+ 757 0046 C0E91245 		strd	r4, [r0, #72]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 28
+
+
+ 758 004a 12E0     		b	.L40
+ 759              	.L35:
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 760              		.loc 1 59 5 is_stmt 1 view .LVU227
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 761              		.loc 1 59 21 view .LVU228
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 762              		.loc 1 59 24 is_stmt 0 view .LVU229
+ 763 004c 0024     		movs	r4, #0
+ 764 004e 0025     		movs	r5, #0
+ 765 0050 C0E90C45 		strd	r4, [r0, #48]
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 766              		.loc 1 59 32 is_stmt 1 view .LVU230
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 767              		.loc 1 59 35 is_stmt 0 view .LVU231
+ 768 0054 C0E90E45 		strd	r4, [r0, #56]
+  59:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_12:     c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 769              		.loc 1 59 43 is_stmt 1 view .LVU232
+ 770              	.L39:
+ 771              		.loc 1 71 46 is_stmt 0 view .LVU233
+ 772 0058 C0E91023 		strd	r2, [r0, #64]
+ 773 005c F3E7     		b	.L38
+ 774              	.L34:
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 775              		.loc 1 60 5 is_stmt 1 view .LVU234
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 776              		.loc 1 60 21 view .LVU235
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 777              		.loc 1 60 24 is_stmt 0 view .LVU236
+ 778 005e 0024     		movs	r4, #0
+ 779 0060 0025     		movs	r5, #0
+ 780 0062 C0E90C45 		strd	r4, [r0, #48]
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 781              		.loc 1 60 32 is_stmt 1 view .LVU237
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 782              		.loc 1 60 35 is_stmt 0 view .LVU238
+ 783 0066 C0E90E45 		strd	r4, [r0, #56]
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 784              		.loc 1 60 43 is_stmt 1 view .LVU239
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 785              		.loc 1 60 46 is_stmt 0 view .LVU240
+ 786 006a C0E91045 		strd	r4, [r0, #64]
+  60:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case LP_24:     c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  1.0;  break;
+ 787              		.loc 1 60 54 is_stmt 1 view .LVU241
+ 788              	.L44:
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 789              		.loc 1 69 57 is_stmt 0 view .LVU242
+ 790 006e C0E91223 		strd	r2, [r0, #72]
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 791              		.loc 1 69 65 is_stmt 1 view .LVU243
+ 792              	.L40:
+ 793              		.loc 1 71 65 view .LVU244
+ 794              		.loc 1 71 68 is_stmt 0 view .LVU245
+ 795 0072 C0E91445 		strd	r4, [r0, #80]
+ 796              		.loc 1 71 77 is_stmt 1 view .LVU246
+ 797              	.L20:
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 29
+
+
+  73:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+  74:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   }
+  75:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   calculateCoefficientsApprox4();
+ 798              		.loc 1 75 3 view .LVU247
+ 799              		.loc 1 75 31 is_stmt 0 view .LVU248
+ 800 0076 FFF7FEFF 		bl	_ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev
+ 801              	.LVL61:
+  76:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 802              		.loc 1 76 1 view .LVU249
+ 803 007a F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 804              	.LVL62:
+ 805              	.L33:
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 806              		.loc 1 61 5 is_stmt 1 view .LVU250
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 807              		.loc 1 61 21 view .LVU251
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 808              		.loc 1 61 24 is_stmt 0 view .LVU252
+ 809 007c 0024     		movs	r4, #0
+ 810 007e 0025     		movs	r5, #0
+ 811 0080 C0E90C45 		strd	r4, [r0, #48]
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 812              		.loc 1 61 32 is_stmt 1 view .LVU253
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 813              		.loc 1 61 35 is_stmt 0 view .LVU254
+ 814 0084 C0E90E45 		strd	r4, [r0, #56]
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 815              		.loc 1 61 43 is_stmt 1 view .LVU255
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 816              		.loc 1 61 46 is_stmt 0 view .LVU256
+ 817 0088 C0E91045 		strd	r4, [r0, #64]
+  61:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_6:      c0 =  1.0; c1 = -1.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  break;
+ 818              		.loc 1 61 54 is_stmt 1 view .LVU257
+ 819              	.L45:
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 820              		.loc 1 65 54 view .LVU258
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 821              		.loc 1 65 57 is_stmt 0 view .LVU259
+ 822 008c C0E91245 		strd	r4, [r0, #72]
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 823              		.loc 1 65 65 is_stmt 1 view .LVU260
+ 824 0090 28E0     		b	.L41
+ 825              	.L32:
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 826              		.loc 1 62 5 view .LVU261
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 827              		.loc 1 62 21 view .LVU262
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 828              		.loc 1 62 24 is_stmt 0 view .LVU263
+ 829 0092 C0E90C23 		strd	r2, [r0, #48]
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 830              		.loc 1 62 32 is_stmt 1 view .LVU264
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 831              		.loc 1 62 35 is_stmt 0 view .LVU265
+ 832 0096 0022     		movs	r2, #0
+ 833 0098 414B     		ldr	r3, .L47+4
+ 834 009a C0E90E23 		strd	r2, [r0, #56]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 30
+
+
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 835              		.loc 1 62 43 is_stmt 1 view .LVU266
+  62:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_12:     c0 =  1.0; c1 = -2.0; c2 =  1.0; c3 =  0.0; c4 =  0.0;  break;
+ 836              		.loc 1 62 46 is_stmt 0 view .LVU267
+ 837 009e 0022     		movs	r2, #0
+ 838 00a0 0023     		movs	r3, #0
+ 839              	.L42:
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 840              		.loc 1 72 43 is_stmt 1 view .LVU268
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 841              		.loc 1 72 46 is_stmt 0 view .LVU269
+ 842 00a2 C0E91023 		strd	r2, [r0, #64]
+ 843 00a6 0AE0     		b	.L43
+ 844              	.L31:
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 845              		.loc 1 63 5 is_stmt 1 view .LVU270
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 846              		.loc 1 63 21 view .LVU271
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 847              		.loc 1 63 24 is_stmt 0 view .LVU272
+ 848 00a8 C0E90C23 		strd	r2, [r0, #48]
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 849              		.loc 1 63 32 is_stmt 1 view .LVU273
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 850              		.loc 1 63 46 is_stmt 0 view .LVU274
+ 851 00ac C0E91023 		strd	r2, [r0, #64]
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 852              		.loc 1 63 35 view .LVU275
+ 853 00b0 0024     		movs	r4, #0
+ 854 00b2 4FF04045 		mov	r5, #-1073741824
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 855              		.loc 1 63 57 view .LVU276
+ 856 00b6 0022     		movs	r2, #0
+ 857 00b8 0023     		movs	r3, #0
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 858              		.loc 1 63 35 view .LVU277
+ 859 00ba C0E90E45 		strd	r4, [r0, #56]
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 860              		.loc 1 63 43 is_stmt 1 view .LVU278
+  63:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_18:     c0 =  1.0; c1 = -3.0; c2 =  3.0; c3 = -1.0; c4 =  0.0;  break;
+ 861              		.loc 1 63 54 view .LVU279
+ 862              	.L43:
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 863              		.loc 1 72 54 view .LVU280
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 864              		.loc 1 72 57 is_stmt 0 view .LVU281
+ 865 00be C0E91223 		strd	r2, [r0, #72]
+ 866 00c2 0FE0     		b	.L41
+ 867              	.L30:
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 868              		.loc 1 64 5 is_stmt 1 view .LVU282
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 869              		.loc 1 64 21 view .LVU283
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 870              		.loc 1 64 24 is_stmt 0 view .LVU284
+ 871 00c4 C0E90C23 		strd	r2, [r0, #48]
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 31
+
+
+ 872              		.loc 1 64 32 is_stmt 1 view .LVU285
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 873              		.loc 1 64 35 is_stmt 0 view .LVU286
+ 874 00c8 0022     		movs	r2, #0
+ 875 00ca 364B     		ldr	r3, .L47+8
+ 876 00cc C0E90E23 		strd	r2, [r0, #56]
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 877              		.loc 1 64 43 is_stmt 1 view .LVU287
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 878              		.loc 1 64 46 is_stmt 0 view .LVU288
+ 879 00d0 0022     		movs	r2, #0
+ 880 00d2 354B     		ldr	r3, .L47+12
+ 881 00d4 C0E91023 		strd	r2, [r0, #64]
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 882              		.loc 1 64 54 is_stmt 1 view .LVU289
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 883              		.loc 1 64 57 is_stmt 0 view .LVU290
+ 884 00d8 0022     		movs	r2, #0
+ 885 00da 314B     		ldr	r3, .L47+4
+ 886 00dc C0E91223 		strd	r2, [r0, #72]
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 887              		.loc 1 64 65 is_stmt 1 view .LVU291
+  64:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case HP_24:     c0 =  1.0; c1 = -4.0; c2 =  6.0; c3 = -4.0; c4 =  1.0;  break;
+ 888              		.loc 1 64 68 is_stmt 0 view .LVU292
+ 889 00e0 0022     		movs	r2, #0
+ 890 00e2 0023     		movs	r3, #0
+ 891              	.L41:
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 892              		.loc 1 72 65 is_stmt 1 view .LVU293
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 893              		.loc 1 72 68 is_stmt 0 view .LVU294
+ 894 00e4 C0E91423 		strd	r2, [r0, #80]
+ 895 00e8 C5E7     		b	.L20
+ 896              	.L29:
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 897              		.loc 1 65 5 is_stmt 1 view .LVU295
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 898              		.loc 1 65 21 view .LVU296
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 899              		.loc 1 65 35 is_stmt 0 view .LVU297
+ 900 00ea 0024     		movs	r4, #0
+ 901 00ec 2F4D     		ldr	r5, .L47+16
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 902              		.loc 1 65 46 view .LVU298
+ 903 00ee 0026     		movs	r6, #0
+ 904 00f0 2F4F     		ldr	r7, .L47+20
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 905              		.loc 1 65 24 view .LVU299
+ 906 00f2 C0E90C23 		strd	r2, [r0, #48]
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 907              		.loc 1 65 32 is_stmt 1 view .LVU300
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 908              		.loc 1 65 35 is_stmt 0 view .LVU301
+ 909 00f6 C0E90E45 		strd	r4, [r0, #56]
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ 910              		.loc 1 65 43 is_stmt 1 view .LVU302
+  65:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_12:  c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -2.0; c4 =  1.0;  break;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 32
+
+
+ 911              		.loc 1 65 46 is_stmt 0 view .LVU303
+ 912 00fa C0E91067 		strd	r6, [r0, #64]
+ 913 00fe C5E7     		b	.L45
+ 914              	.L28:
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 915              		.loc 1 66 5 is_stmt 1 view .LVU304
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 916              		.loc 1 66 21 view .LVU305
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 917              		.loc 1 66 24 is_stmt 0 view .LVU306
+ 918 0100 0024     		movs	r4, #0
+ 919 0102 0025     		movs	r5, #0
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 920              		.loc 1 66 46 view .LVU307
+ 921 0104 C0E91023 		strd	r2, [r0, #64]
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 922              		.loc 1 66 24 view .LVU308
+ 923 0108 C0E90C45 		strd	r4, [r0, #48]
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 924              		.loc 1 66 32 is_stmt 1 view .LVU309
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 925              		.loc 1 66 35 is_stmt 0 view .LVU310
+ 926 010c C0E90E45 		strd	r4, [r0, #56]
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 927              		.loc 1 66 43 is_stmt 1 view .LVU311
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 928              		.loc 1 66 54 view .LVU312
+  66:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_18:   c0 =  0.0; c1 =  0.0; c2 =  0.0; c3 =  1.0; c4 = -1.0;  break;
+ 929              		.loc 1 66 57 is_stmt 0 view .LVU313
+ 930 0110 0024     		movs	r4, #0
+ 931 0112 4FF04045 		mov	r5, #-1073741824
+ 932 0116 B9E7     		b	.L45
+ 933              	.L27:
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 934              		.loc 1 67 5 is_stmt 1 view .LVU314
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 935              		.loc 1 67 21 view .LVU315
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 936              		.loc 1 67 24 is_stmt 0 view .LVU316
+ 937 0118 0024     		movs	r4, #0
+ 938 011a 0025     		movs	r5, #0
+ 939 011c C0E90C45 		strd	r4, [r0, #48]
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 940              		.loc 1 67 32 is_stmt 1 view .LVU317
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 941              		.loc 1 67 35 is_stmt 0 view .LVU318
+ 942 0120 C0E90E45 		strd	r4, [r0, #56]
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 943              		.loc 1 67 43 is_stmt 1 view .LVU319
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 944              		.loc 1 67 46 is_stmt 0 view .LVU320
+ 945 0124 C0E91045 		strd	r4, [r0, #64]
+  67:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_18_6:   c0 =  0.0; c1 =  1.0; c2 = -3.0; c3 =  3.0; c4 = -1.0;  break;
+ 946              		.loc 1 67 54 is_stmt 1 view .LVU321
+ 947              	.L46:
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 948              		.loc 1 68 57 is_stmt 0 view .LVU322
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 33
+
+
+ 949 0128 C0E91223 		strd	r2, [r0, #72]
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 950              		.loc 1 68 65 is_stmt 1 view .LVU323
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 951              		.loc 1 68 68 is_stmt 0 view .LVU324
+ 952 012c 0022     		movs	r2, #0
+ 953 012e 1C4B     		ldr	r3, .L47+4
+ 954 0130 D8E7     		b	.L41
+ 955              	.L26:
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 956              		.loc 1 68 5 is_stmt 1 view .LVU325
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 957              		.loc 1 68 21 view .LVU326
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 958              		.loc 1 68 35 is_stmt 0 view .LVU327
+ 959 0132 C0E90E23 		strd	r2, [r0, #56]
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 960              		.loc 1 68 24 view .LVU328
+ 961 0136 0024     		movs	r4, #0
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 962              		.loc 1 68 46 view .LVU329
+ 963 0138 0022     		movs	r2, #0
+ 964 013a 1A4B     		ldr	r3, .L47+8
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 965              		.loc 1 68 24 view .LVU330
+ 966 013c 0025     		movs	r5, #0
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 967              		.loc 1 68 46 view .LVU331
+ 968 013e C0E91023 		strd	r2, [r0, #64]
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 969              		.loc 1 68 24 view .LVU332
+ 970 0142 C0E90C45 		strd	r4, [r0, #48]
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 971              		.loc 1 68 32 is_stmt 1 view .LVU333
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 972              		.loc 1 68 43 view .LVU334
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 973              		.loc 1 68 54 view .LVU335
+  68:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_12:   c0 =  0.0; c1 =  0.0; c2 =  1.0; c3 = -1.0; c4 =  0.0;  break;
+ 974              		.loc 1 68 57 is_stmt 0 view .LVU336
+ 975 0146 0022     		movs	r2, #0
+ 976 0148 174B     		ldr	r3, .L47+12
+ 977 014a EDE7     		b	.L46
+ 978              	.L25:
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 979              		.loc 1 69 5 is_stmt 1 view .LVU337
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 980              		.loc 1 69 21 view .LVU338
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 981              		.loc 1 69 24 is_stmt 0 view .LVU339
+ 982 014c 0024     		movs	r4, #0
+ 983 014e 0025     		movs	r5, #0
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 984              		.loc 1 69 46 view .LVU340
+ 985 0150 C0E91023 		strd	r2, [r0, #64]
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 986              		.loc 1 69 24 view .LVU341
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 34
+
+
+ 987 0154 C0E90C45 		strd	r4, [r0, #48]
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 988              		.loc 1 69 32 is_stmt 1 view .LVU342
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 989              		.loc 1 69 57 is_stmt 0 view .LVU343
+ 990 0158 0022     		movs	r2, #0
+ 991 015a 114B     		ldr	r3, .L47+4
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 992              		.loc 1 69 35 view .LVU344
+ 993 015c C0E90E45 		strd	r4, [r0, #56]
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 994              		.loc 1 69 43 is_stmt 1 view .LVU345
+  69:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_12_6:   c0 =  0.0; c1 =  1.0; c2 = -2.0; c3 =  1.0; c4 =  0.0;  break;
+ 995              		.loc 1 69 54 view .LVU346
+ 996 0160 85E7     		b	.L44
+ 997              	.L24:
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 998              		.loc 1 70 5 view .LVU347
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 999              		.loc 1 70 21 view .LVU348
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1000              		.loc 1 70 24 is_stmt 0 view .LVU349
+ 1001 0162 0024     		movs	r4, #0
+ 1002 0164 0025     		movs	r5, #0
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1003              		.loc 1 70 46 view .LVU350
+ 1004 0166 0026     		movs	r6, #0
+ 1005 0168 4FF04047 		mov	r7, #-1073741824
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1006              		.loc 1 70 24 view .LVU351
+ 1007 016c C0E90C45 		strd	r4, [r0, #48]
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1008              		.loc 1 70 32 is_stmt 1 view .LVU352
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1009              		.loc 1 70 35 is_stmt 0 view .LVU353
+ 1010 0170 C0E90E23 		strd	r2, [r0, #56]
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1011              		.loc 1 70 43 is_stmt 1 view .LVU354
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1012              		.loc 1 70 46 is_stmt 0 view .LVU355
+ 1013 0174 C0E91067 		strd	r6, [r0, #64]
+  70:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     case BP_6_6:    c0 =  0.0; c1 =  1.0; c2 = -1.0; c3 =  0.0; c4 =  0.0;  break;
+ 1014              		.loc 1 70 54 is_stmt 1 view .LVU356
+ 1015 0178 79E7     		b	.L44
+ 1016              	.L22:
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1017              		.loc 1 71 5 view .LVU357
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1018              		.loc 1 71 21 view .LVU358
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1019              		.loc 1 71 24 is_stmt 0 view .LVU359
+ 1020 017a 0024     		movs	r4, #0
+ 1021 017c 0025     		movs	r5, #0
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1022              		.loc 1 71 35 view .LVU360
+ 1023 017e C0E90E23 		strd	r2, [r0, #56]
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 35
+
+
+ 1024              		.loc 1 71 24 view .LVU361
+ 1025 0182 C0E90C45 		strd	r4, [r0, #48]
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1026              		.loc 1 71 32 is_stmt 1 view .LVU362
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1027              		.loc 1 71 43 view .LVU363
+  71:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     default:        c0 =  1.0; c1 =  0.0; c2 =  0.0; c3 =  0.0; c4 =  0.0;  // flat
+ 1028              		.loc 1 71 46 is_stmt 0 view .LVU364
+ 1029 0186 0022     		movs	r2, #0
+ 1030 0188 054B     		ldr	r3, .L47+4
+ 1031 018a 65E7     		b	.L39
+ 1032              	.L21:
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 1033              		.loc 1 72 5 is_stmt 1 view .LVU365
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 1034              		.loc 1 72 21 view .LVU366
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 1035              		.loc 1 72 24 is_stmt 0 view .LVU367
+ 1036 018c C0E90C23 		strd	r2, [r0, #48]
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 1037              		.loc 1 72 32 is_stmt 1 view .LVU368
+  72:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****     }
+ 1038              		.loc 1 72 35 is_stmt 0 view .LVU369
+ 1039 0190 0022     		movs	r2, #0
+ 1040 0192 0023     		movs	r3, #0
+ 1041 0194 C0E90E23 		strd	r2, [r0, #56]
+ 1042 0198 83E7     		b	.L42
+ 1043              	.L48:
+ 1044 019a 00BF     		.align	2
+ 1045              	.L47:
+ 1046 019c 0000F03F 		.word	1072693248
+ 1047 01a0 0000F0BF 		.word	-1074790400
+ 1048 01a4 000008C0 		.word	-1073217536
+ 1049 01a8 00000840 		.word	1074266112
+ 1050 01ac 000010C0 		.word	-1072693248
+ 1051 01b0 00001840 		.word	1075314688
+ 1052              		.cfi_endproc
+ 1053              	.LFE639:
+ 1055              		.section	.text._ZN5rosic12TeeBeeFilter5resetEv,"ax",%progbits
+ 1056              		.align	1
+ 1057              		.global	_ZN5rosic12TeeBeeFilter5resetEv
+ 1058              		.syntax unified
+ 1059              		.thumb
+ 1060              		.thumb_func
+ 1062              	_ZN5rosic12TeeBeeFilter5resetEv:
+ 1063              	.LVL63:
+ 1064              	.LFB640:
+  77:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  78:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** //-------------------------------------------------------------------------------------------------
+  79:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** // others:
+  80:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+  81:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** void TeeBeeFilter::reset()
+  82:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1065              		.loc 1 82 1 is_stmt 1 view -0
+ 1066              		.cfi_startproc
+ 1067              		@ args = 0, pretend = 0, frame = 0
+ 1068              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 36
+
+
+  83:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.reset();
+ 1069              		.loc 1 83 3 view .LVU371
+  82:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.reset();
+ 1070              		.loc 1 82 1 is_stmt 0 view .LVU372
+ 1071 0000 10B5     		push	{r4, lr}
+ 1072              		.cfi_def_cfa_offset 8
+ 1073              		.cfi_offset 4, -8
+ 1074              		.cfi_offset 14, -4
+  82:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.reset();
+ 1075              		.loc 1 82 1 view .LVU373
+ 1076 0002 0446     		mov	r4, r0
+ 1077              		.loc 1 83 25 view .LVU374
+ 1078 0004 A830     		adds	r0, r0, #168
+ 1079              	.LVL64:
+ 1080              		.loc 1 83 25 view .LVU375
+ 1081 0006 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter5resetEv
+ 1082              	.LVL65:
+  84:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   y1 = 0.0;
+ 1083              		.loc 1 84 3 is_stmt 1 view .LVU376
+ 1084              		.loc 1 84 6 is_stmt 0 view .LVU377
+ 1085 000a 0022     		movs	r2, #0
+ 1086 000c 0023     		movs	r3, #0
+ 1087 000e C4E90423 		strd	r2, [r4, #16]
+  85:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   y2 = 0.0;
+ 1088              		.loc 1 85 3 is_stmt 1 view .LVU378
+ 1089              		.loc 1 85 6 is_stmt 0 view .LVU379
+ 1090 0012 C4E90623 		strd	r2, [r4, #24]
+  86:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   y3 = 0.0;
+ 1091              		.loc 1 86 3 is_stmt 1 view .LVU380
+ 1092              		.loc 1 86 6 is_stmt 0 view .LVU381
+ 1093 0016 C4E90823 		strd	r2, [r4, #32]
+  87:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   y4 = 0.0;
+ 1094              		.loc 1 87 3 is_stmt 1 view .LVU382
+ 1095              		.loc 1 87 6 is_stmt 0 view .LVU383
+ 1096 001a C4E90A23 		strd	r2, [r4, #40]
+  88:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 1097              		.loc 1 88 1 view .LVU384
+ 1098 001e 10BD     		pop	{r4, pc}
+ 1099              		.loc 1 88 1 view .LVU385
+ 1100              		.cfi_endproc
+ 1101              	.LFE640:
+ 1103              		.section	.text._ZN5rosic12TeeBeeFilterC2Ev,"ax",%progbits
+ 1104              		.align	1
+ 1105              		.global	_ZN5rosic12TeeBeeFilterC2Ev
+ 1106              		.syntax unified
+ 1107              		.thumb
+ 1108              		.thumb_func
+ 1110              	_ZN5rosic12TeeBeeFilterC2Ev:
+ 1111              	.LVL66:
+ 1112              	.LFB632:
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1113              		.loc 1 7 1 is_stmt 1 view -0
+ 1114              		.cfi_startproc
+ 1115              		@ args = 0, pretend = 0, frame = 0
+ 1116              		@ frame_needed = 0, uses_anonymous_args = 0
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1117              		.loc 1 7 1 is_stmt 0 view .LVU387
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 37
+
+
+ 1118 0000 38B5     		push	{r3, r4, r5, lr}
+ 1119              		.cfi_def_cfa_offset 16
+ 1120              		.cfi_offset 3, -16
+ 1121              		.cfi_offset 4, -12
+ 1122              		.cfi_offset 5, -8
+ 1123              		.cfi_offset 14, -4
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1124              		.loc 1 7 1 view .LVU388
+ 1125 0002 0446     		mov	r4, r0
+ 1126              	.LBB15:
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1127              		.loc 1 7 28 view .LVU389
+ 1128 0004 A830     		adds	r0, r0, #168
+ 1129              	.LVL67:
+   7:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** {
+ 1130              		.loc 1 7 28 view .LVU390
+ 1131 0006 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilterC1Ev
+ 1132              	.LVL68:
+   9:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive               =     0.0;
+ 1133              		.loc 1 9 3 is_stmt 1 view .LVU391
+   9:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive               =     0.0;
+ 1134              		.loc 1 9 23 is_stmt 0 view .LVU392
+ 1135 000a 0022     		movs	r2, #0
+ 1136 000c 1E4B     		ldr	r3, .L51+24
+  11:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceRaw        =     0.0;
+ 1137              		.loc 1 11 23 view .LVU393
+ 1138 000e 0020     		movs	r0, #0
+ 1139 0010 1E49     		ldr	r1, .L51+28
+   9:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   drive               =     0.0;
+ 1140              		.loc 1 9 23 view .LVU394
+ 1141 0012 C4E91C23 		strd	r2, [r4, #112]
+  10:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   driveFactor         =     1.0;
+ 1142              		.loc 1 10 3 is_stmt 1 view .LVU395
+  10:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   driveFactor         =     1.0;
+ 1143              		.loc 1 10 23 is_stmt 0 view .LVU396
+ 1144 0016 0022     		movs	r2, #0
+ 1145 0018 0023     		movs	r3, #0
+ 1146 001a C4E91E23 		strd	r2, [r4, #120]
+  11:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceRaw        =     0.0;
+ 1147              		.loc 1 11 3 is_stmt 1 view .LVU397
+  12:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceSkewed     =     0.0;
+ 1148              		.loc 1 12 23 is_stmt 0 view .LVU398
+ 1149 001e C4E92023 		strd	r2, [r4, #128]
+  13:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   g                   =     1.0;
+ 1150              		.loc 1 13 23 view .LVU399
+ 1151 0022 C4E92223 		strd	r2, [r4, #136]
+  15:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 1152              		.loc 1 15 23 view .LVU400
+ 1153 0026 12A3     		adr	r3, .L51
+ 1154 0028 D3E90023 		ldrd	r2, [r3]
+  11:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceRaw        =     0.0;
+ 1155              		.loc 1 11 23 view .LVU401
+ 1156 002c C4E91A01 		strd	r0, [r4, #104]
+  12:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   resonanceSkewed     =     0.0;
+ 1157              		.loc 1 12 3 is_stmt 1 view .LVU402
+  13:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   g                   =     1.0;
+ 1158              		.loc 1 13 3 view .LVU403
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 38
+
+
+  14:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   sampleRate          = 44100.0;
+ 1159              		.loc 1 14 3 view .LVU404
+  15:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 1160              		.loc 1 15 23 is_stmt 0 view .LVU405
+ 1161 0030 C4E92423 		strd	r2, [r4, #144]
+  16:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1162              		.loc 1 16 23 view .LVU406
+ 1163 0034 10A3     		adr	r3, .L51+8
+ 1164 0036 D3E90023 		ldrd	r2, [r3]
+  14:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   sampleRate          = 44100.0;
+ 1165              		.loc 1 14 23 view .LVU407
+ 1166 003a C4E91801 		strd	r0, [r4, #96]
+  15:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   twoPiOverSampleRate = 2.0*PI/sampleRate;
+ 1167              		.loc 1 15 3 is_stmt 1 view .LVU408
+  16:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1168              		.loc 1 16 3 view .LVU409
+  16:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1169              		.loc 1 16 23 is_stmt 0 view .LVU410
+ 1170 003e C4E92623 		strd	r2, [r4, #152]
+  18:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.setCutoff(150.0);
+ 1171              		.loc 1 18 3 is_stmt 1 view .LVU411
+  18:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   feedbackHighpass.setCutoff(150.0);
+ 1172              		.loc 1 18 27 is_stmt 0 view .LVU412
+ 1173 0042 0221     		movs	r1, #2
+ 1174 0044 04F1A800 		add	r0, r4, #168
+ 1175 0048 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter7setModeEi
+ 1176              	.LVL69:
+  19:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1177              		.loc 1 19 3 is_stmt 1 view .LVU413
+  19:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1178              		.loc 1 19 29 is_stmt 0 view .LVU414
+ 1179 004c 04F1A800 		add	r0, r4, #168
+ 1180 0050 9FED0B0B 		vldr.64	d0, .L51+16
+ 1181 0054 FFF7FEFF 		bl	_ZN5rosic13OnePoleFilter9setCutoffEd
+ 1182              	.LVL70:
+  22:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   calculateCoefficientsExact();
+ 1183              		.loc 1 22 3 is_stmt 1 view .LVU415
+  22:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   calculateCoefficientsExact();
+ 1184              		.loc 1 22 10 is_stmt 0 view .LVU416
+ 1185 0058 0F21     		movs	r1, #15
+ 1186 005a 2046     		mov	r0, r4
+ 1187 005c FFF7FEFF 		bl	_ZN5rosic12TeeBeeFilter7setModeEi
+ 1188              	.LVL71:
+  23:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   reset();
+ 1189              		.loc 1 23 3 is_stmt 1 view .LVU417
+  23:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp ****   reset();
+ 1190              		.loc 1 23 29 is_stmt 0 view .LVU418
+ 1191 0060 2046     		mov	r0, r4
+ 1192 0062 FFF7FEFF 		bl	_ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv
+ 1193              	.LVL72:
+  24:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 1194              		.loc 1 24 3 is_stmt 1 view .LVU419
+  24:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** }
+ 1195              		.loc 1 24 8 is_stmt 0 view .LVU420
+ 1196 0066 2046     		mov	r0, r4
+ 1197 0068 FFF7FEFF 		bl	_ZN5rosic12TeeBeeFilter5resetEv
+ 1198              	.LVL73:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 39
+
+
+ 1199              	.LBE15:
+  25:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1200              		.loc 1 25 1 view .LVU421
+ 1201 006c 2046     		mov	r0, r4
+ 1202 006e 38BD     		pop	{r3, r4, r5, pc}
+ 1203              	.LVL74:
+ 1204              	.L52:
+  25:open303/Source/DSPCode/rosic_TeeBeeFilter.cpp **** 
+ 1205              		.loc 1 25 1 view .LVU422
+ 1206              		.align	3
+ 1207              	.L51:
+ 1208 0070 00000000 		.word	0
+ 1209 0074 8088E540 		.word	1088784512
+ 1210 0078 EEE1914B 		.word	1267851758
+ 1211 007c B2AC223F 		.word	1059237042
+ 1212 0080 00000000 		.word	0
+ 1213 0084 00C06240 		.word	1080213504
+ 1214 0088 00408F40 		.word	1083129856
+ 1215 008c 0000F03F 		.word	1072693248
+ 1216              		.cfi_endproc
+ 1217              	.LFE632:
+ 1219              		.global	_ZN5rosic12TeeBeeFilterC1Ev
+ 1220              		.thumb_set _ZN5rosic12TeeBeeFilterC1Ev,_ZN5rosic12TeeBeeFilterC2Ev
+ 1221              		.text
+ 1222              	.Letext0:
+ 1223              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 1224              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 1225              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 1226              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/includ
+ 1227              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 1228              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 1229              		.file 11 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/m
+ 1230              		.file 12 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/s
+ 1231              		.file 13 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 1232              		.file 14 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 1233              		.file 15 "open303/Source/DSPCode/rosic_OnePoleFilter.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s 			page 40
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_TeeBeeFilter.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:20     .text._ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:26     .text._ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv:00000000 _ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:191    .text._ZN5rosic12TeeBeeFilter26calculateCoefficientsExactEv:000000b0 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:197    .text._ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:203    .text._ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev:00000000 _ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:467    .text._ZN5rosic12TeeBeeFilter28calculateCoefficientsApprox4Ev:000001a0 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:541    .text._ZN5rosic12TeeBeeFilterD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:547    .text._ZN5rosic12TeeBeeFilterD2Ev:00000000 _ZN5rosic12TeeBeeFilterD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:547    .text._ZN5rosic12TeeBeeFilterD2Ev:00000000 _ZN5rosic12TeeBeeFilterD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:563    .text._ZN5rosic12TeeBeeFilter13setSampleRateEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:569    .text._ZN5rosic12TeeBeeFilter13setSampleRateEd:00000000 _ZN5rosic12TeeBeeFilter13setSampleRateEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:620    .text._ZN5rosic12TeeBeeFilter13setSampleRateEd:00000038 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:626    .text._ZN5rosic12TeeBeeFilter8setDriveEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:632    .text._ZN5rosic12TeeBeeFilter8setDriveEd:00000000 _ZN5rosic12TeeBeeFilter8setDriveEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:681    .text._ZN5rosic12TeeBeeFilter8setDriveEd:00000020 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:687    .text._ZN5rosic12TeeBeeFilter7setModeEi:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:693    .text._ZN5rosic12TeeBeeFilter7setModeEi:00000000 _ZN5rosic12TeeBeeFilter7setModeEi
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:723    .text._ZN5rosic12TeeBeeFilter7setModeEi:00000018 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:738    .text._ZN5rosic12TeeBeeFilter7setModeEi:00000036 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1046   .text._ZN5rosic12TeeBeeFilter7setModeEi:0000019c $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1056   .text._ZN5rosic12TeeBeeFilter5resetEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1062   .text._ZN5rosic12TeeBeeFilter5resetEv:00000000 _ZN5rosic12TeeBeeFilter5resetEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1104   .text._ZN5rosic12TeeBeeFilterC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1110   .text._ZN5rosic12TeeBeeFilterC2Ev:00000000 _ZN5rosic12TeeBeeFilterC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1208   .text._ZN5rosic12TeeBeeFilterC2Ev:00000070 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccl2DhAo.s:1110   .text._ZN5rosic12TeeBeeFilterC2Ev:00000000 _ZN5rosic12TeeBeeFilterC1Ev
+
+UNDEFINED SYMBOLS
+sin
+cos
+tan
+exp
+_ZN5rosic13OnePoleFilter13setSampleRateEd
+_ZN5rosic13OnePoleFilter5resetEv
+_ZN5rosic13OnePoleFilterC1Ev
+_ZN5rosic13OnePoleFilter7setModeEi
+_ZN5rosic13OnePoleFilter9setCutoffEd

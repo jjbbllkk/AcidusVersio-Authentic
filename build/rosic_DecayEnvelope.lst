@@ -1,0 +1,684 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_DecayEnvelope.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_DecayEnvelope.cpp"
+  19              		.section	.text._ZN5rosic13DecayEnvelopeD2Ev,"ax",%progbits
+  20              		.align	1
+  21              		.global	_ZN5rosic13DecayEnvelopeD2Ev
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic13DecayEnvelopeD2Ev:
+  27              	.LVL0:
+  28              	.LFB622:
+   1:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** #include "rosic_DecayEnvelope.h"
+   2:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+   4:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+   7:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** DecayEnvelope::DecayEnvelope()
+   8:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {  
+   9:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   c             = 1.0;    
+  10:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   attackCoeff   = 1.0;
+  11:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   y             = 0.0;
+  12:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   yInit         = 1.0;
+  13:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   
+  14:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   tau           = 200.0;
+  15:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   attackTime    = 0.0; // Default to instant
+  16:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   
+  17:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   time          = 0.0;
+  18:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   fs            = 44100.0;
+  19:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   timeIncrement = 1000.0 / fs; // ms per sample
+  20:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  21:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum  = false;
+  22:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+  23:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  24:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  25:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** DecayEnvelope::~DecayEnvelope()
+  29              		.loc 1 25 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 2
+
+
+  26:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  27:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  28:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  34              		.loc 1 28 1 is_stmt 0 view .LVU1
+  35 0000 7047     		bx	lr
+  36              		.cfi_endproc
+  37              	.LFE622:
+  39              		.global	_ZN5rosic13DecayEnvelopeD1Ev
+  40              		.thumb_set _ZN5rosic13DecayEnvelopeD1Ev,_ZN5rosic13DecayEnvelopeD2Ev
+  41              		.section	.text._ZN5rosic13DecayEnvelope7triggerEv,"ax",%progbits
+  42              		.align	1
+  43              		.global	_ZN5rosic13DecayEnvelope7triggerEv
+  44              		.syntax unified
+  45              		.thumb
+  46              		.thumb_func
+  48              	_ZN5rosic13DecayEnvelope7triggerEv:
+  49              	.LVL1:
+  50              	.LFB628:
+  29:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  30:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** //-------------------------------------------------------------------------------------------------
+  31:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** // parameter settings:
+  32:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  33:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::setSampleRate(double newSampleRate)
+  34:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  35:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( newSampleRate > 0.0 )
+  36:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   {
+  37:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     fs = newSampleRate;
+  38:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     timeIncrement = 1000.0 / fs;
+  39:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+  40:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   }
+  41:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  42:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  43:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::setAttack(double newAttackTime)
+  44:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  45:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     if(newAttackTime >= 0.0) {
+  46:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         attackTime = newAttackTime;
+  47:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         calculateCoefficient();
+  48:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     }
+  49:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  50:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  51:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::setDecayTimeConstant(double newTimeConstant)
+  52:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  53:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( newTimeConstant > 0.001 ) // at least 0.001 ms decay
+  54:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   {
+  55:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     tau = newTimeConstant;
+  56:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+  57:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   }
+  58:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  59:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  60:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::setNormalizeSum(bool shouldNormalizeSum)
+  61:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  62:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum = shouldNormalizeSum;
+  63:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+  64:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  65:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  66:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** //-------------------------------------------------------------------------------------------------
+  67:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** // others:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 3
+
+
+  68:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  69:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::trigger()
+  70:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  51              		.loc 1 70 1 is_stmt 1 view -0
+  52              		.cfi_startproc
+  53              		@ args = 0, pretend = 0, frame = 0
+  54              		@ frame_needed = 0, uses_anonymous_args = 0
+  55              		@ link register save eliminated.
+  71:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // Reset the timer to start the Attack Phase.
+  72:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // CRITICAL: Do NOT reset 'y' to 0.0 here. 
+  73:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // Real 303 capacitors charge from their *current* voltage.
+  74:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // This creates the authentic "slide" behavior if re-triggered quickly.
+  75:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   time = 0.0;
+  56              		.loc 1 75 3 view .LVU3
+  57              		.loc 1 75 8 is_stmt 0 view .LVU4
+  58 0000 0022     		movs	r2, #0
+  59 0002 0023     		movs	r3, #0
+  60 0004 C0E90C23 		strd	r2, [r0, #48]
+  76:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+  61              		.loc 1 76 1 view .LVU5
+  62 0008 7047     		bx	lr
+  63              		.cfi_endproc
+  64              	.LFE628:
+  66              		.section	.text._ZN5rosic13DecayEnvelope12endIsReachedEd,"ax",%progbits
+  67              		.align	1
+  68              		.global	_ZN5rosic13DecayEnvelope12endIsReachedEd
+  69              		.syntax unified
+  70              		.thumb
+  71              		.thumb_func
+  73              	_ZN5rosic13DecayEnvelope12endIsReachedEd:
+  74              	.LVL2:
+  75              	.LFB629:
+  77:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  78:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** bool DecayEnvelope::endIsReached(double threshold)
+  79:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+  76              		.loc 1 79 1 is_stmt 1 view -0
+  77              		.cfi_startproc
+  78              		@ args = 0, pretend = 0, frame = 0
+  79              		@ frame_needed = 0, uses_anonymous_args = 0
+  80              		@ link register save eliminated.
+  80:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( y < threshold && time > attackTime )
+  81              		.loc 1 80 3 view .LVU7
+  82 0000 90ED047B 		vldr.64	d7, [r0, #16]
+  83 0004 B4EEC70B 		vcmpe.f64	d0, d7
+  84 0008 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  85 000c 0BDD     		ble	.L8
+  86              		.loc 1 80 21 is_stmt 0 discriminator 1 view .LVU8
+  87 000e 90ED0C6B 		vldr.64	d6, [r0, #48]
+  88 0012 90ED087B 		vldr.64	d7, [r0, #32]
+  89 0016 B4EEC76B 		vcmpe.f64	d6, d7
+  90 001a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  91 001e CCBF     		ite	gt
+  92 0020 0120     		movgt	r0, #1
+  93              	.LVL3:
+  94              		.loc 1 80 21 discriminator 1 view .LVU9
+  95 0022 0020     		movle	r0, #0
+  96 0024 7047     		bx	lr
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 4
+
+
+  97              	.LVL4:
+  98              	.L8:
+  81:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     return true;
+  82:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   else
+  83:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     return false;
+  99              		.loc 1 83 12 view .LVU10
+ 100 0026 0020     		movs	r0, #0
+ 101              	.LVL5:
+  84:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 102              		.loc 1 84 1 view .LVU11
+ 103 0028 7047     		bx	lr
+ 104              		.cfi_endproc
+ 105              	.LFE629:
+ 107              		.section	.text._ZN5rosic13DecayEnvelope20calculateCoefficientEv,"ax",%progbits
+ 108              		.align	1
+ 109              		.global	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 110              		.syntax unified
+ 111              		.thumb
+ 112              		.thumb_func
+ 114              	_ZN5rosic13DecayEnvelope20calculateCoefficientEv:
+ 115              	.LVL6:
+ 116              	.LFB630:
+  85:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  86:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** //-------------------------------------------------------------------------------------------------
+  87:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** // internal functions:
+  88:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+  89:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** void DecayEnvelope::calculateCoefficient()
+  90:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+ 117              		.loc 1 90 1 is_stmt 1 view -0
+ 118              		.cfi_startproc
+ 119              		@ args = 0, pretend = 0, frame = 0
+ 120              		@ frame_needed = 0, uses_anonymous_args = 0
+  91:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 1. Calculate Decay Coefficient (Multiplicative)
+  92:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   c = exp( -1.0 / (0.001*tau*fs) );
+ 121              		.loc 1 92 3 view .LVU13
+  90:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 1. Calculate Decay Coefficient (Multiplicative)
+ 122              		.loc 1 90 1 is_stmt 0 view .LVU14
+ 123 0000 10B5     		push	{r4, lr}
+ 124              		.cfi_def_cfa_offset 8
+ 125              		.cfi_offset 4, -8
+ 126              		.cfi_offset 14, -4
+ 127              		.loc 1 92 25 view .LVU15
+ 128 0002 90ED0A0B 		vldr.64	d0, [r0, #40]
+  90:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 1. Calculate Decay Coefficient (Multiplicative)
+ 129              		.loc 1 90 1 view .LVU16
+ 130 0006 2DED0A8B 		vpush.64	{d8, d9, d10, d11, d12}
+ 131              		.cfi_def_cfa_offset 48
+ 132              		.cfi_offset 80, -48
+ 133              		.cfi_offset 81, -44
+ 134              		.cfi_offset 82, -40
+ 135              		.cfi_offset 83, -36
+ 136              		.cfi_offset 84, -32
+ 137              		.cfi_offset 85, -28
+ 138              		.cfi_offset 86, -24
+ 139              		.cfi_offset 87, -20
+ 140              		.cfi_offset 88, -16
+ 141              		.cfi_offset 89, -12
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 5
+
+
+ 142              		.loc 1 92 25 view .LVU17
+ 143 000a 9FED1BCB 		vldr.64	d12, .L17
+ 144              		.loc 1 92 30 view .LVU18
+ 145 000e 90ED10BB 		vldr.64	d11, [r0, #64]
+ 146              		.loc 1 92 10 view .LVU19
+ 147 0012 BFEE00AB 		vmov.f64	d10, #-1.0e+0
+  90:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 1. Calculate Decay Coefficient (Multiplicative)
+ 148              		.loc 1 90 1 view .LVU20
+ 149 0016 0446     		mov	r4, r0
+ 150              		.loc 1 92 25 view .LVU21
+ 151 0018 20EE0C0B 		vmul.f64	d0, d0, d12
+ 152 001c B7EE008B 		vmov.f64	d8, #1.0e+0
+ 153              		.loc 1 92 29 view .LVU22
+ 154 0020 20EE0B0B 		vmul.f64	d0, d0, d11
+ 155              		.loc 1 92 10 view .LVU23
+ 156 0024 8AEE000B 		vdiv.f64	d0, d10, d0
+ 157 0028 FFF7FEFF 		bl	exp
+ 158              	.LVL7:
+ 159              		.loc 1 92 10 view .LVU24
+ 160 002c B0EE409B 		vmov.f64	d9, d0
+ 161              		.loc 1 92 5 discriminator 1 view .LVU25
+ 162 0030 84ED000B 		vstr.64	d0, [r4]
+  93:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   
+  94:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 2. Calculate Attack Coefficient (Additive Asymptotic)
+  95:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // Logic: 1 - exp(-1 / (time_in_seconds * sample_rate))
+  96:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if (attackTime > 0.0) {
+ 163              		.loc 1 96 3 is_stmt 1 view .LVU26
+ 164              		.loc 1 96 7 is_stmt 0 view .LVU27
+ 165 0034 94ED080B 		vldr.64	d0, [r4, #32]
+ 166              		.loc 1 96 3 view .LVU28
+ 167 0038 B5EEC00B 		vcmpe.f64	d0, #0
+ 168 003c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 169 0040 17DD     		ble	.L16
+  97:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****       attackCoeff = 1.0 - exp( -1.0 / (0.001 * attackTime * fs) );
+ 170              		.loc 1 97 7 is_stmt 1 view .LVU29
+ 171              		.loc 1 97 46 is_stmt 0 view .LVU30
+ 172 0042 20EE0C0B 		vmul.f64	d0, d0, d12
+ 173              		.loc 1 97 59 view .LVU31
+ 174 0046 20EE0B0B 		vmul.f64	d0, d0, d11
+ 175              		.loc 1 97 30 view .LVU32
+ 176 004a 8AEE000B 		vdiv.f64	d0, d10, d0
+ 177 004e FFF7FEFF 		bl	exp
+ 178              	.LVL8:
+ 179              		.loc 1 97 25 discriminator 1 view .LVU33
+ 180 0052 38EE400B 		vsub.f64	d0, d8, d0
+ 181              	.L10:
+  98:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   } else {
+  99:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****       attackCoeff = 1.0; // Instant jump
+ 100:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   }
+ 101:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** 
+ 102:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   // 3. Normalize
+ 103:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( normalizeSum == true )
+ 182              		.loc 1 103 3 view .LVU34
+ 183 0056 94F84830 		ldrb	r3, [r4, #72]	@ zero_extendqisi2
+  97:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****       attackCoeff = 1.0 - exp( -1.0 / (0.001 * attackTime * fs) );
+ 184              		.loc 1 97 19 discriminator 1 view .LVU35
+ 185 005a 84ED020B 		vstr.64	d0, [r4, #8]
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 6
+
+
+ 186              		.loc 1 103 3 is_stmt 1 view .LVU36
+ 187 005e 0BB1     		cbz	r3, .L12
+ 104:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     yInit = (1.0-c)/c;
+ 188              		.loc 1 104 5 view .LVU37
+ 189              		.loc 1 104 17 is_stmt 0 view .LVU38
+ 190 0060 38EE498B 		vsub.f64	d8, d8, d9
+ 191              	.L12:
+ 105:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   else  
+ 106:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     yInit = 1.0/c; // Slightly > 1.0 to compensate for first multiply, keeps peak at 1.0
+ 192              		.loc 1 106 5 is_stmt 1 view .LVU39
+ 193              		.loc 1 106 16 is_stmt 0 view .LVU40
+ 194 0064 88EE097B 		vdiv.f64	d7, d8, d9
+ 107:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }...
+ 195              		.loc 1 107 1 view .LVU41
+ 196 0068 BDEC0A8B 		vldm	sp!, {d8-d12}
+ 197              		.cfi_remember_state
+ 198              		.cfi_restore 88
+ 199              		.cfi_restore 89
+ 200              		.cfi_restore 86
+ 201              		.cfi_restore 87
+ 202              		.cfi_restore 84
+ 203              		.cfi_restore 85
+ 204              		.cfi_restore 82
+ 205              		.cfi_restore 83
+ 206              		.cfi_restore 80
+ 207              		.cfi_restore 81
+ 208              		.cfi_def_cfa_offset 8
+ 209 006c 84ED067B 		vstr.64	d7, [r4, #24]
+ 210 0070 10BD     		pop	{r4, pc}
+ 211              	.LVL9:
+ 212              	.L16:
+ 213              		.cfi_restore_state
+ 214              		.loc 1 107 1 view .LVU42
+ 215 0072 B0EE480B 		vmov.f64	d0, d8
+ 216 0076 EEE7     		b	.L10
+ 217              	.L18:
+ 218              		.align	3
+ 219              	.L17:
+ 220 0078 FCA9F1D2 		.word	-755914244
+ 221 007c 4D62503F 		.word	1062232653
+ 222              		.cfi_endproc
+ 223              	.LFE630:
+ 225              		.section	.text._ZN5rosic13DecayEnvelopeC2Ev,"ax",%progbits
+ 226              		.align	1
+ 227              		.global	_ZN5rosic13DecayEnvelopeC2Ev
+ 228              		.syntax unified
+ 229              		.thumb
+ 230              		.thumb_func
+ 232              	_ZN5rosic13DecayEnvelopeC2Ev:
+ 233              	.LVL10:
+ 234              	.LFB619:
+   7:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** DecayEnvelope::DecayEnvelope()
+ 235              		.loc 1 7 1 is_stmt 1 view -0
+ 236              		.cfi_startproc
+ 237              		@ args = 0, pretend = 0, frame = 0
+ 238              		@ frame_needed = 0, uses_anonymous_args = 0
+ 239              	.LBB2:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 7
+
+
+   9:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   c             = 1.0;    
+ 240              		.loc 1 9 3 view .LVU44
+  10:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   attackCoeff   = 1.0;
+ 241              		.loc 1 10 3 view .LVU45
+  11:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   y             = 0.0;
+ 242              		.loc 1 11 3 view .LVU46
+  11:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   y             = 0.0;
+ 243              		.loc 1 11 17 is_stmt 0 view .LVU47
+ 244 0000 0022     		movs	r2, #0
+ 245 0002 0023     		movs	r3, #0
+ 246              	.LBE2:
+   7:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** DecayEnvelope::DecayEnvelope()
+ 247              		.loc 1 7 1 view .LVU48
+ 248 0004 D0B5     		push	{r4, r6, r7, lr}
+ 249              		.cfi_def_cfa_offset 16
+ 250              		.cfi_offset 4, -16
+ 251              		.cfi_offset 6, -12
+ 252              		.cfi_offset 7, -8
+ 253              		.cfi_offset 14, -4
+ 254              	.LBB3:
+  11:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   y             = 0.0;
+ 255              		.loc 1 11 17 view .LVU49
+ 256 0006 C0E90423 		strd	r2, [r0, #16]
+  12:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   yInit         = 1.0;
+ 257              		.loc 1 12 3 is_stmt 1 view .LVU50
+  14:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   tau           = 200.0;
+ 258              		.loc 1 14 3 view .LVU51
+  15:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   attackTime    = 0.0; // Default to instant
+ 259              		.loc 1 15 17 is_stmt 0 view .LVU52
+ 260 000a C0E90823 		strd	r2, [r0, #32]
+  17:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   time          = 0.0;
+ 261              		.loc 1 17 17 view .LVU53
+ 262 000e C0E90C23 		strd	r2, [r0, #48]
+  18:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   fs            = 44100.0;
+ 263              		.loc 1 18 17 view .LVU54
+ 264 0012 0EA3     		adr	r3, .L20+12
+ 265 0014 D3E90023 		ldrd	r2, [r3]
+  14:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   tau           = 200.0;
+ 266              		.loc 1 14 17 view .LVU55
+ 267 0018 0026     		movs	r6, #0
+ 268 001a 0B4F     		ldr	r7, .L20+8
+ 269              	.LBE3:
+   7:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** DecayEnvelope::DecayEnvelope()
+ 270              		.loc 1 7 1 view .LVU56
+ 271 001c 0446     		mov	r4, r0
+ 272              	.LBB4:
+  18:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   fs            = 44100.0;
+ 273              		.loc 1 18 17 view .LVU57
+ 274 001e C0E91023 		strd	r2, [r0, #64]
+  19:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   timeIncrement = 1000.0 / fs; // ms per sample
+ 275              		.loc 1 19 17 view .LVU58
+ 276 0022 07A3     		adr	r3, .L20
+ 277 0024 D3E90023 		ldrd	r2, [r3]
+  14:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   tau           = 200.0;
+ 278              		.loc 1 14 17 view .LVU59
+ 279 0028 C0E90A67 		strd	r6, [r0, #40]
+  15:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   attackTime    = 0.0; // Default to instant
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 8
+
+
+ 280              		.loc 1 15 3 is_stmt 1 view .LVU60
+  17:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   time          = 0.0;
+ 281              		.loc 1 17 3 view .LVU61
+  18:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   fs            = 44100.0;
+ 282              		.loc 1 18 3 view .LVU62
+  19:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   timeIncrement = 1000.0 / fs; // ms per sample
+ 283              		.loc 1 19 3 view .LVU63
+  19:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   timeIncrement = 1000.0 / fs; // ms per sample
+ 284              		.loc 1 19 17 is_stmt 0 view .LVU64
+ 285 002c C0E90E23 		strd	r2, [r0, #56]
+  21:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum  = false;
+ 286              		.loc 1 21 3 is_stmt 1 view .LVU65
+  21:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum  = false;
+ 287              		.loc 1 21 17 is_stmt 0 view .LVU66
+ 288 0030 0023     		movs	r3, #0
+ 289 0032 80F84830 		strb	r3, [r0, #72]
+  22:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 290              		.loc 1 22 3 is_stmt 1 view .LVU67
+  22:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 291              		.loc 1 22 23 is_stmt 0 view .LVU68
+ 292 0036 FFF7FEFF 		bl	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 293              	.LVL11:
+  22:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 294              		.loc 1 22 23 view .LVU69
+ 295              	.LBE4:
+  23:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 296              		.loc 1 23 1 view .LVU70
+ 297 003a 2046     		mov	r0, r4
+ 298 003c D0BD     		pop	{r4, r6, r7, pc}
+ 299              	.LVL12:
+ 300              	.L21:
+  23:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 301              		.loc 1 23 1 view .LVU71
+ 302 003e 00BF     		.align	3
+ 303              	.L20:
+ 304 0040 CE05A6F2 		.word	-224000562
+ 305 0044 4E38973F 		.word	1066874958
+ 306 0048 00006940 		.word	1080623104
+ 307 004c 00000000 		.word	0
+ 308 0050 8088E540 		.word	1088784512
+ 309              		.cfi_endproc
+ 310              	.LFE619:
+ 312              		.global	_ZN5rosic13DecayEnvelopeC1Ev
+ 313              		.thumb_set _ZN5rosic13DecayEnvelopeC1Ev,_ZN5rosic13DecayEnvelopeC2Ev
+ 314              		.section	.text._ZN5rosic13DecayEnvelope13setSampleRateEd,"ax",%progbits
+ 315              		.align	1
+ 316              		.global	_ZN5rosic13DecayEnvelope13setSampleRateEd
+ 317              		.syntax unified
+ 318              		.thumb
+ 319              		.thumb_func
+ 321              	_ZN5rosic13DecayEnvelope13setSampleRateEd:
+ 322              	.LVL13:
+ 323              	.LFB624:
+  34:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+ 324              		.loc 1 34 1 is_stmt 1 view -0
+ 325              		.cfi_startproc
+ 326              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 9
+
+
+ 327              		@ frame_needed = 0, uses_anonymous_args = 0
+ 328              		@ link register save eliminated.
+  35:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( newSampleRate > 0.0 )
+ 329              		.loc 1 35 3 view .LVU73
+ 330 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 331 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 332 0008 09DD     		ble	.L26
+  37:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     fs = newSampleRate;
+ 333              		.loc 1 37 5 view .LVU74
+  38:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     timeIncrement = 1000.0 / fs;
+ 334              		.loc 1 38 28 is_stmt 0 view .LVU75
+ 335 000a 9FED056B 		vldr.64	d6, .L27
+  37:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     fs = newSampleRate;
+ 336              		.loc 1 37 8 view .LVU76
+ 337 000e 80ED100B 		vstr.64	d0, [r0, #64]
+  38:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     timeIncrement = 1000.0 / fs;
+ 338              		.loc 1 38 5 is_stmt 1 view .LVU77
+  38:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     timeIncrement = 1000.0 / fs;
+ 339              		.loc 1 38 28 is_stmt 0 view .LVU78
+ 340 0012 86EE007B 		vdiv.f64	d7, d6, d0
+  38:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     timeIncrement = 1000.0 / fs;
+ 341              		.loc 1 38 19 view .LVU79
+ 342 0016 80ED0E7B 		vstr.64	d7, [r0, #56]
+  39:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+ 343              		.loc 1 39 5 is_stmt 1 view .LVU80
+  39:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+ 344              		.loc 1 39 25 is_stmt 0 view .LVU81
+ 345 001a FFF7FEBF 		b	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 346              	.LVL14:
+ 347              	.L26:
+  41:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 348              		.loc 1 41 1 view .LVU82
+ 349 001e 7047     		bx	lr
+ 350              	.L28:
+ 351              		.align	3
+ 352              	.L27:
+ 353 0020 00000000 		.word	0
+ 354 0024 00408F40 		.word	1083129856
+ 355              		.cfi_endproc
+ 356              	.LFE624:
+ 358              		.section	.text._ZN5rosic13DecayEnvelope9setAttackEd,"ax",%progbits
+ 359              		.align	1
+ 360              		.global	_ZN5rosic13DecayEnvelope9setAttackEd
+ 361              		.syntax unified
+ 362              		.thumb
+ 363              		.thumb_func
+ 365              	_ZN5rosic13DecayEnvelope9setAttackEd:
+ 366              	.LVL15:
+ 367              	.LFB625:
+  44:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+ 368              		.loc 1 44 1 is_stmt 1 view -0
+ 369              		.cfi_startproc
+ 370              		@ args = 0, pretend = 0, frame = 0
+ 371              		@ frame_needed = 0, uses_anonymous_args = 0
+ 372              		@ link register save eliminated.
+  45:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     if(newAttackTime >= 0.0) {
+ 373              		.loc 1 45 5 view .LVU84
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 10
+
+
+ 374 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 375 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 376 0008 03DB     		blt	.L33
+  46:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         attackTime = newAttackTime;
+ 377              		.loc 1 46 9 view .LVU85
+  46:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         attackTime = newAttackTime;
+ 378              		.loc 1 46 20 is_stmt 0 view .LVU86
+ 379 000a 80ED080B 		vstr.64	d0, [r0, #32]
+  47:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         calculateCoefficient();
+ 380              		.loc 1 47 9 is_stmt 1 view .LVU87
+  47:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****         calculateCoefficient();
+ 381              		.loc 1 47 29 is_stmt 0 view .LVU88
+ 382 000e FFF7FEBF 		b	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 383              	.LVL16:
+ 384              	.L33:
+  49:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 385              		.loc 1 49 1 view .LVU89
+ 386 0012 7047     		bx	lr
+ 387              		.cfi_endproc
+ 388              	.LFE625:
+ 390              		.section	.text._ZN5rosic13DecayEnvelope20setDecayTimeConstantEd,"ax",%progbits
+ 391              		.align	1
+ 392              		.global	_ZN5rosic13DecayEnvelope20setDecayTimeConstantEd
+ 393              		.syntax unified
+ 394              		.thumb
+ 395              		.thumb_func
+ 397              	_ZN5rosic13DecayEnvelope20setDecayTimeConstantEd:
+ 398              	.LVL17:
+ 399              	.LFB626:
+  52:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+ 400              		.loc 1 52 1 is_stmt 1 view -0
+ 401              		.cfi_startproc
+ 402              		@ args = 0, pretend = 0, frame = 0
+ 403              		@ frame_needed = 0, uses_anonymous_args = 0
+ 404              		@ link register save eliminated.
+  53:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   if( newTimeConstant > 0.001 ) // at least 0.001 ms decay
+ 405              		.loc 1 53 3 view .LVU91
+ 406 0000 9FED057B 		vldr.64	d7, .L39
+ 407 0004 B4EEC70B 		vcmpe.f64	d0, d7
+ 408 0008 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 409 000c 03DD     		ble	.L38
+  55:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     tau = newTimeConstant;
+ 410              		.loc 1 55 5 view .LVU92
+  55:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     tau = newTimeConstant;
+ 411              		.loc 1 55 9 is_stmt 0 view .LVU93
+ 412 000e 80ED0A0B 		vstr.64	d0, [r0, #40]
+  56:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+ 413              		.loc 1 56 5 is_stmt 1 view .LVU94
+  56:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****     calculateCoefficient();
+ 414              		.loc 1 56 25 is_stmt 0 view .LVU95
+ 415 0012 FFF7FEBF 		b	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 416              	.LVL18:
+ 417              	.L38:
+  58:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** }
+ 418              		.loc 1 58 1 view .LVU96
+ 419 0016 7047     		bx	lr
+ 420              	.L40:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 11
+
+
+ 421              		.align	3
+ 422              	.L39:
+ 423 0018 FCA9F1D2 		.word	-755914244
+ 424 001c 4D62503F 		.word	1062232653
+ 425              		.cfi_endproc
+ 426              	.LFE626:
+ 428              		.section	.text._ZN5rosic13DecayEnvelope15setNormalizeSumEb,"ax",%progbits
+ 429              		.align	1
+ 430              		.global	_ZN5rosic13DecayEnvelope15setNormalizeSumEb
+ 431              		.syntax unified
+ 432              		.thumb
+ 433              		.thumb_func
+ 435              	_ZN5rosic13DecayEnvelope15setNormalizeSumEb:
+ 436              	.LVL19:
+ 437              	.LFB627:
+  61:open303/Source/DSPCode/rosic_DecayEnvelope.cpp **** {
+ 438              		.loc 1 61 1 is_stmt 1 view -0
+ 439              		.cfi_startproc
+ 440              		@ args = 0, pretend = 0, frame = 0
+ 441              		@ frame_needed = 0, uses_anonymous_args = 0
+ 442              		@ link register save eliminated.
+  62:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum = shouldNormalizeSum;
+ 443              		.loc 1 62 3 view .LVU98
+  62:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   normalizeSum = shouldNormalizeSum;
+ 444              		.loc 1 62 16 is_stmt 0 view .LVU99
+ 445 0000 80F84810 		strb	r1, [r0, #72]
+  63:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 446              		.loc 1 63 3 is_stmt 1 view .LVU100
+  63:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 447              		.loc 1 63 23 is_stmt 0 view .LVU101
+ 448 0004 FFF7FEBF 		b	_ZN5rosic13DecayEnvelope20calculateCoefficientEv
+ 449              	.LVL20:
+  63:open303/Source/DSPCode/rosic_DecayEnvelope.cpp ****   calculateCoefficient();
+ 450              		.loc 1 63 23 view .LVU102
+ 451              		.cfi_endproc
+ 452              	.LFE627:
+ 454              		.text
+ 455              	.Letext0:
+ 456              		.file 2 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 457              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 458              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 459              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/includ
+ 460              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 461              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 462              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ma
+ 463              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/st
+ 464              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 465              		.file 11 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 466              		.file 12 "open303/Source/DSPCode/rosic_DecayEnvelope.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s 			page 12
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_DecayEnvelope.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:20     .text._ZN5rosic13DecayEnvelopeD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:26     .text._ZN5rosic13DecayEnvelopeD2Ev:00000000 _ZN5rosic13DecayEnvelopeD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:26     .text._ZN5rosic13DecayEnvelopeD2Ev:00000000 _ZN5rosic13DecayEnvelopeD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:42     .text._ZN5rosic13DecayEnvelope7triggerEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:48     .text._ZN5rosic13DecayEnvelope7triggerEv:00000000 _ZN5rosic13DecayEnvelope7triggerEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:67     .text._ZN5rosic13DecayEnvelope12endIsReachedEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:73     .text._ZN5rosic13DecayEnvelope12endIsReachedEd:00000000 _ZN5rosic13DecayEnvelope12endIsReachedEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:108    .text._ZN5rosic13DecayEnvelope20calculateCoefficientEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:114    .text._ZN5rosic13DecayEnvelope20calculateCoefficientEv:00000000 _ZN5rosic13DecayEnvelope20calculateCoefficientEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:220    .text._ZN5rosic13DecayEnvelope20calculateCoefficientEv:00000078 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:226    .text._ZN5rosic13DecayEnvelopeC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:232    .text._ZN5rosic13DecayEnvelopeC2Ev:00000000 _ZN5rosic13DecayEnvelopeC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:304    .text._ZN5rosic13DecayEnvelopeC2Ev:00000040 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:232    .text._ZN5rosic13DecayEnvelopeC2Ev:00000000 _ZN5rosic13DecayEnvelopeC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:315    .text._ZN5rosic13DecayEnvelope13setSampleRateEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:321    .text._ZN5rosic13DecayEnvelope13setSampleRateEd:00000000 _ZN5rosic13DecayEnvelope13setSampleRateEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:353    .text._ZN5rosic13DecayEnvelope13setSampleRateEd:00000020 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:359    .text._ZN5rosic13DecayEnvelope9setAttackEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:365    .text._ZN5rosic13DecayEnvelope9setAttackEd:00000000 _ZN5rosic13DecayEnvelope9setAttackEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:391    .text._ZN5rosic13DecayEnvelope20setDecayTimeConstantEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:397    .text._ZN5rosic13DecayEnvelope20setDecayTimeConstantEd:00000000 _ZN5rosic13DecayEnvelope20setDecayTimeConstantEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:423    .text._ZN5rosic13DecayEnvelope20setDecayTimeConstantEd:00000018 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:429    .text._ZN5rosic13DecayEnvelope15setNormalizeSumEb:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccM187Bv.s:435    .text._ZN5rosic13DecayEnvelope15setNormalizeSumEb:00000000 _ZN5rosic13DecayEnvelope15setNormalizeSumEb
+
+UNDEFINED SYMBOLS
+exp

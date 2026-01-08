@@ -279,6 +279,12 @@ int main(void)
     
     // 2. Set Volume Release to 15ms (prevent clicking when you let go of the button)
     tb303.setAmpRelease(15); 
+
+    // --- NEW ATTACK FIX ---
+    // Now this will work! 3ms capacitor charge time.
+    tb303.setAttack(3.0f);     
+    tb303.setAmpAttack(3.0f);  
+    // ----------------------
     
     tb303.setDecay(500); // Default Start Value
 

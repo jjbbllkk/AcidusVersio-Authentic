@@ -8,10 +8,7 @@ namespace rosic
 {
 
   /**
-
-  This is a class implements an envelope generator that realizes a pure exponential decay. The 
-  output of the envelope is normalized to the range 0...1.
-
+  MODIFIED: Now includes an Attack phase for authentic 303 capacitor charging simulation.
   */
 
   class DecayEnvelope
@@ -34,13 +31,14 @@ namespace rosic
     /** Sets the sample-rate. */
     void setSampleRate(double newSampleRate);  
 
-    /** Sets the time constant for the multiplicative accumulator (which we consider as primarily 
-    responsible for the decaying part) in milliseconds. */
+    /** Sets the attack time in milliseconds. */
+    void setAttack(double newAttackTime);
+
+    /** Sets the decay time constant in milliseconds. */
     void setDecayTimeConstant(double newTimeConstant);
 
     /** Switches into a mode where the normalization is not made with respect to the peak amplitude 
-    but to the sum of the impulse response - if true, the output will be equivalent to a leaky 
-    integrator's impulse response. */
+    but to the sum of the impulse response. */
     void setNormalizeSum(bool shouldNormalizeSum);
 
     //---------------------------------------------------------------------------------------------
@@ -61,7 +59,7 @@ namespace rosic
     //---------------------------------------------------------------------------------------------
     // others:
 
-    /** Triggers the envelope - the next sample retrieved via getSample() will be 1. */
+    /** Triggers the envelope. */
     void trigger();
 
   protected:
@@ -69,15 +67,19 @@ namespace rosic
     /** Calculates the coefficient for multiplicative accumulation. */
     void calculateCoefficient();
 
-    double c;             // coefficient for multiplicative accumulation
-    double y;             // previous output
-    double yInit;         // initial yalue for previous output (= y/c)
-    double tau;           // time-constant (in milliseconds)
+    double c;             // coefficient for decay
+    double attackCoeff;   // coefficient for attack (charging)
+    double y;             // current output
+    double yInit;         // target peak (usually 1.0)
+    
+    double attackTime;    // attack time in ms
+    double tau;           // decay time in ms
+    
+    double time;          // timer for the attack phase
+    double timeIncrement; // ms per sample
+
     double fs;            // sample-rate
-    bool   normalizeSum;  // flag to indicate that the output should be normalized such that the 
-                          // sum of the impulse response is unity (instead of the peak) - if true
-                          // the output will be equivalent to a leaky integrator's impulse 
-                          // response
+    bool   normalizeSum; 
 
   };
 
@@ -86,7 +88,15 @@ namespace rosic
 
   INLINE double DecayEnvelope::getSample()
   {
-    y *= c;
+    if(time < attackTime) {
+        // ATTACK PHASE: Charge the capacitor (asymptotic approach to 1.0)
+        // y = y + coeff * (target - y)
+        y += attackCoeff * (yInit - y);
+        time += timeIncrement;
+    } else {
+        // DECAY PHASE: Discharge the capacitor (exponential decay)
+        y *= c;
+    }
     return y;
   }
 

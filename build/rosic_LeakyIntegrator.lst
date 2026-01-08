@@ -1,0 +1,856 @@
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 1
+
+
+   1              		.cpu cortex-m7
+   2              		.arch armv7e-m
+   3              		.fpu fpv5-d16
+   4              		.eabi_attribute 28, 1
+   5              		.eabi_attribute 20, 1
+   6              		.eabi_attribute 21, 1
+   7              		.eabi_attribute 23, 3
+   8              		.eabi_attribute 24, 1
+   9              		.eabi_attribute 25, 1
+  10              		.eabi_attribute 26, 1
+  11              		.eabi_attribute 30, 4
+  12              		.eabi_attribute 34, 1
+  13              		.eabi_attribute 18, 4
+  14              		.file	"rosic_LeakyIntegrator.cpp"
+  15              		.text
+  16              	.Ltext0:
+  17              		.cfi_sections	.debug_frame
+  18              		.file 1 "open303/Source/DSPCode/rosic_LeakyIntegrator.cpp"
+  19              		.section	.text._ZN5rosic15LeakyIntegratorD2Ev,"ax",%progbits
+  20              		.align	1
+  21              		.global	_ZN5rosic15LeakyIntegratorD2Ev
+  22              		.syntax unified
+  23              		.thumb
+  24              		.thumb_func
+  26              	_ZN5rosic15LeakyIntegratorD2Ev:
+  27              	.LVL0:
+  28              	.LFB623:
+   1:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** #include "rosic_LeakyIntegrator.h"
+   2:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** using namespace rosic;
+   3:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+   4:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** //-------------------------------------------------------------------------------------------------
+   5:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** // construction/destruction:
+   6:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+   7:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** LeakyIntegrator::LeakyIntegrator()
+   8:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+   9:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   sampleRate  = 44100.0f; 
+  10:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   tau         = 10.0f;    
+  11:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   y1          = 0.0;
+  12:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  13:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   calculateCoefficient();
+  14:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+  15:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  16:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** LeakyIntegrator::~LeakyIntegrator()
+  29              		.loc 1 16 1 view -0
+  30              		.cfi_startproc
+  31              		@ args = 0, pretend = 0, frame = 0
+  32              		@ frame_needed = 0, uses_anonymous_args = 0
+  33              		@ link register save eliminated.
+  17:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+  18:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  19:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+  34              		.loc 1 19 1 is_stmt 0 view .LVU1
+  35 0000 7047     		bx	lr
+  36              		.cfi_endproc
+  37              	.LFE623:
+  39              		.global	_ZN5rosic15LeakyIntegratorD1Ev
+  40              		.thumb_set _ZN5rosic15LeakyIntegratorD1Ev,_ZN5rosic15LeakyIntegratorD2Ev
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 2
+
+
+  41              		.section	.text._ZN5rosic15LeakyIntegrator13getNormalizerEddd,"ax",%progbits
+  42              		.align	1
+  43              		.global	_ZN5rosic15LeakyIntegrator13getNormalizerEddd
+  44              		.syntax unified
+  45              		.thumb
+  46              		.thumb_func
+  48              	_ZN5rosic15LeakyIntegrator13getNormalizerEddd:
+  49              	.LVL1:
+  50              	.LFB627:
+  20:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  21:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** //-------------------------------------------------------------------------------------------------
+  22:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** // parameter settings:
+  23:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  24:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** void LeakyIntegrator::setSampleRate(double newSampleRate)
+  25:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+  26:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( newSampleRate > 0.0 )
+  27:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  28:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     sampleRate = newSampleRate;
+  29:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+  30:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  31:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+  32:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  33:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** void LeakyIntegrator::setTimeConstant(double newTimeConstant)
+  34:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+  35:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( newTimeConstant >= 0.0 && newTimeConstant != tau )
+  36:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  37:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     tau = newTimeConstant; 
+  38:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+  39:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  40:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+  41:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  42:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** //-------------------------------------------------------------------------------------------------
+  43:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** // inquiry:
+  44:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  45:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** double LeakyIntegrator::getNormalizer(double tau1, double tau2, double fs)
+  46:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+  51              		.loc 1 46 1 is_stmt 1 view -0
+  52              		.cfi_startproc
+  53              		@ args = 0, pretend = 0, frame = 16
+  54              		@ frame_needed = 0, uses_anonymous_args = 0
+  47:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double td = 0.001*tau1;
+  55              		.loc 1 47 3 view .LVU3
+  46:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double td = 0.001*tau1;
+  56              		.loc 1 46 1 is_stmt 0 view .LVU4
+  57 0000 00B5     		push	{lr}
+  58              		.cfi_def_cfa_offset 4
+  59              		.cfi_offset 14, -4
+  60 0002 2DED108B 		vpush.64	{d8, d9, d10, d11, d12, d13, d14, d15}
+  61              		.cfi_def_cfa_offset 68
+  62              		.cfi_offset 80, -68
+  63              		.cfi_offset 81, -64
+  64              		.cfi_offset 82, -60
+  65              		.cfi_offset 83, -56
+  66              		.cfi_offset 84, -52
+  67              		.cfi_offset 85, -48
+  68              		.cfi_offset 86, -44
+  69              		.cfi_offset 87, -40
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 3
+
+
+  70              		.cfi_offset 88, -36
+  71              		.cfi_offset 89, -32
+  72              		.cfi_offset 90, -28
+  73              		.cfi_offset 91, -24
+  74              		.cfi_offset 92, -20
+  75              		.cfi_offset 93, -16
+  76              		.cfi_offset 94, -12
+  77              		.cfi_offset 95, -8
+  78              		.loc 1 47 10 view .LVU5
+  79 0006 9FED50DB 		vldr.64	d13, .L10
+  46:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double td = 0.001*tau1;
+  80              		.loc 1 46 1 view .LVU6
+  81 000a B0EE42EB 		vmov.f64	d14, d2
+  82 000e 85B0     		sub	sp, sp, #20
+  83              		.cfi_def_cfa_offset 88
+  84 0010 B7EE009B 		vmov.f64	d9, #1.0e+0
+  85              		.loc 1 47 10 view .LVU7
+  86 0014 20EE0DCB 		vmul.f64	d12, d0, d13
+  87              	.LVL2:
+  48:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ta = 0.001*tau2;
+  88              		.loc 1 48 3 is_stmt 1 view .LVU8
+  89              		.loc 1 48 10 is_stmt 0 view .LVU9
+  90 0018 21EE0DDB 		vmul.f64	d13, d1, d13
+  91              	.LVL3:
+  49:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  50:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   // catch some special cases:
+  51:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( ta == 0.0 && td == 0.0 )
+  92              		.loc 1 51 3 is_stmt 1 view .LVU10
+  93 001c B5EE40DB 		vcmp.f64	d13, #0
+  94 0020 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+  95              		.loc 1 51 17 is_stmt 0 discriminator 1 view .LVU11
+  96 0024 B5EE40CB 		vcmp.f64	d12, #0
+  97              		.loc 1 51 3 view .LVU12
+  98 0028 13D1     		bne	.L3
+  99              		.loc 1 51 17 discriminator 1 view .LVU13
+ 100 002a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 101 002e 00F08580 		beq	.L8
+  52:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     return 1.0;
+  53:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else if( ta == 0.0 )
+  54:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  55:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     return 1.0 / (1.0-exp(-1.0/(fs*td)));
+ 102              		.loc 1 55 5 is_stmt 1 view .LVU14
+ 103              		.loc 1 55 35 is_stmt 0 view .LVU15
+ 104 0032 2CEE02EB 		vmul.f64	d14, d12, d2
+ 105              		.loc 1 55 26 view .LVU16
+ 106 0036 BFEE000B 		vmov.f64	d0, #-1.0e+0
+ 107              	.LVL4:
+ 108              		.loc 1 55 26 view .LVU17
+ 109 003a 80EE0E0B 		vdiv.f64	d0, d0, d14
+ 110              	.L9:
+  56:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  57:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else if( td == 0.0 )
+  58:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  59:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     return 1.0 / (1.0-exp(-1.0/(fs*ta)));
+ 111              		.loc 1 59 26 view .LVU18
+ 112 003e FFF7FEFF 		bl	exp
+ 113              	.LVL5:
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 4
+
+
+ 114              		.loc 1 59 22 discriminator 1 view .LVU19
+ 115 0042 39EE407B 		vsub.f64	d7, d9, d0
+ 116              		.loc 1 59 40 discriminator 1 view .LVU20
+ 117 0046 89EE070B 		vdiv.f64	d0, d9, d7
+ 118              	.LVL6:
+ 119              	.L2:
+  60:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  61:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  62:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   // compute the filter coefficients:
+  63:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double x  = exp( -1.0 / (fs*td)  );
+  64:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double bd = 1-x;
+  65:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ad = -x;
+  66:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   x         = exp( -1.0 / (fs*ta)  );
+  67:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ba = 1-x;
+  68:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double aa = -x;
+  69:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  70:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   // compute the location and height of the peak:
+  71:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double xp;
+  72:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( ta == td )
+  73:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  74:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double tp  = ta;
+  75:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     xp         = (np+1.0)*ba*ba*pow(aa, np);
+  77:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  78:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else
+  79:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double tp  = log(ta/td) / ( (1.0/td) - (1.0/ta) );
+  81:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+  82:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double s   = 1.0 / (aa-ad);
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b01 = s * aa*ba*bd;
+  84:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+  85:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a01 = s * (ad-aa)*aa;
+  86:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a02 = s * (ad-aa)*ad;
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     xp         = b01*pow(a01, np) - b02*pow(a02, np);
+  88:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+  89:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  90:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   // return the normalizer as reciprocal of the peak height:
+  91:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   return 1.0/xp;
+  92:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 120              		.loc 1 92 1 view .LVU21
+ 121 004a 05B0     		add	sp, sp, #20
+ 122              		.cfi_remember_state
+ 123              		.cfi_def_cfa_offset 68
+ 124              		@ sp needed
+ 125 004c BDEC108B 		vldm	sp!, {d8-d15}
+ 126              		.cfi_restore 94
+ 127              		.cfi_restore 95
+ 128              		.cfi_restore 92
+ 129              		.cfi_restore 93
+ 130              		.cfi_restore 90
+ 131              		.cfi_restore 91
+ 132              		.cfi_restore 88
+ 133              		.cfi_restore 89
+ 134              		.cfi_restore 86
+ 135              		.cfi_restore 87
+ 136              		.cfi_restore 84
+ 137              		.cfi_restore 85
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 5
+
+
+ 138              		.cfi_restore 82
+ 139              		.cfi_restore 83
+ 140              		.cfi_restore 80
+ 141              		.cfi_restore 81
+ 142              		.cfi_def_cfa_offset 4
+ 143 0050 00BD     		pop	{pc}
+ 144              	.LVL7:
+ 145              	.L3:
+ 146              		.cfi_restore_state
+  53:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 147              		.loc 1 53 8 is_stmt 1 view .LVU22
+  57:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 148              		.loc 1 57 8 view .LVU23
+ 149 0052 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 150 0056 2DEE028B 		vmul.f64	d8, d13, d2
+ 151 005a BFEE00AB 		vmov.f64	d10, #-1.0e+0
+ 152 005e 02D1     		bne	.L5
+  59:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 153              		.loc 1 59 5 view .LVU24
+  59:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 154              		.loc 1 59 26 is_stmt 0 view .LVU25
+ 155 0060 8AEE080B 		vdiv.f64	d0, d10, d8
+ 156              	.LVL8:
+  59:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 157              		.loc 1 59 26 view .LVU26
+ 158 0064 EBE7     		b	.L9
+ 159              	.LVL9:
+ 160              	.L5:
+  63:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double bd = 1-x;
+ 161              		.loc 1 63 3 is_stmt 1 view .LVU27
+  63:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double bd = 1-x;
+ 162              		.loc 1 63 30 is_stmt 0 view .LVU28
+ 163 0066 2CEE020B 		vmul.f64	d0, d12, d2
+ 164              	.LVL10:
+  63:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double bd = 1-x;
+ 165              		.loc 1 63 18 view .LVU29
+ 166 006a 8AEE000B 		vdiv.f64	d0, d10, d0
+ 167 006e FFF7FEFF 		bl	exp
+ 168              	.LVL11:
+  63:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double bd = 1-x;
+ 169              		.loc 1 63 18 view .LVU30
+ 170 0072 8DED000B 		vstr.64	d0, [sp]	@ int
+ 171              	.LVL12:
+  64:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ad = -x;
+ 172              		.loc 1 64 3 is_stmt 1 view .LVU31
+  65:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   x         = exp( -1.0 / (fs*ta)  );
+ 173              		.loc 1 65 3 view .LVU32
+  66:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ba = 1-x;
+ 174              		.loc 1 66 3 view .LVU33
+  66:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ba = 1-x;
+ 175              		.loc 1 66 18 is_stmt 0 view .LVU34
+ 176 0076 8AEE080B 		vdiv.f64	d0, d10, d8
+ 177 007a FFF7FEFF 		bl	exp
+ 178              	.LVL13:
+ 179              	.LBB2:
+  72:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 180              		.loc 1 72 3 view .LVU35
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 6
+
+
+ 181 007e B4EE4DCB 		vcmp.f64	d12, d13
+ 182              	.LBE2:
+  66:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ba = 1-x;
+ 183              		.loc 1 66 18 view .LVU36
+ 184 0082 B0EE40BB 		vmov.f64	d11, d0
+ 185              	.LVL14:
+  67:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double aa = -x;
+ 186              		.loc 1 67 3 is_stmt 1 view .LVU37
+  67:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double aa = -x;
+ 187              		.loc 1 67 10 is_stmt 0 view .LVU38
+ 188 0086 39EE40FB 		vsub.f64	d15, d9, d0
+ 189              	.LVL15:
+  68:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 190              		.loc 1 68 3 is_stmt 1 view .LVU39
+ 191              	.LBB6:
+  72:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 192              		.loc 1 72 3 is_stmt 0 view .LVU40
+ 193 008a F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 194              	.LBE6:
+  68:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 195              		.loc 1 68 10 view .LVU41
+ 196 008e B1EE40AB 		vneg.f64	d10, d0
+ 197              	.LVL16:
+  71:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( ta == td )
+ 198              		.loc 1 71 3 is_stmt 1 view .LVU42
+  72:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 199              		.loc 1 72 3 view .LVU43
+ 200              	.LBB7:
+ 201 0092 9DED007B 		vldr.64	d7, [sp]	@ int
+ 202 0096 10D1     		bne	.L6
+ 203              	.LBB3:
+  74:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 204              		.loc 1 74 5 view .LVU44
+ 205              	.LVL17:
+  75:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     xp         = (np+1.0)*ba*ba*pow(aa, np);
+ 206              		.loc 1 75 5 view .LVU45
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 207              		.loc 1 76 5 view .LVU46
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 208              		.loc 1 76 36 is_stmt 0 view .LVU47
+ 209 0098 B0EE481B 		vmov.f64	d1, d8
+ 210 009c B0EE4A0B 		vmov.f64	d0, d10
+ 211              	.LVL18:
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 212              		.loc 1 76 36 view .LVU48
+ 213 00a0 FFF7FEFF 		bl	pow
+ 214              	.LVL19:
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 215              		.loc 1 76 21 view .LVU49
+ 216 00a4 38EE098B 		vadd.f64	d8, d8, d9
+ 217              	.LVL20:
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 218              		.loc 1 76 26 view .LVU50
+ 219 00a8 28EE0F8B 		vmul.f64	d8, d8, d15
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 220              		.loc 1 76 29 view .LVU51
+ 221 00ac 28EE0F8B 		vmul.f64	d8, d8, d15
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 7
+
+
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 222              		.loc 1 76 16 discriminator 1 view .LVU52
+ 223 00b0 28EE008B 		vmul.f64	d8, d8, d0
+ 224              	.LVL21:
+ 225              	.L7:
+  76:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 226              		.loc 1 76 16 discriminator 1 view .LVU53
+ 227              	.LBE3:
+ 228              	.LBE7:
+  91:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 229              		.loc 1 91 3 is_stmt 1 view .LVU54
+  91:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 230              		.loc 1 91 14 is_stmt 0 view .LVU55
+ 231 00b4 89EE080B 		vdiv.f64	d0, d9, d8
+ 232 00b8 C7E7     		b	.L2
+ 233              	.LVL22:
+ 234              	.L6:
+  64:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ad = -x;
+ 235              		.loc 1 64 10 view .LVU56
+ 236 00ba 39EE476B 		vsub.f64	d6, d9, d7
+ 237              	.LBB8:
+ 238              	.LBB4:
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 239              		.loc 1 80 21 view .LVU57
+ 240 00be 8DEE0C0B 		vdiv.f64	d0, d13, d12
+ 241              	.LVL23:
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 242              		.loc 1 80 21 view .LVU58
+ 243              	.LBE4:
+ 244              	.LBE8:
+  65:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   x         = exp( -1.0 / (fs*ta)  );
+ 245              		.loc 1 65 10 view .LVU59
+ 246 00c2 B1EE478B 		vneg.f64	d8, d7
+  64:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   double ad = -x;
+ 247              		.loc 1 64 10 view .LVU60
+ 248 00c6 8DED026B 		vstr.64	d6, [sp, #8]	@ int
+  65:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   x         = exp( -1.0 / (fs*ta)  );
+ 249              		.loc 1 65 10 view .LVU61
+ 250 00ca 8DED007B 		vstr.64	d7, [sp]	@ int
+ 251              	.LVL24:
+ 252              	.LBB9:
+ 253              	.LBB5:
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 254              		.loc 1 80 5 is_stmt 1 view .LVU62
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 255              		.loc 1 80 21 is_stmt 0 view .LVU63
+ 256 00ce FFF7FEFF 		bl	log
+ 257              	.LVL25:
+  81:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double s   = 1.0 / (aa-ad);
+ 258              		.loc 1 81 5 is_stmt 1 view .LVU64
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 259              		.loc 1 80 48 is_stmt 0 discriminator 1 view .LVU65
+ 260 00d2 89EE0D5B 		vdiv.f64	d5, d9, d13
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 261              		.loc 1 80 37 discriminator 1 view .LVU66
+ 262 00d6 89EE0C4B 		vdiv.f64	d4, d9, d12
+  82:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b01 = s * aa*ba*bd;
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 8
+
+
+ 263              		.loc 1 82 12 view .LVU67
+ 264 00da 9DED007B 		vldr.64	d7, [sp]	@ int
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 265              		.loc 1 80 42 discriminator 1 view .LVU68
+ 266 00de 34EE454B 		vsub.f64	d4, d4, d5
+  82:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b01 = s * aa*ba*bd;
+ 267              		.loc 1 82 12 view .LVU69
+ 268 00e2 37EE4B5B 		vsub.f64	d5, d7, d11
+  85:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a02 = s * (ad-aa)*ad;
+ 269              		.loc 1 85 20 view .LVU70
+ 270 00e6 3BEE47BB 		vsub.f64	d11, d11, d7
+ 271              	.LVL26:
+  80:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double np  = fs*tp;
+ 272              		.loc 1 80 53 discriminator 1 view .LVU71
+ 273 00ea 80EE04CB 		vdiv.f64	d12, d0, d4
+ 274              	.LVL27:
+  82:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b01 = s * aa*ba*bd;
+ 275              		.loc 1 82 12 view .LVU72
+ 276 00ee 89EE05DB 		vdiv.f64	d13, d9, d5
+ 277              	.LVL28:
+  81:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double s   = 1.0 / (aa-ad);
+ 278              		.loc 1 81 12 view .LVU73
+ 279 00f2 2CEE0ECB 		vmul.f64	d12, d12, d14
+ 280              	.LVL29:
+  82:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b01 = s * aa*ba*bd;
+ 281              		.loc 1 82 5 is_stmt 1 view .LVU74
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+ 282              		.loc 1 83 5 view .LVU75
+  84:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a01 = s * (ad-aa)*aa;
+ 283              		.loc 1 84 5 view .LVU76
+  85:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a02 = s * (ad-aa)*ad;
+ 284              		.loc 1 85 5 view .LVU77
+  85:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a02 = s * (ad-aa)*ad;
+ 285              		.loc 1 85 20 is_stmt 0 view .LVU78
+ 286 00f6 2BEE0DBB 		vmul.f64	d11, d11, d13
+ 287              	.LVL30:
+  86:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     xp         = b01*pow(a01, np) - b02*pow(a02, np);
+ 288              		.loc 1 86 5 is_stmt 1 view .LVU79
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 289              		.loc 1 87 5 view .LVU80
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 290              		.loc 1 87 25 is_stmt 0 view .LVU81
+ 291 00fa B0EE4C1B 		vmov.f64	d1, d12
+ 292 00fe 2BEE0A0B 		vmul.f64	d0, d11, d10
+ 293              	.LVL31:
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 294              		.loc 1 87 25 view .LVU82
+ 295 0102 FFF7FEFF 		bl	pow
+ 296              	.LVL32:
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 297              		.loc 1 87 44 discriminator 1 view .LVU83
+ 298 0106 B0EE4C1B 		vmov.f64	d1, d12
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 299              		.loc 1 87 25 view .LVU84
+ 300 010a B0EE40EB 		vmov.f64	d14, d0
+ 301              	.LVL33:
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 9
+
+
+ 302              		.loc 1 87 44 discriminator 1 view .LVU85
+ 303 010e 2BEE080B 		vmul.f64	d0, d11, d8
+ 304              	.LVL34:
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 305              		.loc 1 87 44 discriminator 1 view .LVU86
+ 306 0112 FFF7FEFF 		bl	pow
+ 307              	.LVL35:
+  84:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a01 = s * (ad-aa)*aa;
+ 308              		.loc 1 84 20 view .LVU87
+ 309 0116 28EE0D8B 		vmul.f64	d8, d8, d13
+ 310              	.LVL36:
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+ 311              		.loc 1 83 20 view .LVU88
+ 312 011a 2AEE0DAB 		vmul.f64	d10, d10, d13
+ 313              	.LVL37:
+  84:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a01 = s * (ad-aa)*aa;
+ 314              		.loc 1 84 24 view .LVU89
+ 315 011e 28EE0F8B 		vmul.f64	d8, d8, d15
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+ 316              		.loc 1 83 24 view .LVU90
+ 317 0122 2AEE0FAB 		vmul.f64	d10, d10, d15
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+ 318              		.loc 1 83 12 view .LVU91
+ 319 0126 9DED026B 		vldr.64	d6, [sp, #8]	@ int
+  84:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double a01 = s * (ad-aa)*aa;
+ 320              		.loc 1 84 12 view .LVU92
+ 321 012a 28EE068B 		vmul.f64	d8, d8, d6
+  83:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     double b02 = s * ad*ba*bd;
+ 322              		.loc 1 83 12 view .LVU93
+ 323 012e 2AEE06AB 		vmul.f64	d10, d10, d6
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 324              		.loc 1 87 16 discriminator 2 view .LVU94
+ 325 0132 20EE488B 		vnmul.f64	d8, d0, d8
+ 326 0136 AEEE0A8B 		vfma.f64	d8, d14, d10
+ 327 013a BBE7     		b	.L7
+ 328              	.LVL38:
+ 329              	.L8:
+  87:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 330              		.loc 1 87 16 discriminator 2 view .LVU95
+ 331              	.LBE5:
+ 332              	.LBE9:
+  52:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else if( ta == 0.0 )
+ 333              		.loc 1 52 12 view .LVU96
+ 334 013c B0EE490B 		vmov.f64	d0, d9
+ 335              	.LVL39:
+  52:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else if( ta == 0.0 )
+ 336              		.loc 1 52 12 view .LVU97
+ 337 0140 83E7     		b	.L2
+ 338              	.L11:
+ 339 0142 00BFAFF3 		.align	3
+ 339      0080
+ 340              	.L10:
+ 341 0148 FCA9F1D2 		.word	-755914244
+ 342 014c 4D62503F 		.word	1062232653
+ 343              		.cfi_endproc
+ 344              	.LFE627:
+ 346              		.section	.text._ZN5rosic15LeakyIntegrator5resetEv,"ax",%progbits
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 10
+
+
+ 347              		.align	1
+ 348              		.global	_ZN5rosic15LeakyIntegrator5resetEv
+ 349              		.syntax unified
+ 350              		.thumb
+ 351              		.thumb_func
+ 353              	_ZN5rosic15LeakyIntegrator5resetEv:
+ 354              	.LVL40:
+ 355              	.LFB628:
+  93:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  94:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** //-------------------------------------------------------------------------------------------------
+  95:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** // others:
+  96:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+  97:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** void LeakyIntegrator::reset()
+  98:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+ 356              		.loc 1 98 1 is_stmt 1 view -0
+ 357              		.cfi_startproc
+ 358              		@ args = 0, pretend = 0, frame = 0
+ 359              		@ frame_needed = 0, uses_anonymous_args = 0
+ 360              		@ link register save eliminated.
+  99:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   y1 = 0;
+ 361              		.loc 1 99 3 view .LVU99
+ 362              		.loc 1 99 6 is_stmt 0 view .LVU100
+ 363 0000 0022     		movs	r2, #0
+ 364 0002 0023     		movs	r3, #0
+ 365 0004 C0E90223 		strd	r2, [r0, #8]
+ 100:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 366              		.loc 1 100 1 view .LVU101
+ 367 0008 7047     		bx	lr
+ 368              		.cfi_endproc
+ 369              	.LFE628:
+ 371              		.section	.text._ZN5rosic15LeakyIntegrator20calculateCoefficientEv,"ax",%progbits
+ 372              		.align	1
+ 373              		.global	_ZN5rosic15LeakyIntegrator20calculateCoefficientEv
+ 374              		.syntax unified
+ 375              		.thumb
+ 376              		.thumb_func
+ 378              	_ZN5rosic15LeakyIntegrator20calculateCoefficientEv:
+ 379              	.LVL41:
+ 380              	.LFB629:
+ 101:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 102:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** void LeakyIntegrator::calculateCoefficient()
+ 103:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+ 381              		.loc 1 103 1 is_stmt 1 view -0
+ 382              		.cfi_startproc
+ 383              		@ args = 0, pretend = 0, frame = 0
+ 384              		@ frame_needed = 0, uses_anonymous_args = 0
+ 104:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( tau > 0.0 )
+ 385              		.loc 1 104 3 view .LVU103
+ 386              		.loc 1 104 7 is_stmt 0 view .LVU104
+ 387 0000 90ED067B 		vldr.64	d7, [r0, #24]
+ 103:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( tau > 0.0 )
+ 388              		.loc 1 103 1 view .LVU105
+ 389 0004 10B5     		push	{r4, lr}
+ 390              		.cfi_def_cfa_offset 8
+ 391              		.cfi_offset 4, -8
+ 392              		.cfi_offset 14, -4
+ 393              		.loc 1 104 3 view .LVU106
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 11
+
+
+ 394 0006 B5EEC07B 		vcmpe.f64	d7, #0
+ 103:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( tau > 0.0 )
+ 395              		.loc 1 103 1 view .LVU107
+ 396 000a 0446     		mov	r4, r0
+ 397              		.loc 1 104 3 view .LVU108
+ 398 000c F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 399 0010 10DD     		ble	.L18
+ 105:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     coeff = exp( -1.0 / (sampleRate*0.001*tau)  );
+ 400              		.loc 1 105 5 is_stmt 1 view .LVU109
+ 401              		.loc 1 105 36 is_stmt 0 view .LVU110
+ 402 0012 90ED040B 		vldr.64	d0, [r0, #16]
+ 403 0016 9FED0A6B 		vldr.64	d6, .L19
+ 404 001a 20EE060B 		vmul.f64	d0, d0, d6
+ 405              		.loc 1 105 42 view .LVU111
+ 406 001e 20EE070B 		vmul.f64	d0, d0, d7
+ 407              		.loc 1 105 16 view .LVU112
+ 408 0022 BFEE007B 		vmov.f64	d7, #-1.0e+0
+ 409 0026 87EE000B 		vdiv.f64	d0, d7, d0
+ 410 002a FFF7FEFF 		bl	exp
+ 411              	.LVL42:
+ 412              	.L14:
+ 413              		.loc 1 105 11 discriminator 1 view .LVU113
+ 414 002e 84ED000B 		vstr.64	d0, [r4]
+ 106:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   else
+ 107:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     coeff = 0.0;
+ 108:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 415              		.loc 1 108 1 view .LVU114
+ 416 0032 10BD     		pop	{r4, pc}
+ 417              	.LVL43:
+ 418              	.L18:
+ 419              		.loc 1 108 1 view .LVU115
+ 420 0034 9FED040B 		vldr.64	d0, .L19+8
+ 421 0038 F9E7     		b	.L14
+ 422              	.L20:
+ 423 003a 00BFAFF3 		.align	3
+ 423      0080
+ 424              	.L19:
+ 425 0040 FCA9F1D2 		.word	-755914244
+ 426 0044 4D62503F 		.word	1062232653
+ 427 0048 00000000 		.word	0
+ 428 004c 00000000 		.word	0
+ 429              		.cfi_endproc
+ 430              	.LFE629:
+ 432              		.section	.text._ZN5rosic15LeakyIntegratorC2Ev,"ax",%progbits
+ 433              		.align	1
+ 434              		.global	_ZN5rosic15LeakyIntegratorC2Ev
+ 435              		.syntax unified
+ 436              		.thumb
+ 437              		.thumb_func
+ 439              	_ZN5rosic15LeakyIntegratorC2Ev:
+ 440              	.LVL44:
+ 441              	.LFB620:
+   7:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+ 442              		.loc 1 7 1 is_stmt 1 view -0
+ 443              		.cfi_startproc
+ 444              		@ args = 0, pretend = 0, frame = 0
+ 445              		@ frame_needed = 0, uses_anonymous_args = 0
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 12
+
+
+ 446              	.LBB10:
+   9:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   tau         = 10.0f;    
+ 447              		.loc 1 9 3 view .LVU117
+   9:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   tau         = 10.0f;    
+ 448              		.loc 1 9 15 is_stmt 0 view .LVU118
+ 449 0000 0AA3     		adr	r3, .L22+4
+ 450 0002 D3E90023 		ldrd	r2, [r3]
+ 451              	.LBE10:
+   7:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+ 452              		.loc 1 7 1 view .LVU119
+ 453 0006 10B5     		push	{r4, lr}
+ 454              		.cfi_def_cfa_offset 8
+ 455              		.cfi_offset 4, -8
+ 456              		.cfi_offset 14, -4
+ 457              	.LBB11:
+   9:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   tau         = 10.0f;    
+ 458              		.loc 1 9 15 view .LVU120
+ 459 0008 C0E90423 		strd	r2, [r0, #16]
+  10:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   y1          = 0.0;
+ 460              		.loc 1 10 3 is_stmt 1 view .LVU121
+  10:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   y1          = 0.0;
+ 461              		.loc 1 10 15 is_stmt 0 view .LVU122
+ 462 000c 0022     		movs	r2, #0
+ 463 000e 064B     		ldr	r3, .L22
+ 464              	.LBE11:
+   7:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** {
+ 465              		.loc 1 7 1 view .LVU123
+ 466 0010 0446     		mov	r4, r0
+ 467              	.LBB12:
+  10:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   y1          = 0.0;
+ 468              		.loc 1 10 15 view .LVU124
+ 469 0012 C0E90623 		strd	r2, [r0, #24]
+  11:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 470              		.loc 1 11 3 is_stmt 1 view .LVU125
+  11:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 471              		.loc 1 11 15 is_stmt 0 view .LVU126
+ 472 0016 0022     		movs	r2, #0
+ 473 0018 0023     		movs	r3, #0
+ 474 001a C0E90223 		strd	r2, [r0, #8]
+  13:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 475              		.loc 1 13 3 is_stmt 1 view .LVU127
+  13:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 476              		.loc 1 13 23 is_stmt 0 view .LVU128
+ 477 001e FFF7FEFF 		bl	_ZN5rosic15LeakyIntegrator20calculateCoefficientEv
+ 478              	.LVL45:
+  13:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** }
+ 479              		.loc 1 13 23 view .LVU129
+ 480              	.LBE12:
+  14:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 481              		.loc 1 14 1 view .LVU130
+ 482 0022 2046     		mov	r0, r4
+ 483 0024 10BD     		pop	{r4, pc}
+ 484              	.LVL46:
+ 485              	.L23:
+  14:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 486              		.loc 1 14 1 view .LVU131
+ 487 0026 00BF     		.align	3
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 13
+
+
+ 488              	.L22:
+ 489 0028 00002440 		.word	1076101120
+ 490 002c 00000000 		.word	0
+ 491 0030 8088E540 		.word	1088784512
+ 492              		.cfi_endproc
+ 493              	.LFE620:
+ 495              		.global	_ZN5rosic15LeakyIntegratorC1Ev
+ 496              		.thumb_set _ZN5rosic15LeakyIntegratorC1Ev,_ZN5rosic15LeakyIntegratorC2Ev
+ 497              		.section	.text._ZN5rosic15LeakyIntegrator13setSampleRateEd,"ax",%progbits
+ 498              		.align	1
+ 499              		.global	_ZN5rosic15LeakyIntegrator13setSampleRateEd
+ 500              		.syntax unified
+ 501              		.thumb
+ 502              		.thumb_func
+ 504              	_ZN5rosic15LeakyIntegrator13setSampleRateEd:
+ 505              	.LVL47:
+ 506              	.LFB625:
+  25:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( newSampleRate > 0.0 )
+ 507              		.loc 1 25 1 is_stmt 1 view -0
+ 508              		.cfi_startproc
+ 509              		@ args = 0, pretend = 0, frame = 0
+ 510              		@ frame_needed = 0, uses_anonymous_args = 0
+ 511              		@ link register save eliminated.
+  26:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 512              		.loc 1 26 3 view .LVU133
+ 513 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 514 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 515 0008 03DD     		ble	.L28
+  28:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+ 516              		.loc 1 28 5 view .LVU134
+  28:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+ 517              		.loc 1 28 16 is_stmt 0 view .LVU135
+ 518 000a 80ED040B 		vstr.64	d0, [r0, #16]
+  29:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 519              		.loc 1 29 5 is_stmt 1 view .LVU136
+  29:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 520              		.loc 1 29 25 is_stmt 0 view .LVU137
+ 521 000e FFF7FEBF 		b	_ZN5rosic15LeakyIntegrator20calculateCoefficientEv
+ 522              	.LVL48:
+ 523              	.L28:
+  31:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 524              		.loc 1 31 1 view .LVU138
+ 525 0012 7047     		bx	lr
+ 526              		.cfi_endproc
+ 527              	.LFE625:
+ 529              		.section	.text._ZN5rosic15LeakyIntegrator15setTimeConstantEd,"ax",%progbits
+ 530              		.align	1
+ 531              		.global	_ZN5rosic15LeakyIntegrator15setTimeConstantEd
+ 532              		.syntax unified
+ 533              		.thumb
+ 534              		.thumb_func
+ 536              	_ZN5rosic15LeakyIntegrator15setTimeConstantEd:
+ 537              	.LVL49:
+ 538              	.LFB626:
+  34:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   if( newTimeConstant >= 0.0 && newTimeConstant != tau )
+ 539              		.loc 1 34 1 is_stmt 1 view -0
+ 540              		.cfi_startproc
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 14
+
+
+ 541              		@ args = 0, pretend = 0, frame = 0
+ 542              		@ frame_needed = 0, uses_anonymous_args = 0
+ 543              		@ link register save eliminated.
+  35:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 544              		.loc 1 35 3 view .LVU140
+ 545 0000 B5EEC00B 		vcmpe.f64	d0, #0
+ 546 0004 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 547 0008 0ADB     		blt	.L29
+  35:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   {
+ 548              		.loc 1 35 30 is_stmt 0 discriminator 1 view .LVU141
+ 549 000a 90ED067B 		vldr.64	d7, [r0, #24]
+ 550 000e B4EE407B 		vcmp.f64	d7, d0
+ 551 0012 F1EE10FA 		vmrs	APSR_nzcv, FPSCR
+ 552 0016 03D0     		beq	.L29
+  37:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+ 553              		.loc 1 37 5 is_stmt 1 view .LVU142
+  37:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****     calculateCoefficient();
+ 554              		.loc 1 37 9 is_stmt 0 view .LVU143
+ 555 0018 80ED060B 		vstr.64	d0, [r0, #24]
+  38:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 556              		.loc 1 38 5 is_stmt 1 view .LVU144
+  38:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp ****   }
+ 557              		.loc 1 38 25 is_stmt 0 view .LVU145
+ 558 001c FFF7FEBF 		b	_ZN5rosic15LeakyIntegrator20calculateCoefficientEv
+ 559              	.LVL50:
+ 560              	.L29:
+  40:open303/Source/DSPCode/rosic_LeakyIntegrator.cpp **** 
+ 561              		.loc 1 40 1 view .LVU146
+ 562 0020 7047     		bx	lr
+ 563              		.cfi_endproc
+ 564              	.LFE626:
+ 566              		.text
+ 567              	.Letext0:
+ 568              		.file 2 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cm
+ 569              		.file 3 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/bi
+ 570              		.file 4 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/cs
+ 571              		.file 5 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/lib/gcc/arm-none-eabi/15.2.1/includ
+ 572              		.file 6 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/math.h"
+ 573              		.file 7 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/stdlib.h"
+ 574              		.file 8 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/ma
+ 575              		.file 9 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/st
+ 576              		.file 10 "/Applications/ArmGNUToolchain/15.2.rel1/arm-none-eabi/arm-none-eabi/include/c++/15.2.1/a
+ 577              		.file 11 "open303/Source/DSPCode/rosic_NumberManipulations.h"
+ 578              		.file 12 "open303/Source/DSPCode/rosic_LeakyIntegrator.h"
+ARM GAS  /var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s 			page 15
+
+
+DEFINED SYMBOLS
+                            *ABS*:00000000 rosic_LeakyIntegrator.cpp
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:20     .text._ZN5rosic15LeakyIntegratorD2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:26     .text._ZN5rosic15LeakyIntegratorD2Ev:00000000 _ZN5rosic15LeakyIntegratorD2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:26     .text._ZN5rosic15LeakyIntegratorD2Ev:00000000 _ZN5rosic15LeakyIntegratorD1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:42     .text._ZN5rosic15LeakyIntegrator13getNormalizerEddd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:48     .text._ZN5rosic15LeakyIntegrator13getNormalizerEddd:00000000 _ZN5rosic15LeakyIntegrator13getNormalizerEddd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:341    .text._ZN5rosic15LeakyIntegrator13getNormalizerEddd:00000148 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:347    .text._ZN5rosic15LeakyIntegrator5resetEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:353    .text._ZN5rosic15LeakyIntegrator5resetEv:00000000 _ZN5rosic15LeakyIntegrator5resetEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:372    .text._ZN5rosic15LeakyIntegrator20calculateCoefficientEv:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:378    .text._ZN5rosic15LeakyIntegrator20calculateCoefficientEv:00000000 _ZN5rosic15LeakyIntegrator20calculateCoefficientEv
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:425    .text._ZN5rosic15LeakyIntegrator20calculateCoefficientEv:00000040 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:433    .text._ZN5rosic15LeakyIntegratorC2Ev:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:439    .text._ZN5rosic15LeakyIntegratorC2Ev:00000000 _ZN5rosic15LeakyIntegratorC2Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:489    .text._ZN5rosic15LeakyIntegratorC2Ev:00000028 $d
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:439    .text._ZN5rosic15LeakyIntegratorC2Ev:00000000 _ZN5rosic15LeakyIntegratorC1Ev
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:498    .text._ZN5rosic15LeakyIntegrator13setSampleRateEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:504    .text._ZN5rosic15LeakyIntegrator13setSampleRateEd:00000000 _ZN5rosic15LeakyIntegrator13setSampleRateEd
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:530    .text._ZN5rosic15LeakyIntegrator15setTimeConstantEd:00000000 $t
+/var/folders/7j/7n_15nxd0bx4q178nq7r8qsr0000gn/T//ccAGg5TY.s:536    .text._ZN5rosic15LeakyIntegrator15setTimeConstantEd:00000000 _ZN5rosic15LeakyIntegrator15setTimeConstantEd
+
+UNDEFINED SYMBOLS
+exp
+pow
+log
