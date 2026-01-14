@@ -16,7 +16,11 @@ This is a heavily modified version of the AcidusVersio firmware. It moves the Op
 ## How to Flash (IMPORTANT)
 **The flashing process has changed.** Because this firmware uses the external SDRAM, you must use the **Daisy Bootloader**, not the standard System DFU.
 
-### 1. Install the Bootloader (Do this once)
+### 1. Set up your build environment
+1. Clone this repository locally 
+2. Clone the [libDaisy](https://github.com/electro-smith/libDaisy) repository, in a directory parallel to this codebase
+
+### 2. Install the Bootloader (Do this once)
 1.  Connect Versio via USB.
 2.  Enter System Mode: Hold **BOOT**, press **RESET**, release **BOOT**.
 3.  Run:
@@ -25,7 +29,7 @@ This is a heavily modified version of the AcidusVersio firmware. It moves the Op
     ```
 4.  The module will reboot and the LED will start "breathing" (fading in and out).
 
-### 2. Flash the Firmware
+### 3. Flash the Firmware
 **Do not** press BOOT+RESET. 
 1.  Ensure the LED is "breathing" (if not, tap RESET once).
 2.  Run:
